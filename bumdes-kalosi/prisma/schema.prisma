@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/* =======================
+   ENUMS
+======================= */
+
+enum ProductCategory {
+  KULINER
+  WISATA
+  MART
+  KETAPANG
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/* =======================
+   MODELS
+======================= */
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  price       Int
+  promoPrice  Int?             @map("promo_price")
+  isPromo     Boolean          @default(false) @map("is_promo")
+  description String?
+  category    ProductCategory
+  imageUrl    String?          @map("image_url")
+  stock       Int?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  reviews     Review[]
+  orderItems  OrderItem[]
+
+  @@index([category])
+  @@map("products")
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  customerName    String        @map("customer_name")
+  customerAddress String        @map("customer_address")
+  customerPhone   String?       @map("customer_phone")
+  items           Json          // snapshot saat checkout
+  totalPrice      Int           @map("total_price")
+  status          OrderStatus   @default(PENDING)
+  notes           String?
+  whatsappUrl     String?       @map("whatsapp_url")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  itemsDetail     OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  productId String   @map("product_id")
+  quantity  Int
+  price     Int      // snapshot harga saat checkout
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Review {
+  id         String        @id @default(uuid())
+  productId  String        @map("product_id")
+  rating     Int           // 1 - 5
+  comment    String?
+  authorName String        @default("Anonymous") @map("author_name")
+  status     ReviewStatus  @default(PENDING)
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("reviews")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // hashed
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
