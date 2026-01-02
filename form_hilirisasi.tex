@@ -1,0 +1,59 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[indonesian]{babel}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{ragged2e}
+
+% Setup margin
+\geometry{
+    a4paper,
+    left=3cm,
+    right=2cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+% Custom column type for better text wrapping
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\Large FORM HILIRISASI KKN}
+\end{center}
+
+\vspace{1cm}
+
+\begin{tabularx}{\textwidth}{@{}L{5.5cm}cL{10cm}@{}}
+\textbf{Nama Mahasiswa} & : & PANGERAN JUHRIFAR JAFAR \\[0.3cm]
+
+\textbf{NIM} & : & H071231056 \\[0.3cm]
+
+\textbf{Desa} & : & DESA KALOSI, KECAMATAN DUA PITUE\\
+& & KABUPATEN SIDENRENG RAPPANG \\[0.3cm]
+
+\textbf{Usulan Program Kerja KKN} & : & Pengembangan Website Landing Page BUMDes Kalosi (\textit{``Digitalisasi Pemasaran \& Manajemen Pesanan Terintegrasi''}) \\[0.3cm]
+
+\textbf{Analisis Masalah} & : & Terdapat tiga masalah utama: (1) \textbf{Pemasaran Terbatas} -- Unit usaha potensial (Kuliner, Wisata Malam, Mart) masih bergantung pada jangkauan fisik dan transaksi manual; (2) \textbf{Kurangnya Representasi Digital} -- Belum ada platform profesional yang menampilkan profil usaha dengan visual menarik (\textit{Wow Factor}) untuk menarik wisatawan luar; (3) \textbf{Inefisiensi Pesanan} -- Proses pemesanan belum terdata dengan baik, hanya mengandalkan riwayat chat WhatsApp yang sulit direkap. \\[0.3cm]
+
+\textbf{Metode} & : & Pengembangan \textbf{Platform Digital Terintegrasi} menggunakan teknologi Modern Web (Next.js \& PostgreSQL) dengan tahapan: (1) \textbf{Frontend Interaktif} -- Pembuatan Katalog Produk \& Wisata dengan fitur keranjang belanja (\textit{Client-Side Cart}); (2) \textbf{Checkout Automation} -- Integrasi pemesanan via WhatsApp dengan fitur \textit{Order Logging} otomatis ke database sebelum redirect; (3) \textbf{Admin Dashboard} -- Pembuatan panel admin untuk pengelolaan menu, harga, dan rekap pesanan secara mandiri. \textbf{Timeline 4 Minggu:} Minggu 1 (Setup \& Design), Minggu 2 (Admin Dashboard), Minggu 3 (Logic Checkout), Minggu 4 (Deployment \& Pelatihan). \\[0.3cm]
+
+\textbf{Sasaran} & : & (1) \textbf{Masyarakat Lokal:} Memudahkan pemesanan kuliner/kebutuhan harian tanpa antri; (2) \textbf{Wisatawan:} Kemudahan akses informasi wahana wisata malam (lokasi, harga tiket); (3) \textbf{Pengelola BUMDes:} Efisiensi operasional dengan data pesanan yang jelas dan kemampuan update katalog secara mandiri. \\[0.3cm]
+
+\textbf{Jenis Hilirisasi yang Direncanakan} & : & \textbf{Produk Teknologi Tepat Guna / Artikel Pengabdian}\\
+& & (Judul: \textit{Digitalisasi BUMDes "Sumber Kalosi" melalui Implementasi Website Landing Page dengan Fitur WhatsApp Checkout}). \\[0.5cm]
+
+\end{tabularx}
+
+\vspace{2cm}
+
+\begin{tabularx}{\textwidth}{XX}
+\centering TTD Mahasiswa & \centering TTD DPK \\[0.3cm]
+\centering Pangeran Juhrifar Jafar & \centering Anggun Permata Sari, S. Pt., M. Pt. \\
+\centering H071231056 & \centering 199410282024062003 \\
+\end{tabularx}
+
+\end{document}
