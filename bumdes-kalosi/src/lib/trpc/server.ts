@@ -11,10 +11,10 @@ const getBaseUrl = () => {
 
 export const api = cache(() =>
     createTRPCProxyClient<AppRouter>({
-        transformer: superjson,
         links: [
             httpBatchLink({
                 url: `${getBaseUrl()}/api/trpc`,
+                transformer: superjson,
             }),
         ],
     })

@@ -1,11 +1,40 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { HeroSection } from "@/components/custom/HeroSection";
+import { ServiceShowcase } from "@/components/custom/ServiceShowcase";
+import { SectionHeader } from "@/components/custom/SectionHeader";
+import { AboutSection } from "@/components/custom/AboutSection";
+import { CTABanner } from "@/components/custom/CTABanner";
 
 export default function Home() {
   return (
-    <main className="container mx-auto p-8 space-y-8 d-flex justify-content-center align-items-center">
-        <h1 className="text-4xl font-bold">BUMDes Kalosi</h1>
-    </main>
-  )
+    <div className="min-h-screen bg-background flex flex-col font-sans">
+      <Navbar />
+
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <HeroSection />
+
+        {/* Business Units Grid */}
+        <section className="py-20 container mx-auto px-4 relative z-30">
+          <SectionHeader
+            title="Layanan Kami"
+            subtitle="Jelajahi berbagai layanan unggulan dari BUMDes Kalosi"
+            align="center"
+            className="mb-12"
+          />
+          <ServiceShowcase />
+        </section>
+
+        {/* Introduction / About Section */}
+        <AboutSection />
+
+        {/* CTA Banner */}
+        <CTABanner />
+      </main>
+
+      <Footer />
+    </div>
+  );
 }
+
