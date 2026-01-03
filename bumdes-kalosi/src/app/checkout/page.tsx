@@ -2,28 +2,26 @@
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { PageHero } from "@/components/custom/PageHero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea"; // Assuming Textarea exists based on file list
+import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "react-use-cart";
 import { useState, useEffect } from "react";
-import { Phone, MapPin, User, ShoppingBag, Send } from "lucide-react";
+import { Phone, MapPin, User, ShoppingBag, Send, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function CheckoutPage() {
     const { items, cartTotal, isEmpty } = useCart();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
-    // Form Stats
     const [formData, setFormData] = useState({
         nama: "",
         noHp: "",
-        dusun: "",
         alamatLengkap: "",
     });
 
@@ -31,22 +29,26 @@ export default function CheckoutPage() {
         setMounted(true);
     }, []);
 
-    // Prevent hydration mismatch
     if (!mounted) return null;
 
     if (isEmpty) {
         return (
-            <div className="min-h-screen bg-background flex flex-col font-sans">
-                <Navbar />
-                <main className="flex-grow flex flex-col items-center justify-center p-4">
-                    <div className="text-center space-y-4">
-                        <div className="bg-slate-100 p-6 rounded-full inline-block">
-                            <ShoppingBag className="h-12 w-12 text-slate-400" />
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+                <Navbar forceOpaque />
+                <main className="flex-grow flex flex-col items-center justify-center p-6">
+                    <div className="max-w-md w-full text-center space-y-6 bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/60">
+                        <div className="bg-emerald-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ShoppingBag className="h-10 w-10 text-emerald-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900">Keranjang Kosong</h2>
-                        <p className="text-muted-foreground">Anda belum memilih produk apapun.</p>
-                        <Button onClick={() => router.push("/layanan")}>
-                            Kembali Belanja
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-bold text-slate-900">Keranjang Masih Kosong</h2>
+                            <p className="text-slate-500">Sepertinya Anda belum memilih produk atau layanan dari BUMDes Kalosi.</p>
+                        </div>
+                        <Button
+                            onClick={() => router.push("/layanan")}
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 rounded-xl transition-all"
+                        >
+                            Mulai Belanja
                         </Button>
                     </div>
                 </main>
@@ -60,157 +62,169 @@ export default function CheckoutPage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSelectChange = (value: string) => {
-        setFormData(prev => ({ ...prev, dusun: value }));
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Basic Validation
-        if (!formData.nama || !formData.noHp || !formData.dusun || !formData.alamatLengkap) {
-            toast.error("Mohon lengkapi semua data diri Anda.");
+        if (!formData.nama || !formData.noHp || !formData.alamatLengkap) {
+            toast.error("Mohon lengkapi semua data pengiriman.");
             return;
         }
 
-        // WhatsApp Logic
-        const adminPhone = "6285255887755"; // Replace with actual admin number if known, otherwise placeholder
-
-        let message = `Halo Admin BUMDes Kalosi, saya ingin memesan:\n\n`;
-        message += `*Data Pemesan:*\n`;
+        const adminPhone = "6282393318287";
+        let message = `*PESANAN BARU - BUMDES KALOSI*\n`;
+        message += `------------------------------------------\n\n`;
+        message += `👤 *Data Pemesan:*\n`;
         message += `Nama: ${formData.nama}\n`;
         message += `No HP: ${formData.noHp}\n`;
-        message += `Alamat: ${formData.dusun} - ${formData.alamatLengkap}\n\n`;
+        message += `Alamat: ${formData.alamatLengkap}\n\n`;
 
-        message += `*Detail Pesanan:*\n`;
+        message += `🛒 *Detail Pesanan:*\n`;
         items.forEach((item, index) => {
             message += `${index + 1}. ${item.title} (${item.quantity}x) - Rp ${(item.price * item.quantity!).toLocaleString('id-ID')}\n`;
         });
 
-        message += `\n*Total Tagihan: Rp ${cartTotal.toLocaleString('id-ID')}*`;
-        message += `\n\nMohon diproses, terima kasih.`;
+        message += `\n💰 *Total Tagihan: Rp ${cartTotal.toLocaleString('id-ID')}*\n\n`;
+        message += `------------------------------------------\n`;
+        message += `_Mohon segera dikonfirmasi ya Admin, Terima kasih!_`;
 
         const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
         window.open(waUrl, '_blank');
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col font-sans">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">
             <Navbar forceOpaque />
-            <main className="flex-grow pt-20 pb-12">
+
+            <main className="flex-grow pt-28 pb-16">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <h1 className="text-3xl font-bold mb-8 text-slate-900">Checkout Pesanan</h1>
+                    <div className="max-w-5xl mx-auto">
+                        {/* Header & Breadcrumb */}
+                        <div className="mb-10 text-center lg:text-left">
+                            <Link href="/layanan" className="inline-flex items-center text-sm text-emerald-600 font-medium mb-4 hover:gap-2 transition-all gap-1">
+                                <ArrowLeft className="w-4 h-4" /> Kembali ke Layanan
+                            </Link>
+                            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Checkout</h1>
+                            <p className="text-slate-500 mt-2">Selesaikan pesanan Anda dengan mengisi data di bawah ini.</p>
+                        </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Left Column: Form */}
-                            <div className="space-y-6">
-                                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800">
-                                        <User className="h-5 w-5 text-emerald-600" />
-                                        Data Diri & Alamat
-                                    </h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                            {/* Form Pengiriman */}
+                            <div className="lg:col-span-7 space-y-6">
+                                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40">
+                                    <div className="flex items-center gap-3 mb-8">
+                                        <div className="bg-emerald-100 p-2 rounded-lg">
+                                            <MapPin className="h-5 w-5 text-emerald-600" />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-slate-800">Informasi Pengiriman</h2>
+                                    </div>
 
-                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="nama">Nama Lengkap</Label>
-                                            <Input
-                                                id="nama"
-                                                name="nama"
-                                                placeholder="Contoh: Andi Wijaya"
-                                                value={formData.nama}
-                                                onChange={handleInputChange}
-                                                required
-                                            />
+                                    <form className="space-y-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nama" className="text-slate-700 font-medium">Nama Lengkap</Label>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                                    <Input
+                                                        id="nama"
+                                                        name="nama"
+                                                        placeholder="Andi Wijaya"
+                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        value={formData.nama}
+                                                        onChange={handleInputChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="noHp" className="text-slate-700 font-medium">Nomor WhatsApp</Label>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                                    <Input
+                                                        id="noHp"
+                                                        name="noHp"
+                                                        type="tel"
+                                                        placeholder="081234..."
+                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        value={formData.noHp}
+                                                        onChange={handleInputChange}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="noHp">Nomor WhatsApp / HP</Label>
-                                            <Input
-                                                id="noHp"
-                                                name="noHp"
-                                                type="tel"
-                                                placeholder="Contoh: 081234567890"
-                                                value={formData.noHp}
-                                                onChange={handleInputChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="dusun">Dusun / Wilayah</Label>
-                                            <Select onValueChange={handleSelectChange} required>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Pilih Dusun" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="Kalosi">Kalosi</SelectItem>
-                                                    <SelectItem value="Killa">Killa</SelectItem>
-                                                    <SelectItem value="Tondok Kalua">Tondok Kalua</SelectItem>
-                                                    {/* Add more dusun as needed */}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="alamatLengkap">Alamat Lengkap</Label>
+                                            <Label htmlFor="alamatLengkap" className="text-slate-700 font-medium">Detail Alamat / Patokan (Bisa Shareloct di WA)</Label>
                                             <Textarea
                                                 id="alamatLengkap"
                                                 name="alamatLengkap"
-                                                placeholder="Contoh: Jl. Poros Kalosi, dekat Mesjid Raya..."
-                                                className="resize-none h-24"
+                                                placeholder="Contoh: Rumah warna hijau depan masjid, Jl. Poros Kalosi..."
+                                                className="resize-none h-28 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl p-4"
                                                 value={formData.alamatLengkap}
                                                 onChange={handleInputChange}
-                                                required
                                             />
                                         </div>
                                     </form>
                                 </div>
+
+                                {/* Payment Note */}
+                                <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex gap-4">
+                                    <CheckCircle2 className="h-6 w-6 text-blue-600 shrink-0" />
+                                    <p className="text-sm text-blue-800 leading-relaxed">
+                                        <strong>Metode Pembayaran:</strong> Untuk saat ini kami melayani pembayaran
+                                        <strong> Cash on Delivery (COD)</strong> atau Transfer saat barang sampai.
+                                        Admin akan mengonfirmasi total biaya melalui WhatsApp.
+                                    </p>
+                                </div>
                             </div>
 
-                            {/* Right Column: Order Summary */}
-                            <div className="space-y-6">
-                                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-24">
-                                    <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800">
+                            {/* Ringkasan Pesanan */}
+                            <div className="lg:col-span-5">
+                                <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/40 sticky top-28">
+                                    <h2 className="text-xl font-bold mb-6 text-slate-800 flex items-center gap-2">
                                         <ShoppingBag className="h-5 w-5 text-emerald-600" />
                                         Ringkasan Pesanan
                                     </h2>
 
-                                    <div className="space-y-4 mb-6">
+                                    <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 mb-8 custom-scrollbar">
                                         {items.map((item) => (
-                                            <div key={item.id} className="flex justify-between items-start text-sm">
-                                                <div className="space-y-1">
-                                                    <span className="font-medium text-slate-700 block">{item.title}</span>
-                                                    <span className="text-slate-500 text-xs">{item.quantity} x Rp {item.price.toLocaleString('id-ID')}</span>
+                                            <div key={item.id} className="flex justify-between items-center group">
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-slate-700 group-hover:text-emerald-600 transition-colors">{item.title}</span>
+                                                    <span className="text-slate-400 text-xs font-medium">{item.quantity} Unit x Rp {item.price.toLocaleString('id-ID')}</span>
                                                 </div>
-                                                <span className="font-semibold text-slate-900">
+                                                <span className="font-bold text-slate-900">
                                                     Rp {(item.price * item.quantity!).toLocaleString('id-ID')}
                                                 </span>
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div className="border-t border-slate-100 pt-4 space-y-3">
-                                        <div className="flex justify-between items-center text-slate-600">
-                                            <span>Subtotal</span>
-                                            <span>Rp {cartTotal.toLocaleString('id-ID')}</span>
+                                    <div className="space-y-4 pt-6 border-t border-slate-100">
+                                        <div className="flex justify-between items-center text-slate-500">
+                                            <span className="text-sm">Subtotal</span>
+                                            <span className="font-medium">Rp {cartTotal.toLocaleString('id-ID')}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-lg font-bold text-slate-900 border-t border-dashed border-slate-200 pt-3">
-                                            <span>Total Pembayaran</span>
-                                            <span className="text-emerald-600">Rp {cartTotal.toLocaleString('id-ID')}</span>
+                                        <div className="flex justify-between items-center text-slate-500">
+                                            <span className="text-sm">Biaya Layanan</span>
+                                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full uppercase">Gratis</span>
+                                        </div>
+
+                                        <div className="flex justify-between items-center pt-4 border-t border-dashed border-slate-200">
+                                            <span className="text-lg font-bold text-slate-900">Total</span>
+                                            <span className="text-2xl font-black text-emerald-600">
+                                                Rp {cartTotal.toLocaleString('id-ID')}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <Button
                                         onClick={handleSubmit}
-                                        className="w-full mt-6 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold h-12 text-base shadow-lg shadow-emerald-500/20"
+                                        className="w-full mt-8 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-extrabold h-14 rounded-2xl text-lg shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98]"
                                     >
-                                        <Send className="w-5 h-5 mr-2" />
-                                        Pesan Sekarang via WhatsApp
+                                        <Send className="w-5 h-5 mr-3" />
+                                        Pesan via WhatsApp
                                     </Button>
 
-                                    <p className="text-xs text-center text-slate-400 mt-4">
-                                        Anda akan diarahkan ke WhatsApp Admin untuk konfirmasi pesanan.
+                                    <p className="text-[10px] text-center text-slate-400 mt-5 leading-relaxed uppercase tracking-wider font-semibold">
+                                        Terjamin Aman • Layanan Desa Kalosi
                                     </p>
                                 </div>
                             </div>
@@ -218,6 +232,7 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </main>
+
             <Footer />
         </div>
     );
