@@ -48,10 +48,8 @@ export function Navbar() {
                         {[
                             { name: "Beranda", href: "/" },
                             { name: "Tentang Kami", href: "/tentang-kami" },
+                            { name: "Layanan & Produk", href: "/layanan" },
                             { name: "Berita", href: "/berita" },
-                            { name: "Kuliner", href: "#kuliner" },
-                            { name: "Wisata", href: "#wisata" },
-                            { name: "Mart", href: "#mart" },
                         ].map((item) => (
                             <Link
                                 key={item.name}
@@ -105,9 +103,7 @@ export function Navbar() {
                                         { name: "Beranda", href: "/" },
                                         { name: "Tentang Kami", href: "/tentang-kami" },
                                         { name: "Berita", href: "/berita" },
-                                        { name: "Kuliner", href: "#kuliner" },
-                                        { name: "Wisata", href: "#wisata" },
-                                        { name: "Mart", href: "#mart" },
+                                        { name: "Layanan", href: "/layanan" },
                                     ].map((item) => (
                                         <Link
                                             key={item.name}
