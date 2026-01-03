@@ -26,6 +26,6 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 - [x] Tombol **"Pesan via WhatsApp"** (Redirect ke WA Admin).
 
 ### 4. Admin Dashboard (Opsional / Tahap Akhir)
-- [ ] Halaman Login Admin.
-- [ ] Dashboard Input Produk Baru.
+- [x] Halaman Login Admin.
+- [x] Dashboard Input Produk Baru, Layanan, Berita, gitu aja dulu.
 - [ ] Rekap Pesanan Masuk.
