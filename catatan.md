@@ -27,5 +27,5 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 
 ### 4. Admin Dashboard (Opsional / Tahap Akhir)
 - [x] Halaman Login Admin.
-- [x] Dashboard Input Produk Baru, Layanan, Berita, gitu aja dulu.
+- [] Dashboard Input Produk Baru, Layanan, Berita, gitu aja dulu, fokus penyesuaian tampilan untuk sekarang tinggal sesuaikan aja isi tabs setiap sidebar item, tetap pakai style dari dashboard-01 data-tabel.txt, begitu juga dengan yang lain.
 - [ ] Rekap Pesanan Masuk.

@@ -46,22 +46,22 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
+      title: "News",
       url: "#",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Products",
       url: "#",
-      icon: IconFolder,
+      icon: IconUsers,
     },
     {
-      title: "Team",
+      title: "Transactions",
+      url: "#",
+      icon: IconUsers,
+    },
+    {
+      title: "Users",
       url: "#",
       icon: IconUsers,
     },
@@ -125,27 +125,17 @@ const data = {
       url: "#",
       icon: IconHelp,
     },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Rekap Bumdes",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
+      name: "Laporan",
       url: "#",
       icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
     },
   ],
 }
@@ -162,7 +152,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Bumdes Kalosi</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
