@@ -22,7 +22,7 @@ export default async function ProductDetailPage({
 
     return (
         <div className="min-h-screen bg-background flex flex-col font-sans">
-            <Navbar />
+            <Navbar forceOpaque />
             <main className="flex-grow pt-24 pb-20">
                 <div className="container mx-auto px-4">
                     {/* Breadcrumb / Back */}

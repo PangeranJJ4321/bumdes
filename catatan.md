@@ -9,21 +9,21 @@ halamanya gitu..
 Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutnya:
 
 ### 1. Halaman Detail Produk (`/layanan/[slug]` atau `[id]`)
-- [ ] Tampilan detail foto produk (Gallery).
-- [ ] Deskripsi lengkap.
-- [ ] Pilihan varian (jika ada, misal: Pedas/Sedang).
-- [ ] Tombol **"Tambah ke Keranjang"**.
+- [x] Tampilan detail foto produk (Gallery).
+- [x] Deskripsi lengkap.
+- [x] Pilihan varian (jika ada, misal: Pedas/Sedang).
+- [x] Tombol **"Tambah ke Keranjang"**.
 
 ### 2. Fitur Keranjang Belanja (Shopping Cart)
-- [ ] **Cart Sidebar/Drawer**: Muncul dari kanan saat klik ikon keranjang.
-- [ ] List item yang dipilih.
-- [ ] Tombol **"Checkout"**.
+- [x] **Cart Sidebar/Drawer**: Muncul dari kanan saat klik ikon keranjang.
+- [x] List item yang dipilih.
+- [x] Tombol **"Checkout"**.
 
 ### 3. Halaman Checkout (`/checkout`)
-- [ ] Form Data Diri (Nama, No HP).
-- [ ] Dropdown Alamat/Dusun.
-- [ ] Ringkasan Pesanan.
-- [ ] Tombol **"Pesan via WhatsApp"** (Redirect ke WA Admin).
+- [x] Form Data Diri (Nama, No HP).
+- [x] Dropdown Alamat/Dusun.
+- [x] Ringkasan Pesanan.
+- [x] Tombol **"Pesan via WhatsApp"** (Redirect ke WA Admin).
 
 ### 4. Admin Dashboard (Opsional / Tahap Akhir)
 - [ ] Halaman Login Admin.
