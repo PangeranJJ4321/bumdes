@@ -1,0 +1,92 @@
+[
+    {
+        "id": 1,
+        "title": "BUMDes Kalosi Resmikan Unit Usaha Baru",
+        "category": "Berita",
+        "author": "Admin Desa",
+        "date": "04 Jan 2026",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 2,
+        "title": "Jadwal Musyawarah Desa Bulan Januari",
+        "category": "Pengumuman",
+        "author": "Sekretaris Desa",
+        "date": "03 Jan 2026",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop"
+    },
+    {
+        "id": 3,
+        "title": "Laporan Keuangan BUMDes Tahun 2025",
+        "category": "Laporan",
+        "author": "Bendahara",
+        "date": "02 Jan 2026",
+        "status": "Draft",
+        "image": "https://images.unsplash.com/photo-1554224155-98406f585ee5?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 4,
+        "title": "Kunjungan Bapak Bupati ke Desa Kalosi",
+        "category": "Kegiatan",
+        "author": "Admin Desa",
+        "date": "01 Jan 2026",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1560523160-754a9e25c68f?q=80&w=2036&auto=format&fit=crop"
+    },
+    {
+        "id": 5,
+        "title": "Pelatihan Digital Marketing untuk UMKM",
+        "category": "Kegiatan",
+        "author": "Tim KKN",
+        "date": "31 Dec 2025",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 6,
+        "title": "Lowongan Kerja Staff Admin BUMDes",
+        "category": "Pengumuman",
+        "author": "Ketua BUMDes",
+        "date": "30 Dec 2025",
+        "status": "Archived",
+        "image": "https://images.unsplash.com/photo-1621570275815-5c1a76c8c5c7?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 7,
+        "title": "Kerja Bakti Membersihkan Lingkungan Desa",
+        "category": "Kegiatan",
+        "author": "Kepala Dusun",
+        "date": "29 Dec 2025",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 8,
+        "title": "Penyaluran Bantuan Langsung Tunai (BLT)",
+        "category": "Berita",
+        "author": "Admin Desa",
+        "date": "28 Dec 2025",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1607863680198-23d4b2565df0?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 9,
+        "title": "Rapat Koordinasi Pengurus BUMDes",
+        "category": "Agenda",
+        "author": "Ketua BUMDes",
+        "date": "27 Dec 2025",
+        "status": "Draft",
+        "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 10,
+        "title": "Update Stok Produk BUMDes Mart",
+        "category": "Pengumuman",
+        "author": "Admin Mart",
+        "date": "26 Dec 2025",
+        "status": "Published",
+        "image": "https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?q=80&w=2072&auto=format&fit=crop"
+    }
+]

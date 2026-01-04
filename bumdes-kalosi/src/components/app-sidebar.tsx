@@ -17,6 +17,9 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconNews,
+  IconBox,
+  IconReceipt,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -42,23 +45,23 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/admin/dashboard",
       icon: IconDashboard,
     },
     {
       title: "News",
-      url: "#",
-      icon: IconChartBar,
+      url: "/admin/dashboard/news",
+      icon: IconNews,
     },
     {
       title: "Products",
-      url: "#",
-      icon: IconUsers,
+      url: "/admin/dashboard/products",
+      icon: IconBox,
     },
     {
       title: "Transactions",
       url: "#",
-      icon: IconUsers,
+      icon: IconReceipt,
     },
     {
       title: "Users",

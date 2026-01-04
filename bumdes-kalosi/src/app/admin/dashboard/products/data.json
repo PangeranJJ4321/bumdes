@@ -1,0 +1,56 @@
+[
+    {
+        "id": "1",
+        "name": "Kopi Arabika Kalosi 250g",
+        "category": "Kuliner",
+        "price": 45000,
+        "stock": 50,
+        "status": "Tersedia",
+        "image": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+        "id": "2",
+        "name": "Keripik Singkong Balado",
+        "category": "Kuliner",
+        "price": 15000,
+        "stock": 100,
+        "status": "Tersedia",
+        "image": "https://images.unsplash.com/photo-1566478919030-26401083f2dc?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+        "id": "3",
+        "name": "Minyak Goreng 2L",
+        "category": "Bumdes Mart",
+        "price": 35000,
+        "stock": 20,
+        "status": "Tersedia",
+        "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcdcc3a?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+        "id": "4",
+        "name": "Ikan Mas Segar /kg",
+        "category": "Perikanan",
+        "price": 40000,
+        "stock": 15,
+        "status": "Tersedia",
+        "image": "https://images.unsplash.com/photo-1519706363292-8dbddb07e5b1?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+        "id": "5",
+        "name": "Gas LPG 3kg",
+        "category": "Agen LPG",
+        "price": 22000,
+        "stock": 0,
+        "status": "Habis",
+        "image": "https://images.unsplash.com/photo-1585834893708-41076fb40dbb?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+        "id": "6",
+        "name": "Tiket Masuk Wisata Air Terjun",
+        "category": "Wisata",
+        "price": 10000,
+        "stock": 9999,
+        "status": "Tersedia",
+        "image": "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80&w=200&h=200"
+    }
+]
