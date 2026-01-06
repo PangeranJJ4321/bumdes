@@ -1,0 +1,87 @@
+[
+    {
+        "id": "TRX-001",
+        "date": "2024-01-05T10:30:00",
+        "customer": {
+            "name": "Budi Santoso",
+            "email": "budi.s@example.com"
+        },
+        "amount": 45000,
+        "status": "Success",
+        "items": [
+            {
+                "name": "Kopi Arabika Kalosi 250g",
+                "quantity": 1,
+                "price": 45000
+            }
+        ]
+    },
+    {
+        "id": "TRX-002",
+        "date": "2024-01-05T14:15:00",
+        "customer": {
+            "name": "Siti Aminah",
+            "email": "siti.aminah@example.com"
+        },
+        "amount": 150000,
+        "status": "Pending",
+        "items": [
+            {
+                "name": "Sewa Tenda Camping",
+                "quantity": 3,
+                "price": 50000
+            }
+        ]
+    },
+    {
+        "id": "TRX-003",
+        "date": "2024-01-04T09:00:00",
+        "customer": {
+            "name": "Ahmad Rizky",
+            "email": "ahmad.r@example.com"
+        },
+        "amount": 25000,
+        "status": "Failed",
+        "items": [
+            {
+                "name": "Paket Wisata Air Terjun",
+                "quantity": 1,
+                "price": 25000
+            }
+        ]
+    },
+    {
+        "id": "TRX-004",
+        "date": "2024-01-03T16:45:00",
+        "customer": {
+            "name": "Dewi Pertiwi",
+            "email": "dewi.p@example.com"
+        },
+        "amount": 90000,
+        "status": "Success",
+        "items": [
+            {
+                "name": "Kopi Robusta 250g",
+                "quantity": 2,
+                "price": 45000
+            }
+        ]
+    },
+    {
+        "id": "TRX-005",
+        "date": "2024-01-03T11:20:00",
+        "customer": {
+            "name": "Rudi Hartono",
+            "email": "rudi.h@example.com"
+        },
+        "amount": 20000,
+        "status": "Success",
+        "items": [
+            {
+                "name": "Jasa Antar Jemput",
+                "quantity": 2,
+                "price": 10000
+            }
+        ]
+    }
+]

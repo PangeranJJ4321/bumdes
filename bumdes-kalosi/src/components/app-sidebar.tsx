@@ -59,13 +59,18 @@ const data = {
       icon: IconBox,
     },
     {
+      title: "Services",
+      url: "/admin/dashboard/services",
+      icon: IconListDetails,
+    },
+    {
       title: "Transactions",
-      url: "#",
+      url: "/admin/dashboard/transactions",
       icon: IconReceipt,
     },
     {
       title: "Users",
-      url: "#",
+      url: "/admin/dashboard/users",
       icon: IconUsers,
     },
   ],

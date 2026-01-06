@@ -25,23 +25,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-const productFormSchema = z.object({
+const serviceFormSchema = z.object({
     name: z
         .string()
         .min(2, {
-            message: "Nama produk harus minimal 2 karakter.",
+            message: "Nama layanan harus minimal 2 karakter.",
         })
         .max(100, {
-            message: "Nama produk tidak boleh lebih dari 100 karakter.",
+            message: "Nama layanan tidak boleh lebih dari 100 karakter.",
         }),
     category: z.string().min(1, {
-        message: "Silakan pilih kategori produk.",
+        message: "Silakan pilih kategori layanan.",
     }),
     price: z.string().min(1, {
         message: "Harga harus diisi.",
-    }),
-    stock: z.string().min(1, {
-        message: "Stok harus diisi.",
     }),
     status: z.string().min(1, {
         message: "Silakan pilih status.",
@@ -50,55 +47,50 @@ const productFormSchema = z.object({
         message: "Masukkan URL gambar yang valid.",
     }).optional().or(z.literal("")),
     description: z.string().optional(),
-    isFeatured: z.boolean().default(false),
 })
 
-type ProductFormValues = z.infer<typeof productFormSchema>
+type ServiceFormValues = z.infer<typeof serviceFormSchema>
 
 // Default values for the form
-const defaultValues: Partial<ProductFormValues> = {
+const defaultValues: Partial<ServiceFormValues> = {
     name: "",
     category: "",
     price: "",
-    stock: "",
-    status: "Tersedia",
+    status: "Aktif",
     image: "",
     description: "",
-    isFeatured: false,
 }
 
-interface ProductFormProps {
-    initialData?: ProductFormValues & { id?: string };
+interface ServiceFormProps {
+    initialData?: ServiceFormValues & { id?: string };
     isEdit?: boolean;
 }
 
-export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
+export function ServiceForm({ initialData, isEdit = false }: ServiceFormProps) {
     const router = useRouter()
-    const form = useForm<ProductFormValues>({
-        resolver: zodResolver(productFormSchema),
+    const form = useForm<ServiceFormValues>({
+        resolver: zodResolver(serviceFormSchema),
         defaultValues: initialData ? {
             name: initialData.name,
             category: initialData.category,
             price: initialData.price,
-            stock: initialData.stock,
             status: initialData.status,
             image: initialData.image,
             description: initialData.description || "",
-            isFeatured: initialData.isFeatured || false,
         } : defaultValues,
     })
 
-    function onSubmit(data: ProductFormValues) {
+    function onSubmit(data: ServiceFormValues) {
         toast.success(
             isEdit
-                ? "Produk berhasil diperbarui!"
-                : "Produk berhasil ditambahkan!"
+                ? "Layanan berhasil diperbarui!"
+                : "Layanan berhasil ditambahkan!"
         )
         console.log(JSON.stringify(data, null, 2))
 
         // Simulate API delay and redirect
         setTimeout(() => {
-            router.push("/admin/dashboard/products")
+            router.push("/admin/dashboard/services")
         }, 1000)
     }
 
@@ -111,9 +103,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         name="name"
                         render={({ field }) => (
                             <FormItem className="col-span-2">
-                                <FormLabel>Nama Produk</FormLabel>
+                                <FormLabel>Nama Layanan</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Contoh: Kopi Arabika 200g" {...field} />
+                                    <Input placeholder="Contoh: Paket Wisata Alam" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -133,11 +125,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Kuliner">Kuliner</SelectItem>
-                                        <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
-                                        <SelectItem value="Perikanan">Perikanan</SelectItem>
-                                        <SelectItem value="Agen LPG">Agen LPG</SelectItem>
                                         <SelectItem value="Wisata">Wisata</SelectItem>
+                                        <SelectItem value="Penyewaan">Penyewaan</SelectItem>
+                                        <SelectItem value="Jasa">Jasa</SelectItem>
+                                        <SelectItem value="Edukasi">Edukasi</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -158,8 +149,8 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Tersedia">Tersedia</SelectItem>
-                                        <SelectItem value="Habis">Habis</SelectItem>
+                                        <SelectItem value="Aktif">Aktif</SelectItem>
+                                        <SelectItem value="Nonaktif">Nonaktif</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -172,21 +163,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         name="price"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Harga (Rp)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="0" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="stock"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Stok</FormLabel>
+                                <FormLabel>Harga Mulai (Rp)</FormLabel>
                                 <FormControl>
                                     <Input type="number" placeholder="0" {...field} />
                                 </FormControl>
@@ -205,7 +182,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                     <Input placeholder="https://..." {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Link gambar produk.
+                                    Link gambar layanan.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -217,10 +194,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         name="description"
                         render={({ field }) => (
                             <FormItem className="col-span-2">
-                                <FormLabel>Deskripsi Produk</FormLabel>
+                                <FormLabel>Deskripsi Layanan</FormLabel>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="Jelaskan detail produk..."
+                                        placeholder="Jelaskan detail layanan..."
                                         className="min-h-[120px]"
                                         {...field}
                                     />
@@ -229,35 +206,14 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                             </FormItem>
                         )}
                     />
-
-                    <FormField
-                        control={form.control}
-                        name="isFeatured"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 col-span-2">
-                                <div className="space-y-0.5">
-                                    <FormLabel className="text-base">Produk Unggulan</FormLabel>
-                                    <FormDescription>
-                                        Tampilkan produk ini di halaman utama sebagai produk unggulan.
-                                    </FormDescription>
-                                </div>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Batal
                     </Button>
-                    <Button type="submit">{isEdit ? "Update Produk" : "Simpan Produk"}</Button>
+                    <Button type="submit">{isEdit ? "Update Layanan" : "Simpan Layanan"}</Button>
                 </div>
-            </form >
-        </Form >
+            </form>
+        </Form>
     )
 }

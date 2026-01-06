@@ -31,4 +31,5 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 - [/] Dashboard Input Fitur Lain (Produk Baru, Berita, dll).
     - [x] Fitur Berita (Tabel, Filter, Gambar, Form Create/Edit).
     - [x] Fitur Produk (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail).
+    - [ ] Fitur Layanan (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail).
 - [ ] Rekap Pesanan Masuk.

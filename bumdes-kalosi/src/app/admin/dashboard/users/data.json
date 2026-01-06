@@ -1,0 +1,42 @@
+[
+    {
+        "id": "USR-001",
+        "name": "Admin Bumdes",
+        "email": "admin@bumdes-kalosi.id",
+        "role": "Admin",
+        "status": "Active",
+        "joinedDate": "2023-12-01T00:00:00"
+    },
+    {
+        "id": "USR-002",
+        "name": "Budi Santoso",
+        "email": "budi.s@example.com",
+        "role": "User",
+        "status": "Active",
+        "joinedDate": "2024-01-02T10:00:00"
+    },
+    {
+        "id": "USR-003",
+        "name": "Siti Aminah",
+        "email": "siti.aminah@example.com",
+        "role": "User",
+        "status": "Inactive",
+        "joinedDate": "2024-01-05T09:30:00"
+    },
+    {
+        "id": "USR-004",
+        "name": "Ahmad Rizky",
+        "email": "ahmad.r@example.com",
+        "role": "User",
+        "status": "Active",
+        "joinedDate": "2024-01-03T14:20:00"
+    },
+    {
+        "id": "USR-005",
+        "name": "Dewi Pertiwi",
+        "email": "dewi.p@example.com",
+        "role": "User",
+        "status": "Suspended",
+        "joinedDate": "2024-01-01T11:00:00"
+    }
+]

@@ -51,17 +51,16 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export type Product = {
+export type Service = {
     id: string
     name: string
     category: string
     price: number
-    stock: number
     status: string
+    description: string
     image: string
-    isFeatured?: boolean
 }
 
 const formatCurrency = (value: number) => {
@@ -72,7 +71,7 @@ const formatCurrency = (value: number) => {
     }).format(value)
 }
 
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<Service>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -110,32 +109,20 @@ export const columns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "name",
-        header: "Nama Produk",
+        header: "Nama Layanan",
         cell: ({ row }) => <div className="font-medium line-clamp-2">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "category",
         header: "Kategori",
         cell: ({ row }) => (
-            <div className="flex flex-col gap-1">
-                <Badge variant="outline" className="w-fit">{row.getValue("category")}</Badge>
-                {row.original.isFeatured && (
-                    <Badge variant="default" className="w-fit bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600">
-                        Unggulan
-                    </Badge>
-                )}
-            </div>
+            <Badge variant="outline">{row.getValue("category")}</Badge>
         ),
     },
     {
         accessorKey: "price",
-        header: "Harga",
+        header: "Harga Mulai",
         cell: ({ row }) => <div>{formatCurrency(row.getValue("price"))}</div>,
-    },
-    {
-        accessorKey: "stock",
-        header: "Stok",
-        cell: ({ row }) => <div>{row.getValue("stock")}</div>,
     },
     {
         accessorKey: "status",
@@ -143,7 +130,7 @@ export const columns: ColumnDef<Product>[] = [
         cell: ({ row }) => {
             const status = row.getValue("status") as string
             return (
-                <Badge variant={status === "Tersedia" ? "default" : "secondary"}>
+                <Badge variant={status === "Penyewaan" ? "default" : "secondary"}>
                     {status}
                 </Badge>
             )
@@ -153,7 +140,7 @@ export const columns: ColumnDef<Product>[] = [
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const product = row.original
+            const service = row.original
 
             return (
                 <AlertDialog>
@@ -166,19 +153,19 @@ export const columns: ColumnDef<Product>[] = [
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(product.name)}
+                                onClick={() => navigator.clipboard.writeText(service.name)}
                             >
                                 Copy detail
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/products/${product.id}`}>
+                                <Link href={`/admin/dashboard/services/${service.id}`}>
                                     Lihat Detail
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/products/${product.id}/edit`}>
-                                    Edit Produk
+                                <Link href={`/admin/dashboard/services/${service.id}/edit`}>
+                                    Edit Layanan
                                 </Link>
                             </DropdownMenuItem>
                             <AlertDialogTrigger asChild>
@@ -192,7 +179,7 @@ export const columns: ColumnDef<Product>[] = [
                         <AlertDialogHeader>
                             <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Tindakan ini tidak dapat dibatalkan. Produk "{product.name}" akan dihapus permanen dari database.
+                                Tindakan ini tidak dapat dibatalkan. Layanan "{service.name}" akan dihapus permanen dari database.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -200,7 +187,7 @@ export const columns: ColumnDef<Product>[] = [
                             <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={() => {
-                                    toast.success("Produk berhasil dihapus")
+                                    toast.success("Layanan berhasil dihapus")
                                 }}
                             >
                                 Hapus
@@ -213,7 +200,7 @@ export const columns: ColumnDef<Product>[] = [
     },
 ]
 
-export function ProductsTable({ data }: { data: Product[] }) {
+export function ServicesTable({ data }: { data: Service[] }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -252,7 +239,7 @@ export function ProductsTable({ data }: { data: Product[] }) {
                     <div className="relative">
                         <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Cari produk..."
+                            placeholder="Cari layanan..."
                             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                             onChange={(event) =>
                                 table.getColumn("name")?.setFilterValue(event.target.value)
@@ -262,8 +249,8 @@ export function ProductsTable({ data }: { data: Product[] }) {
                     </div>
                 </div>
                 <Button variant="default" size="sm" asChild>
-                    <Link href="/admin/dashboard/products/create">
-                        <IconPlus className="mr-2 h-4 w-4" /> Tambah Produk
+                    <Link href="/admin/dashboard/services/create">
+                        <IconPlus className="mr-2 h-4 w-4" /> Tambah Layanan
                     </Link>
                 </Button>
             </div>
@@ -271,11 +258,10 @@ export function ProductsTable({ data }: { data: Product[] }) {
             <Tabs defaultValue="all" value={categoryFilter} onValueChange={setCategoryFilter} className="w-full">
                 <TabsList className="w-full justify-start overflow-x-auto">
                     <TabsTrigger value="all">Semua</TabsTrigger>
-                    <TabsTrigger value="Kuliner">Kuliner</TabsTrigger>
-                    <TabsTrigger value="Bumdes Mart">Bumdes Mart</TabsTrigger>
-                    <TabsTrigger value="Perikanan">Perikanan</TabsTrigger>
-                    <TabsTrigger value="Agen LPG">Agen LPG</TabsTrigger>
                     <TabsTrigger value="Wisata">Wisata</TabsTrigger>
+                    <TabsTrigger value="Penyewaan">Penyewaan</TabsTrigger>
+                    <TabsTrigger value="Jasa">Jasa</TabsTrigger>
+                    <TabsTrigger value="Edukasi">Edukasi</TabsTrigger>
                 </TabsList>
             </Tabs>
 
@@ -322,7 +308,7 @@ export function ProductsTable({ data }: { data: Product[] }) {
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    Tidak ada produk ditemukan.
+                                    Tidak ada layanan ditemukan.
                                 </TableCell>
                             </TableRow>
                         )}

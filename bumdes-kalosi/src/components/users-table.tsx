@@ -15,24 +15,12 @@ import {
 } from "@tanstack/react-table"
 import {
     IconDotsVertical,
-    IconPlus,
     IconSearch,
+    IconUser,
+    IconTrash,
+    IconShield,
+    IconShieldOff
 } from "@tabler/icons-react"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
-
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -40,6 +28,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
     Table,
@@ -51,28 +40,19 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { format } from "date-fns"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export type Product = {
+export type User = {
     id: string
     name: string
-    category: string
-    price: number
-    stock: number
+    email: string
+    role: string
     status: string
-    image: string
-    isFeatured?: boolean
+    joinedDate: string
 }
 
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-    }).format(value)
-}
-
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<User>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -96,138 +76,102 @@ export const columns: ColumnDef<Product>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "image",
-        header: "Gambar",
-        cell: ({ row }) => (
-            <div className="h-12 w-12 overflow-hidden rounded-md border bg-muted">
-                <img
-                    src={row.getValue("image")}
-                    alt={row.getValue("name")}
-                    className="h-full w-full object-cover"
-                />
-            </div>
-        ),
-    },
-    {
         accessorKey: "name",
-        header: "Nama Produk",
-        cell: ({ row }) => <div className="font-medium line-clamp-2">{row.getValue("name")}</div>,
-    },
-    {
-        accessorKey: "category",
-        header: "Kategori",
+        header: "User",
         cell: ({ row }) => (
-            <div className="flex flex-col gap-1">
-                <Badge variant="outline" className="w-fit">{row.getValue("category")}</Badge>
-                {row.original.isFeatured && (
-                    <Badge variant="default" className="w-fit bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600">
-                        Unggulan
-                    </Badge>
-                )}
+            <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src={`https://avatar.vercel.sh/${row.getValue("email")}`} />
+                    <AvatarFallback>{(row.getValue("name") as string).substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                    <span className="font-medium">{row.getValue("name")}</span>
+                    <span className="text-xs text-muted-foreground">{row.original.email}</span>
+                </div>
             </div>
         ),
     },
     {
-        accessorKey: "price",
-        header: "Harga",
-        cell: ({ row }) => <div>{formatCurrency(row.getValue("price"))}</div>,
-    },
-    {
-        accessorKey: "stock",
-        header: "Stok",
-        cell: ({ row }) => <div>{row.getValue("stock")}</div>,
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ row }) => {
+            const role = row.getValue("role") as string
+            return (
+                <div className="flex items-center gap-2">
+                    {role === "Admin" ? <IconShield className="h-4 w-4 text-primary" /> : <IconUser className="h-4 w-4 text-muted-foreground" />}
+                    <span>{role}</span>
+                </div>
+            )
+        },
     },
     {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
             const status = row.getValue("status") as string
-            return (
-                <Badge variant={status === "Tersedia" ? "default" : "secondary"}>
-                    {status}
-                </Badge>
-            )
+            let variant: "default" | "secondary" | "destructive" | "outline" = "default"
+
+            switch (status.toLowerCase()) {
+                case "active": variant = "default"; break;
+                case "inactive": variant = "secondary"; break;
+                case "suspended": variant = "destructive"; break;
+                default: variant = "outline"; break;
+            }
+
+            return <Badge variant={variant}>{status}</Badge>
         },
+    },
+    {
+        accessorKey: "joinedDate",
+        header: "Joined Date",
+        cell: ({ row }) => (
+            <div className="text-sm">
+                {format(new Date(row.getValue("joinedDate")), "dd MMM yyyy")}
+            </div>
+        ),
     },
     {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const product = row.original
+            const user = row.original
 
             return (
-                <AlertDialog>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <IconDotsVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(product.name)}
-                            >
-                                Copy detail
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/products/${product.id}`}>
-                                    Lihat Detail
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/products/${product.id}/edit`}>
-                                    Edit Produk
-                                </Link>
-                            </DropdownMenuItem>
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                    Hapus
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Tindakan ini tidak dapat dibatalkan. Produk "{product.name}" akan dihapus permanen dari database.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => {
-                                    toast.success("Produk berhasil dihapus")
-                                }}
-                            >
-                                Hapus
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <IconDotsVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() => navigator.clipboard.writeText(user.id)}
+                        >
+                            Copy ID User
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                            <IconShieldOff className="mr-2 h-4 w-4" /> Reset Password
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                            <IconTrash className="mr-2 h-4 w-4" /> Hapus User
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             )
         },
     },
 ]
 
-export function ProductsTable({ data }: { data: Product[] }) {
+export function UsersTable({ data }: { data: User[] }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
-
-    // Filter data based on category (controlled by Tabs)
-    const filteredData = React.useMemo(() => {
-        if (categoryFilter === "all") return data
-        return data.filter((item) => item.category === categoryFilter)
-    }, [data, categoryFilter])
 
     const table = useReactTable({
-        data: filteredData,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -252,7 +196,7 @@ export function ProductsTable({ data }: { data: Product[] }) {
                     <div className="relative">
                         <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Cari produk..."
+                            placeholder="Cari user..."
                             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                             onChange={(event) =>
                                 table.getColumn("name")?.setFilterValue(event.target.value)
@@ -261,23 +205,7 @@ export function ProductsTable({ data }: { data: Product[] }) {
                         />
                     </div>
                 </div>
-                <Button variant="default" size="sm" asChild>
-                    <Link href="/admin/dashboard/products/create">
-                        <IconPlus className="mr-2 h-4 w-4" /> Tambah Produk
-                    </Link>
-                </Button>
             </div>
-
-            <Tabs defaultValue="all" value={categoryFilter} onValueChange={setCategoryFilter} className="w-full">
-                <TabsList className="w-full justify-start overflow-x-auto">
-                    <TabsTrigger value="all">Semua</TabsTrigger>
-                    <TabsTrigger value="Kuliner">Kuliner</TabsTrigger>
-                    <TabsTrigger value="Bumdes Mart">Bumdes Mart</TabsTrigger>
-                    <TabsTrigger value="Perikanan">Perikanan</TabsTrigger>
-                    <TabsTrigger value="Agen LPG">Agen LPG</TabsTrigger>
-                    <TabsTrigger value="Wisata">Wisata</TabsTrigger>
-                </TabsList>
-            </Tabs>
 
             <div className="rounded-md border">
                 <Table>
@@ -322,7 +250,7 @@ export function ProductsTable({ data }: { data: Product[] }) {
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    Tidak ada produk ditemukan.
+                                    Tidak ada user ditemukan.
                                 </TableCell>
                             </TableRow>
                         )}
