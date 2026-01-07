@@ -51,7 +51,7 @@ export function HeroSection() {
                     </span>
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-sm">
                         Nikmati Suasana, <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-400">
                             Dukung Ekonomi Desa
                         </span>
                     </h1>
@@ -66,7 +66,7 @@ export function HeroSection() {
                     data-aos-delay="200"
                     data-aos-duration="1000"
                 >
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-white min-w-[160px] h-12 rounded-full text-base font-semibold shadow-lg shadow-emerald-900/20">
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-white min-w-[160px] h-12 rounded-full text-base font-semibold shadow-lg shadow-blue-900/20">
                         Pesan Makan
                     </Button>
                     <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-w-[160px] h-12 rounded-full text-base backdrop-blur-sm">

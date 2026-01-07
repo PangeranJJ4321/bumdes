@@ -27,7 +27,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="relative">
-                                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-3 rounded-2xl shadow-lg shadow-emerald-500/20">
+                                <div className="bg-gradient-to-br from-blue-500 to-sky-600 p-3 rounded-2xl shadow-lg shadow-blue-500/20">
                                     <ShoppingCart className="h-5 w-5 text-white" />
                                 </div>
                                 {!isEmpty && (
@@ -62,7 +62,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                     {isEmpty ? (
                         <div className="h-full flex flex-col items-center justify-center text-center space-y-6 p-8">
                             <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-200 to-teal-200 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-200 to-sky-200 rounded-full blur-2xl opacity-30 animate-pulse"></div>
                                 <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 p-8 rounded-3xl border-2 border-slate-200/50">
                                     <Package className="h-20 w-20 text-slate-300" />
                                 </div>
@@ -74,7 +74,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                 </p>
                             </div>
                             <Button
-                                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/20 group"
+                                className="bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-600 hover:to-sky-700 text-white shadow-lg shadow-blue-500/20 group"
                                 onClick={() => onOpenChange(false)}
                             >
                                 <Sparkles className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
@@ -86,12 +86,12 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                             {items.map((item, index) => (
                                 <div
                                     key={item.id}
-                                    className="group relative flex gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200/60 transition-all duration-300"
+                                    className="group relative flex gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200/60 transition-all duration-300"
                                     style={{
                                         animation: `slideIn 0.3s ease-out ${index * 0.05}s backwards`
                                     }}
                                 >
-                                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-slate-50 border border-slate-200/60 group-hover:border-emerald-200/60 transition-colors">
+                                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-slate-50 border border-slate-200/60 group-hover:border-blue-200/60 transition-colors">
                                         <img
                                             src={item.imageUrl as string}
                                             alt={item.title as string}
@@ -118,7 +118,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                                 <span className="text-xs text-muted-foreground">
                                                     Rp {item.price.toLocaleString('id-ID')} × {item.quantity}
                                                 </span>
-                                                <span className="font-bold text-base bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                                <span className="font-bold text-base bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                                                     Rp {(item.price * item.quantity!).toLocaleString('id-ID')}
                                                 </span>
                                             </div>
@@ -126,7 +126,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 shadow-sm">
                                                 <button
                                                     onClick={() => updateItemQuantity(item.id, (item.quantity ?? 1) - 1)}
-                                                    className="hover:text-emerald-600 transition-colors disabled:opacity-30 disabled:hover:text-current hover:scale-110 active:scale-95"
+                                                    className="hover:text-blue-600 transition-colors disabled:opacity-30 disabled:hover:text-current hover:scale-110 active:scale-95"
                                                     disabled={item.quantity === 1}
                                                 >
                                                     <Minus className="h-3.5 w-3.5" />
@@ -136,7 +136,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                                 </span>
                                                 <button
                                                     onClick={() => updateItemQuantity(item.id, (item.quantity ?? 1) + 1)}
-                                                    className="hover:text-emerald-600 transition-colors hover:scale-110 active:scale-95"
+                                                    className="hover:text-blue-600 transition-colors hover:scale-110 active:scale-95"
                                                 >
                                                     <Plus className="h-3.5 w-3.5" />
                                                 </button>
@@ -151,7 +151,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
 
                 {!isEmpty && (
                     <div className="px-6 pb-6 pt-4 space-y-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                        <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 to-emerald-50/30 rounded-2xl border border-slate-200/50">
+                        <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200/50">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-slate-600 font-medium">Subtotal</span>
                                 <span className="font-semibold text-slate-900">
@@ -161,7 +161,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                             <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
                             <div className="flex items-center justify-between">
                                 <span className="text-lg font-bold text-slate-900">Total Pembayaran</span>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                                     Rp {cartTotal.toLocaleString('id-ID')}
                                 </span>
                             </div>
@@ -176,7 +176,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                 Kosongkan
                             </Button>
                             <Button
-                                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                                className="w-full bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-600 hover:to-sky-700 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-95"
                                 asChild
                             >
                                 <Link href="/checkout" onClick={() => onOpenChange(false)}>

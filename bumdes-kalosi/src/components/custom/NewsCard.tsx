@@ -14,7 +14,7 @@ interface NewsCardProps {
 
 const CATEGORY_COLORS: Record<string, string> = {
     "Inovasi": "bg-blue-500",
-    "Kegiatan": "bg-emerald-500",
+    "Kegiatan": "bg-sky-500",
     "Wisata": "bg-indigo-500",
     "Edukasi": "bg-orange-500",
 }

@@ -42,7 +42,7 @@ const SERVICES = [
             "https://placehold.co/600x800/059669/ffffff?text=Rak+Sembako",
             "https://placehold.co/600x800/047857/ffffff?text=Pelayanan",
         ],
-        colorClass: "bg-emerald-600",
+        colorClass: "bg-blue-600",
     },
     {
         id: "agen",

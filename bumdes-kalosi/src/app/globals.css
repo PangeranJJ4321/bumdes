@@ -49,16 +49,17 @@
 :root {
   --radius: 0.625rem;
 
-  /* Base Colors - Neutral but warm */
-  --background: oklch(0.985 0.005 85);
-  /* Warm White */
-  --foreground: oklch(0.145 0 0);
+  /* Base Colors - Cool Blue White */
+  --background: oklch(0.99 0.01 260);
+  /* Cool White */
+  --foreground: oklch(0.20 0.04 260);
+  /* Deep Blue Black */
 
   /* Cards & Surfaces */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.20 0.04 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.20 0.04 260);
 
   /* Primary - Blue (Trust/Professional) */
   /* oklch(0.48 0.16 260) is a vibrant blue */

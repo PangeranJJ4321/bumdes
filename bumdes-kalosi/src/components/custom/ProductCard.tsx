@@ -91,7 +91,7 @@ export function ProductCard({
                                     )}
                                 </div>
                             ) : (
-                                <span className="text-sm font-medium text-emerald-600">
+                                <span className="text-sm font-medium text-primary">
                                     Hubungi Kami
                                 </span>
                             )}

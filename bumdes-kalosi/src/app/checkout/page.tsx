@@ -39,8 +39,8 @@ export default function CheckoutPage() {
                 <Navbar forceOpaque />
                 <main className="flex-grow flex flex-col items-center justify-center p-6">
                     <div className="max-w-md w-full text-center space-y-6 bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/60">
-                        <div className="bg-emerald-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ShoppingBag className="h-10 w-10 text-emerald-600" />
+                        <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ShoppingBag className="h-10 w-10 text-blue-600" />
                         </div>
                         <div className="space-y-2">
                             <h2 className="text-2xl font-bold text-slate-900">Keranjang Masih Kosong</h2>
@@ -48,7 +48,7 @@ export default function CheckoutPage() {
                         </div>
                         <Button
                             onClick={() => router.push("/layanan")}
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 rounded-xl transition-all"
+                            className="w-full bg-blue-600 hover:bg-blue-700 h-12 rounded-xl transition-all"
                         >
                             Mulai Belanja
                         </Button>
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
                                             {formData.metodePengiriman === 'COURIER' ? (
                                                 <span className="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded-full">Info via WA</span>
                                             ) : (
-                                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full uppercase">Gratis</span>
+                                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase">Gratis</span>
                                             )}
                                         </div>
 

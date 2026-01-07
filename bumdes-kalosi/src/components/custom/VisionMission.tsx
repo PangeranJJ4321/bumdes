@@ -9,14 +9,14 @@ export function VisionMission() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* Vision */}
                     <div
-                        className="bg-emerald-50 rounded-3xl p-8 border border-emerald-100 relative overflow-hidden group"
+                        className="bg-blue-50 rounded-3xl p-8 border border-blue-100 relative overflow-hidden group"
                         data-aos="fade-right"
                     >
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Lightbulb className="w-32 h-32 text-emerald-600" />
+                            <Lightbulb className="w-32 h-32 text-blue-600" />
                         </div>
                         <div className="relative z-10">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-6">
                                 <Target className="w-4 h-4" /> Visi Kami
                             </div>
                             <h3 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
@@ -51,7 +51,7 @@ export function VisionMission() {
                                 {
                                     title: "Optimasi Potensi Lokal",
                                     desc: "Mengelola dan memasarkan produk unggulan serta pariwisata desa ke pasar yang lebih luas.",
-                                    icon: <Target className="w-5 h-5 text-emerald-500" />
+                                    icon: <Target className="w-5 h-5 text-blue-500" />
                                 }
                             ].map((item, idx) => (
                                 <div

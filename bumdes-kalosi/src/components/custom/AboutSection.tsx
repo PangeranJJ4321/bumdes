@@ -63,7 +63,7 @@ export function AboutSection() {
                             {FOCUS_AREAS.map((area, index) => (
                                 <span
                                     key={area}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100 hover:bg-emerald-100 transition-colors cursor-default"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100 hover:bg-blue-100 transition-colors cursor-default"
                                     data-aos="zoom-in"
                                     data-aos-delay={index * 100}
                                 >
@@ -116,8 +116,8 @@ export function AboutSection() {
                         <div
                             key={image}
                             className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform ${index === currentImageIndex
-                                    ? "opacity-100 scale-100"
-                                    : "opacity-0 scale-110"
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-110"
                                 }`}
                             style={{ backgroundImage: `url('${image}')` }}
                         />
