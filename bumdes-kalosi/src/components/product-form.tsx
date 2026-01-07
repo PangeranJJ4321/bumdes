@@ -22,6 +22,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -104,13 +105,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
+                <div className="space-y-4">
                     <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Nama Produk</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Contoh: Kopi Arabika 200g" {...field} />
@@ -120,6 +121,58 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         )}
                     />
 
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Deskripsi Produk</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Jelaskan detail produk..."
+                                        className="min-h-[120px]"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Harga (Rp)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="0" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="stock"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Stok</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="0" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-6">
                     <FormField
                         control={form.control}
                         name="category"
@@ -144,7 +197,25 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                             </FormItem>
                         )}
                     />
+                </div>
 
+                <div className="space-y-4 pt-6">
+                    <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>URL Gambar</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://..." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="space-y-4 pt-6">
                     <FormField
                         control={form.control}
                         name="status"
@@ -169,76 +240,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
 
                     <FormField
                         control={form.control}
-                        name="price"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Harga (Rp)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="0" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="stock"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Stok</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="0" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem className="col-span-2">
-                                <FormLabel>URL Gambar</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://..." {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    Link gambar produk.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem className="col-span-2">
-                                <FormLabel>Deskripsi Produk</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Jelaskan detail produk..."
-                                        className="min-h-[120px]"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
                         name="isFeatured"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 col-span-2">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                    <FormLabel className="text-base">Produk Unggulan</FormLabel>
+                                    <FormLabel className="text-base">Unggulan</FormLabel>
                                     <FormDescription>
-                                        Tampilkan produk ini di halaman utama sebagai produk unggulan.
+                                        Tampilkan di Home
                                     </FormDescription>
                                 </div>
                                 <FormControl>
@@ -251,13 +259,14 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         )}
                     />
                 </div>
-                <div className="flex justify-end gap-2">
+
+                <div className="flex justify-end gap-2 pt-6">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Batal
                     </Button>
                     <Button type="submit">{isEdit ? "Update Produk" : "Simpan Produk"}</Button>
                 </div>
-            </form >
-        </Form >
+            </form>
+        </Form>
     )
 }

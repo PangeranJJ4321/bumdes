@@ -18,8 +18,26 @@ import {
     IconSearch,
     IconFileInvoice,
     IconEdit,
+    IconTrash,
+    IconFilter,
 } from "@tabler/icons-react"
-import type { LucideIcon } from "lucide-react"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -47,6 +65,7 @@ import { TransactionStatusDialog } from "./transaction-status-dialog"
 export type Transaction = {
     id: string
     date: string
+    category: string
     customer: {
         name: string
         email: string
@@ -72,7 +91,8 @@ interface TransactionsTableProps {
     data: Transaction[]
 }
 
-export function TransactionsTable({ data }: TransactionsTableProps) {
+export function TransactionsTable({ data: initialData }: TransactionsTableProps) {
+    const [data, setData] = React.useState<Transaction[]>(initialData)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -82,9 +102,46 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
     const [statusDialogOpen, setStatusDialogOpen] = React.useState(false)
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null)
 
+    // Delete Warning State
+    const [deleteWarningOpen, setDeleteWarningOpen] = React.useState(false)
+    const [transactionToDelete, setTransactionToDelete] = React.useState<Transaction | null>(null)
+
+    // Bulk Delete State
+    const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
+
     const handleEditStatus = (transaction: Transaction) => {
         setSelectedTransaction(transaction)
         setStatusDialogOpen(true)
+    }
+
+    const handleDeleteClick = (transaction: Transaction) => {
+        setTransactionToDelete(transaction)
+        setDeleteWarningOpen(true)
+    }
+
+    const confirmDelete = () => {
+        if (transactionToDelete) {
+            setData(data.filter((t) => t.id !== transactionToDelete.id))
+            setDeleteWarningOpen(false)
+            setTransactionToDelete(null)
+        }
+    }
+
+    const handleBulkDeleteClick = () => {
+        setBulkDeleteWarningOpen(true)
+    }
+
+    const confirmBulkDelete = () => {
+        const selectedIds = Object.keys(rowSelection)
+        // Note: In a real app, rowSelection keys are the indices if using default getRowId
+        // But here we need to correctly map selection to data. 
+        // Let's assume we filter out rows that are selected.
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
+
+        setData(data.filter((t) => !selectedIdsSet.has(t.id)))
+        setRowSelection({})
+        setBulkDeleteWarningOpen(false)
     }
 
     const columns: ColumnDef<Transaction>[] = [
@@ -125,6 +182,13 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
             ),
         },
         {
+            accessorKey: "category",
+            header: "Kategori",
+            cell: ({ row }) => (
+                <Badge variant="outline">{row.getValue("category")}</Badge>
+            ),
+        },
+        {
             accessorKey: "customer.name",
             id: "customerName",
             header: "Pelanggan",
@@ -134,6 +198,22 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
                     <span className="text-xs text-muted-foreground">{row.original.customer.email}</span>
                 </div>
             ),
+        },
+        {
+            id: "items",
+            header: "Items",
+            cell: ({ row }) => {
+                const items = row.original.items
+                const count = items.reduce((acc, item) => acc + item.quantity, 0)
+                return (
+                    <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium">{items.length > 0 ? items[0].name : "No items"}</span>
+                        {items.length > 1 && (
+                            <span className="text-xs text-muted-foreground">+{items.length - 1} lainnya ({count} total)</span>
+                        )}
+                    </div>
+                )
+            },
         },
         {
             accessorKey: "amount",
@@ -191,6 +271,12 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
                             <DropdownMenuItem onClick={() => handleEditStatus(transaction)}>
                                 <IconEdit className="mr-2 h-4 w-4" /> Update Status
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => handleDeleteClick(transaction)}
+                                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                            >
+                                <IconTrash className="mr-2 h-4 w-4" /> Hapus Transaksi
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -221,8 +307,8 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
         <>
             <div className="w-full space-y-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
+                    <div className="flex items-center gap-2 flex-1">
+                        <div className="relative flex-1 md:max-w-sm">
                             <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Cari pelanggan..."
@@ -230,9 +316,66 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
                                 onChange={(event) =>
                                     table.getColumn("customerName")?.setFilterValue(event.target.value)
                                 }
-                                className="pl-8 w-full md:w-[300px]"
+                                className="pl-8 w-full"
                             />
                         </div>
+                        <div className="w-[150px]">
+                            <Select
+                                value={(table.getColumn("category")?.getFilterValue() as string) ?? "all"}
+                                onValueChange={(value) =>
+                                    table.getColumn("category")?.setFilterValue(value === "all" ? "" : value)
+                                }
+                            >
+                                <SelectTrigger className="w-full">
+                                    <div className="flex items-center gap-2">
+                                        <IconFilter className="h-4 w-4" />
+                                        <SelectValue placeholder="Kategori" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Kategori</SelectItem>
+                                    <SelectItem value="Kuliner">Kuliner</SelectItem>
+                                    <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
+                                    <SelectItem value="Perikanan">Perikanan</SelectItem>
+                                    <SelectItem value="Agen LPG">Agen LPG</SelectItem>
+                                    <SelectItem value="Wisata">Wisata</SelectItem>
+                                    <SelectItem value="Jasa">Jasa</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="w-[150px]">
+                            <Select
+                                value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
+                                onValueChange={(value) =>
+                                    table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
+                                }
+                            >
+                                <SelectTrigger className="w-full">
+                                    <div className="flex items-center gap-2">
+                                        <IconFilter className="h-4 w-4" />
+                                        <SelectValue placeholder="Status" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Status</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="success">Success</SelectItem>
+                                    <SelectItem value="failed">Failed</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                            <Button variant="destructive" onClick={handleBulkDeleteClick}>
+                                <IconTrash className="mr-2 h-4 w-4" />
+                                Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                            </Button>
+                        )}
+                        <Button>
+                            Tambah Transaksi
+                        </Button>
                     </div>
                 </div>
 
@@ -317,6 +460,40 @@ export function TransactionsTable({ data }: TransactionsTableProps) {
                 onOpenChange={setStatusDialogOpen}
                 transaction={selectedTransaction}
             />
+
+            <AlertDialog open={deleteWarningOpen} onOpenChange={setDeleteWarningOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. Transaksi ini akan dihapus secara permanen dari sistem.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={bulkDeleteWarningOpen} onOpenChange={setBulkDeleteWarningOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. {table.getFilteredSelectedRowModel().rows.length} transaksi yang dipilih akan dihapus secara permanen dari sistem.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmBulkDelete} className="bg-red-600 hover:bg-red-700">
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

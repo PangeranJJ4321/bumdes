@@ -29,6 +29,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import Link from "next/link"
+
 export function NavUser({
   user,
 }: {
@@ -84,14 +86,16 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/admin/dashboard/profile">
+                  <IconUserCircle />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
+            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+              <IconLogout className="text-red-600"/>
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

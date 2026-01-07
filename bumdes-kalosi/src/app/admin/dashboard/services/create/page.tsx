@@ -38,7 +38,7 @@ export default function Page() {
                             </BreadcrumbList>
                         </Breadcrumb>
 
-                        <div className="flex flex-col gap-8 max-w-3xl">
+                        <div className="flex flex-col gap-8 w-full">
                             <div>
                                 <h2 className="text-3xl font-bold tracking-tight">Tambah Layanan Baru</h2>
                                 <p className="text-muted-foreground">

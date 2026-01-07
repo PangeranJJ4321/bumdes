@@ -2,6 +2,7 @@
     {
         "id": "TRX-001",
         "date": "2024-01-05T10:30:00",
+        "category": "Kuliner",
         "customer": {
             "name": "Budi Santoso",
             "email": "budi.s@example.com"
@@ -19,6 +20,7 @@
     {
         "id": "TRX-002",
         "date": "2024-01-05T14:15:00",
+        "category": "Wisata",
         "customer": {
             "name": "Siti Aminah",
             "email": "siti.aminah@example.com"
@@ -36,6 +38,7 @@
     {
         "id": "TRX-003",
         "date": "2024-01-04T09:00:00",
+        "category": "Wisata",
         "customer": {
             "name": "Ahmad Rizky",
             "email": "ahmad.r@example.com"
@@ -53,6 +56,7 @@
     {
         "id": "TRX-004",
         "date": "2024-01-03T16:45:00",
+        "category": "Kuliner",
         "customer": {
             "name": "Dewi Pertiwi",
             "email": "dewi.p@example.com"
@@ -70,6 +74,7 @@
     {
         "id": "TRX-005",
         "date": "2024-01-03T11:20:00",
+        "category": "Jasa",
         "customer": {
             "name": "Rudi Hartono",
             "email": "rudi.h@example.com"

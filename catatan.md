@@ -28,8 +28,10 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 ### 4. Admin Dashboard (Opsional / Tahap Akhir)
 - [x] Halaman Login Admin.
 - [x] Dashboard: Penyesuaian tampilan (Isi Card KPI, Table Filter Layanan, Remove unused buttons).
-- [/] Dashboard Input Fitur Lain (Produk Baru, Berita, dll).
+- [x] Dashboard Input Fitur Lain (Produk Baru, Berita, dll).
     - [x] Fitur Berita (Tabel, Filter, Gambar, Form Create/Edit).
-    - [x] Fitur Produk (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail).
-    - [ ] Fitur Layanan (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail).
-- [ ] Rekap Pesanan Masuk.
+    - [x] Fitur Produk (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail, Featured Tag).
+    - [x] Fitur Layanan (Tabel Tabs Kategori, Mock Data, Form Create/Edit/Detail).
+    - [x] Fitur Transaksi (Rekap Pesanan, Status Update, Invoice View).
+    - [x] Fitur Users (Daftar Pengguna, Role, Status).
+- [x] Rekap Pesanan Masuk.

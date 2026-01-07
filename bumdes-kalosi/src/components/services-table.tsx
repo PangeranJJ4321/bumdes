@@ -17,6 +17,8 @@ import {
     IconDotsVertical,
     IconPlus,
     IconSearch,
+    IconTrash,
+    IconFilter,
 } from "@tabler/icons-react"
 import {
     AlertDialog,
@@ -29,6 +31,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { toast } from "sonner"
 
 import Link from "next/link"
@@ -51,7 +60,6 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export type Service = {
     id: string
@@ -200,14 +208,16 @@ export const columns: ColumnDef<Service>[] = [
     },
 ]
 
-export function ServicesTable({ data }: { data: Service[] }) {
+export function ServicesTable({ data: initialData }: { data: Service[] }) {
+    const [data, setData] = React.useState<Service[]>(initialData)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
+    const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
 
-    // Filter data based on category (controlled by Tabs)
+    // Filter data based on category
     const filteredData = React.useMemo(() => {
         if (categoryFilter === "all") return data
         return data.filter((item) => item.category === categoryFilter)
@@ -232,113 +242,168 @@ export function ServicesTable({ data }: { data: Service[] }) {
         },
     })
 
+    const handleBulkDelete = () => {
+        setBulkDeleteWarningOpen(true)
+    }
+
+    const confirmBulkDelete = () => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
+
+        setData(data.filter((item) => !selectedIdsSet.has(item.id)))
+        setRowSelection({})
+        setBulkDeleteWarningOpen(false)
+        toast.success(`${selectedIdsSet.size} layanan berhasil dihapus`)
+    }
+
     return (
-        <div className="w-full space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Cari layanan..."
-                            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                            onChange={(event) =>
-                                table.getColumn("name")?.setFilterValue(event.target.value)
-                            }
-                            className="pl-8 w-full md:w-[300px]"
-                        />
+        <>
+            <div className="w-full space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-1">
+                        <div className="relative flex-1 md:max-w-sm">
+                            <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Cari layanan..."
+                                value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                                onChange={(event) =>
+                                    table.getColumn("name")?.setFilterValue(event.target.value)
+                                }
+                                className="pl-8 w-full"
+                            />
+                        </div>
+                        <div className="w-[180px]">
+                            <Select
+                                value={categoryFilter}
+                                onValueChange={setCategoryFilter}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <div className="flex items-center gap-2">
+                                        <IconFilter className="h-4 w-4" />
+                                        <SelectValue placeholder="Kategori" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Kategori</SelectItem>
+                                    <SelectItem value="Wisata">Wisata</SelectItem>
+                                    <SelectItem value="Penyewaan">Penyewaan</SelectItem>
+                                    <SelectItem value="Jasa">Jasa</SelectItem>
+                                    <SelectItem value="Edukasi">Edukasi</SelectItem>
+                                    <SelectItem value="Kuliner">Kuliner</SelectItem>
+                                    <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
+                                    <SelectItem value="Perikanan">Perikanan</SelectItem>
+                                    <SelectItem value="Agen LPG">Agen LPG</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                            <Button variant="destructive" onClick={handleBulkDelete}>
+                                <IconTrash className="mr-2 h-4 w-4" />
+                                Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                            </Button>
+                        )}
+                        <Button variant="default" asChild>
+                            <Link href="/admin/dashboard/services/create">
+                                <IconPlus className="mr-2 h-4 w-4" /> Tambah Layanan
+                            </Link>
+                        </Button>
                     </div>
                 </div>
-                <Button variant="default" size="sm" asChild>
-                    <Link href="/admin/dashboard/services/create">
-                        <IconPlus className="mr-2 h-4 w-4" /> Tambah Layanan
-                    </Link>
-                </Button>
-            </div>
 
-            <Tabs defaultValue="all" value={categoryFilter} onValueChange={setCategoryFilter} className="w-full">
-                <TabsList className="w-full justify-start overflow-x-auto">
-                    <TabsTrigger value="all">Semua</TabsTrigger>
-                    <TabsTrigger value="Wisata">Wisata</TabsTrigger>
-                    <TabsTrigger value="Penyewaan">Penyewaan</TabsTrigger>
-                    <TabsTrigger value="Jasa">Jasa</TabsTrigger>
-                    <TabsTrigger value="Edukasi">Edukasi</TabsTrigger>
-                </TabsList>
-            </Tabs>
-
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => {
+                                        return (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                            </TableHead>
+                                        )
+                                    })}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    Tidak ada layanan ditemukan.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && "selected"}
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        Tidak ada layanan ditemukan.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Next
-                    </Button>
+                <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="flex-1 text-sm text-muted-foreground">
+                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                        {table.getFilteredRowModel().rows.length} row(s) selected.
+                    </div>
+                    <div className="space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <AlertDialog open={bulkDeleteWarningOpen} onOpenChange={setBulkDeleteWarningOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. {table.getFilteredSelectedRowModel().rows.length} layanan yang dipilih akan dihapus secara permanen dari sistem.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmBulkDelete} className="bg-red-600 hover:bg-red-700">
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }

@@ -96,13 +96,15 @@ export function ServiceForm({ initialData, isEdit = false }: ServiceFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
+                <div className="space-y-4">
+                    <h2 className="text-2xl font-bold">Informasi Layanan</h2>
+                    
                     <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Nama Layanan</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Contoh: Paket Wisata Alam" {...field} />
@@ -112,6 +114,42 @@ export function ServiceForm({ initialData, isEdit = false }: ServiceFormProps) {
                         )}
                     />
 
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Deskripsi Layanan</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Jelaskan detail layanan..."
+                                        className="min-h-[120px]"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Harga Mulai (Rp)</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="0" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <h2 className="text-2xl font-bold">Kategori</h2>
+                    
                     <FormField
                         control={form.control}
                         name="category"
@@ -135,7 +173,29 @@ export function ServiceForm({ initialData, isEdit = false }: ServiceFormProps) {
                             </FormItem>
                         )}
                     />
+                </div>
 
+                <div className="space-y-4 pt-6">
+                    <h2 className="text-2xl font-bold">Media</h2>
+                    
+                    <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>URL Gambar</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://..." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <h2 className="text-2xl font-bold">Status Layanan</h2>
+                    
                     <FormField
                         control={form.control}
                         name="status"
@@ -157,57 +217,9 @@ export function ServiceForm({ initialData, isEdit = false }: ServiceFormProps) {
                             </FormItem>
                         )}
                     />
-
-                    <FormField
-                        control={form.control}
-                        name="price"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Harga Mulai (Rp)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="0" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem className="col-span-2">
-                                <FormLabel>URL Gambar</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://..." {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    Link gambar layanan.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem className="col-span-2">
-                                <FormLabel>Deskripsi Layanan</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Jelaskan detail layanan..."
-                                        className="min-h-[120px]"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                 </div>
-                <div className="flex justify-end gap-2">
+
+                <div className="flex justify-end gap-2 pt-6">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Batal
                     </Button>

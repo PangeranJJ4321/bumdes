@@ -18,6 +18,7 @@ import {
     IconFilter,
     IconChevronDown,
     IconPlus,
+    IconTrash,
 } from "@tabler/icons-react"
 import {
     AlertDialog,
@@ -201,12 +202,14 @@ export const columns: ColumnDef<News>[] = [
     },
 ]
 
-export function NewsTable({ data }: { data: News[] }) {
+export function NewsTable({ data: initialData }: { data: News[] }) {
+    const [data, setData] = React.useState<News[]>(initialData)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
+    const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
 
     // Filter data based on category
     const filteredData = React.useMemo(() => {
@@ -232,6 +235,20 @@ export function NewsTable({ data }: { data: News[] }) {
             rowSelection,
         },
     })
+
+    const handleBulkDelete = () => {
+        setBulkDeleteWarningOpen(true)
+    }
+
+    const confirmBulkDelete = () => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
+
+        setData(data.filter((item) => !selectedIdsSet.has(item.id)))
+        setRowSelection({})
+        setBulkDeleteWarningOpen(false)
+        toast.success(`${selectedIdsSet.size} berita berhasil dihapus`)
+    }
 
     return (
         <div className="w-full">
@@ -266,11 +283,19 @@ export function NewsTable({ data }: { data: News[] }) {
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="default" size="sm" className="ml-auto" asChild>
-                    <Link href="/admin/dashboard/news/create">
-                        <IconPlus className="mr-2 h-4 w-4" /> Tambah Berita
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2 ml-auto">
+                    {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                        <Button variant="destructive" onClick={handleBulkDelete}>
+                            <IconTrash className="mr-2 h-4 w-4" />
+                            Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                        </Button>
+                    )}
+                    <Button variant="default" size="sm" asChild>
+                        <Link href="/admin/dashboard/news/create">
+                            <IconPlus className="mr-2 h-4 w-4" /> Tambah Berita
+                        </Link>
+                    </Button>
+                </div>
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -346,6 +371,23 @@ export function NewsTable({ data }: { data: News[] }) {
                     </Button>
                 </div>
             </div>
+
+            <AlertDialog open={bulkDeleteWarningOpen} onOpenChange={setBulkDeleteWarningOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. {table.getFilteredSelectedRowModel().rows.length} berita yang dipilih akan dihapus secara permanen dari server.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmBulkDelete} className="bg-red-600 hover:bg-red-700">
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

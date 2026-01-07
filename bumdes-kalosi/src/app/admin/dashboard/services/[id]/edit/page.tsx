@@ -51,7 +51,7 @@ export default function Page({ params }: { params: { id: string } }) {
                             </BreadcrumbList>
                         </Breadcrumb>
 
-                        <div className="flex flex-col gap-8 max-w-3xl">
+                        <div className="flex flex-col gap-8 w-full">
                             <div>
                                 <h2 className="text-3xl font-bold tracking-tight">Edit Layanan</h2>
                                 <p className="text-muted-foreground">

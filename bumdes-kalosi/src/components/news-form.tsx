@@ -95,112 +95,19 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
+                <div className="space-y-4">
                     <FormField
                         control={form.control}
                         name="title"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Judul Berita</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Masukkan judul berita..." {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Judul utama berita yang akan ditampilkan.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="category"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Kategori</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih kategori" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Berita">Berita</SelectItem>
-                                        <SelectItem value="Pengumuman">Pengumuman</SelectItem>
-                                        <SelectItem value="Kegiatan">Kegiatan</SelectItem>
-                                        <SelectItem value="Agenda">Agenda</SelectItem>
-                                        <SelectItem value="Laporan">Laporan</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Status</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih status" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Published">Published</SelectItem>
-                                        <SelectItem value="Draft">Draft</SelectItem>
-                                        <SelectItem value="Archived">Archived</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="author"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Penulis</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Nama penulis..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="date"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Tanggal</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem className="col-span-2">
-                                <FormLabel>URL Gambar (Opsional)</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://example.com/image.jpg" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    Link gambar sampul berita.
+                                    Judul utama berita yang akan ditampilkan di halaman depan.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -211,12 +118,12 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                         control={form.control}
                         name="content"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Konten Berita</FormLabel>
                                 <FormControl>
                                     <Textarea
                                         placeholder="Tulis isi berita di sini..."
-                                        className="min-h-[200px]"
+                                        className="min-h-[400px]"
                                         {...field}
                                     />
                                 </FormControl>
@@ -225,11 +132,117 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                         )}
                     />
                 </div>
-                <div className="flex justify-end gap-2">
+
+                <div className="space-y-4 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Kategori</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Pilih kategori" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Berita">Berita</SelectItem>
+                                            <SelectItem value="Pengumuman">Pengumuman</SelectItem>
+                                            <SelectItem value="Kegiatan">Kegiatan</SelectItem>
+                                            <SelectItem value="Agenda">Agenda</SelectItem>
+                                            <SelectItem value="Laporan">Laporan</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="author"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Penulis</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Nama penulis..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <h2 className="text-2xl font-bold">Media</h2>
+                    
+                    <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>URL Gambar</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                    Gambar sampul untuk berita ini.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Pilih status" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Published">Published</SelectItem>
+                                            <SelectItem value="Draft">Draft</SelectItem>
+                                            <SelectItem value="Archived">Archived</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Tanggal</FormLabel>
+                                    <FormControl>
+                                        <Input type="date" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-6">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Batal
                     </Button>
-                    <Button type="submit">{isEdit ? "Update Berita" : "Simpan Berita"}</Button>
+                    <Button type="submit">{isEdit ? "Update" : "Simpan"}</Button>
                 </div>
             </form>
         </Form>

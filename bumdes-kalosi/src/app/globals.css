@@ -84,7 +84,7 @@
 
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.48 0.16 150);
+  --ring: oklch(0.65 0.2 250);
   /* Matches Primary */
 
   --chart-1: oklch(0.48 0.16 150);
