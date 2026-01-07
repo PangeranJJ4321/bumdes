@@ -15,6 +15,7 @@ enum ProductCategory {
   WISATA
   MART
   KETAPANG
+  AGEN
 }
 
 enum OrderStatus {
@@ -42,7 +43,7 @@ model Product {
   description String?
   category    ProductCategory
   imageUrl    String?          @map("image_url")
-  stock       Int?
+  stock       Int              @default(0)
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
@@ -61,10 +62,11 @@ model Order {
   items           Json          // snapshot saat checkout
   totalPrice      Int           @map("total_price")
   status          OrderStatus   @default(PENDING)
+  deliveryMethod  String        @default("PICKUP") @map("delivery_method") // PICKUP or COURIER
   notes           String?
   whatsappUrl     String?       @map("whatsapp_url")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
 
   itemsDetail     OrderItem[]
 
@@ -102,10 +104,11 @@ model Review {
 }
 
 model Admin {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String   // hashed
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid())
+  username    String   @unique
+  password    String   // hashed
+  phoneNumber String?  @map("phone_number")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("admins")
 }

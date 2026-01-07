@@ -5,6 +5,7 @@ import { ServiceShowcase } from "@/components/custom/ServiceShowcase";
 import { SectionHeader } from "@/components/custom/SectionHeader";
 import { AboutSection } from "@/components/custom/AboutSection";
 import { CTABanner } from "@/components/custom/CTABanner";
+import { FeaturedProducts } from "@/components/custom/FeaturedProducts";
 
 export default function Home() {
   return (
@@ -25,6 +26,9 @@ export default function Home() {
           />
           <ServiceShowcase />
         </section>
+
+        {/* Featured Products from DB */}
+        <FeaturedProducts />
 
         {/* Introduction / About Section */}
         <AboutSection />

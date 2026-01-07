@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, ShoppingCart, Share2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Share2, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useCart } from "react-use-cart";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ interface ProductDetailProps {
         isPromo?: boolean;
         promoPrice?: number;
         images?: string[];
+        stock?: number | null;
     };
 }
 
@@ -25,6 +26,13 @@ export function ProductDetail({ product }: ProductDetailProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const { addItem } = useCart();
+
+    const stock = product.stock ?? 0;
+    const isOutOfStock = stock <= 0;
+
+    // Rating logic
+    const rating = product.rating ?? 0;
+    const reviewCount = product.reviewCount ?? 0;
 
     // Safely handle images array, defaulting to main imageUrl if empty
     const galleryImages = product.images && product.images.length > 0
@@ -41,7 +49,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
     const handleQuantityChange = (type: "inc" | "dec") => {
         if (type === "dec" && quantity > 1) setQuantity(prev => prev - 1);
-        if (type === "inc") setQuantity(prev => prev + 1);
+        if (type === "inc" && quantity < stock) setQuantity(prev => prev + 1);
     };
 
     const currentPrice = product.isPromo && product.promoPrice ? product.promoPrice : product.price;
@@ -63,6 +71,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
         });
     };
 
+    const handleChatSeller = () => {
+        const adminPhone = "6282393318287";
+        const message = `Halo Admin, saya mau tanya tentang produk *${product.title}*...`;
+        window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column: Image Gallery */}
@@ -71,8 +85,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     <img
                         src={galleryImages[currentImageIndex]}
                         alt={product.title}
-                        className="w-full h-full object-cover animate-in fade-in duration-300"
+                        className={`w-full h-full object-cover animate-in fade-in duration-300 ${isOutOfStock ? 'grayscale opacity-80' : ''}`}
                     />
+
+                    {isOutOfStock && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <span className="bg-slate-900 text-white px-6 py-2 rounded-full font-bold text-lg">STOK HABIS</span>
+                        </div>
+                    )}
 
                     {/* Carousel Controls */}
                     {galleryImages.length > 1 && (
@@ -96,24 +116,26 @@ export function ProductDetail({ product }: ProductDetailProps) {
                         </>
                     )}
 
-                    {product.isPromo && (
+                    {product.isPromo && !isOutOfStock && (
                         <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold shadow-lg animate-pulse">
                             Promo!
                         </div>
                     )}
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                    {galleryImages.map((img, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => setCurrentImageIndex(idx)}
-                            className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${currentImageIndex === idx ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-slate-300"
-                                }`}
-                        >
-                            <img src={img} alt={`View ${idx}`} className="w-full h-full object-cover" />
-                        </button>
-                    ))}
-                </div>
+                {galleryImages.length > 1 && (
+                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {galleryImages.map((img, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentImageIndex(idx)}
+                                className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${currentImageIndex === idx ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-slate-300"
+                                    }`}
+                            >
+                                <img src={img} alt={`View ${idx}`} className="w-full h-full object-cover" />
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Right Column: Details */}
@@ -121,6 +143,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <Badge variant="secondary" className="text-sm px-3 py-1">{product.category}</Badge>
+                        {stock > 0 && stock <= 5 && (
+                            <Badge variant="destructive" className="text-sm px-3 py-1 animate-pulse">Sisa {stock} Unit</Badge>
+                        )}
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{product.title}</h1>
                     <div className="flex items-end gap-3 mb-6">
@@ -147,7 +172,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                                 size="icon"
                                 className="rounded-l-full hover:bg-slate-100"
                                 onClick={() => handleQuantityChange("dec")}
-                                disabled={quantity <= 1}
+                                disabled={quantity <= 1 || isOutOfStock}
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
@@ -157,23 +182,34 @@ export function ProductDetail({ product }: ProductDetailProps) {
                                 size="icon"
                                 className="rounded-r-full hover:bg-slate-100"
                                 onClick={() => handleQuantityChange("inc")}
+                                disabled={quantity >= stock || isOutOfStock}
                             >
                                 <Plus className="h-4 w-4" />
                             </Button>
                         </div>
+                    </div>
+                    <div className="text-sm text-slate-500 text-right">
+                        Stok Tersedia: <span className="font-bold text-slate-900">{stock}</span>
                     </div>
                 </div>
 
                 <div className="flex gap-4">
                     <Button
                         size="lg"
-                        className="flex-1 h-12 text-lg rounded-full font-bold shadow-lg shadow-emerald-900/10"
+                        className="flex-1 h-12 text-lg rounded-xl font-bold shadow-lg shadow-blue-900/10"
                         onClick={handleAddToCart}
+                        disabled={isOutOfStock}
                     >
-                        <ShoppingCart className="mr-2 h-5 w-5" /> Tambah ke Keranjang
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        {isOutOfStock ? "Stok Habis" : "Tambah ke Keranjang"}
                     </Button>
-                    <Button size="icon" variant="outline" className="h-12 w-12 rounded-full border-slate-200">
-                        <Share2 className="h-5 w-5" />
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        className="h-12 border-primary text-primary hover:bg-blue-50 rounded-xl px-6 font-bold"
+                        onClick={handleChatSeller}
+                    >
+                        <Share2 className="mr-2 h-5 w-5" /> Tanya Penjual
                     </Button>
                 </div>
             </div>

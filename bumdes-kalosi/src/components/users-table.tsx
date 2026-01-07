@@ -65,6 +65,7 @@ export type User = {
     position: string
     status: string
     joinedDate: string
+    phoneNumber?: string
 }
 
 export const columns: ColumnDef<User>[] = [
@@ -103,6 +104,15 @@ export const columns: ColumnDef<User>[] = [
                     <span className="font-medium">{row.getValue("name")}</span>
                     <span className="text-xs text-muted-foreground">{row.original.email}</span>
                 </div>
+            </div>
+        ),
+    },
+    {
+        accessorKey: "phoneNumber",
+        header: "No. HP",
+        cell: ({ row }) => (
+            <div className="text-sm font-mono text-muted-foreground">
+                {row.original.phoneNumber || "-"}
             </div>
         ),
     },

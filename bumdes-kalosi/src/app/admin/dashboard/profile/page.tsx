@@ -32,7 +32,7 @@ export default function ProfilePage() {
                             Manage your account settings and preferences.
                         </p>
                     </div>
-                    
+
                     <Separator />
 
                     {/* Cards Grid */}
@@ -68,35 +68,51 @@ export default function ProfilePage() {
                                         <Label htmlFor="name" className="text-sm font-medium">
                                             Full Name
                                         </Label>
-                                        <Input 
-                                            id="name" 
+                                        <Input
+                                            id="name"
                                             placeholder="Enter your full name"
                                             defaultValue="shadcn"
                                             className="h-10"
                                         />
                                     </div>
-                                    
+
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-sm font-medium">
                                             Email Address
                                         </Label>
-                                        <Input 
-                                            id="email" 
+                                        <Input
+                                            id="email"
                                             type="email"
                                             placeholder="your@email.com"
                                             defaultValue="m@example.com"
                                             className="h-10"
                                         />
                                     </div>
-                                    
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone" className="text-sm font-medium">
+                                            WhatsApp Number
+                                        </Label>
+                                        <Input
+                                            id="phone"
+                                            type="tel"
+                                            placeholder="e.g. 62812345678"
+                                            defaultValue="6282393318287"
+                                            className="h-10"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Used for "Chat Penjual" button
+                                        </p>
+                                    </div>
+
                                     <div className="space-y-2">
                                         <Label htmlFor="role" className="text-sm font-medium">
                                             Role
                                         </Label>
-                                        <Input 
-                                            id="role" 
-                                            defaultValue="Administrator" 
-                                            disabled 
+                                        <Input
+                                            id="role"
+                                            defaultValue="Administrator"
+                                            disabled
                                             className="h-10 bg-muted"
                                         />
                                         <p className="text-xs text-muted-foreground">
@@ -124,20 +140,20 @@ export default function ProfilePage() {
                                     <Label htmlFor="current-password" className="text-sm font-medium">
                                         Current Password
                                     </Label>
-                                    <Input 
-                                        id="current-password" 
+                                    <Input
+                                        id="current-password"
                                         type="password"
                                         placeholder="Enter current password"
                                         className="h-10"
                                     />
                                 </div>
-                                
+
                                 <div className="space-y-2">
                                     <Label htmlFor="new-password" className="text-sm font-medium">
                                         New Password
                                     </Label>
-                                    <Input 
-                                        id="new-password" 
+                                    <Input
+                                        id="new-password"
                                         type="password"
                                         placeholder="Enter new password"
                                         className="h-10"
@@ -146,13 +162,13 @@ export default function ProfilePage() {
                                         Must be at least 8 characters
                                     </p>
                                 </div>
-                                
+
                                 <div className="space-y-2">
                                     <Label htmlFor="confirm-password" className="text-sm font-medium">
                                         Confirm New Password
                                     </Label>
-                                    <Input 
-                                        id="confirm-password" 
+                                    <Input
+                                        id="confirm-password"
                                         type="password"
                                         placeholder="Confirm new password"
                                         className="h-10"

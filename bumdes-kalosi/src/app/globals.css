@@ -60,23 +60,29 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
 
-  /* Primary - Emerald Green (Nature/Village/Trust) */
-  /* oklch(0.5 0.15 150) is a vibrant emerald */
-  --primary: oklch(0.48 0.16 150);
+  /* Primary - Blue (Trust/Professional) */
+  /* oklch(0.48 0.16 260) is a vibrant blue */
+  --primary: oklch(0.48 0.16 260);
   --primary-foreground: oklch(0.985 0 0);
 
-  /* Secondary - Warm Orange (Culinary/Action) */
-  /* oklch(0.65 0.18 50) is a warm amber/orange */
-  --secondary: oklch(0.97 0 0);
-  /* Light neutral for secondary backgrounds */
+  /* Secondary - Keep Warm Orange for contrast or switch to Light Blue? 
+     User said "Biru Putih", but pure blue/white might be boring. 
+     Let's keep Secondary as distinct CTA color but maybe cooler?
+     Actually, let's make secondary a lighter blue/slate for "White/Blue" feel.
+     OR keep it Orange/Amber as "Action" color is common. 
+     Let's stick to Blue Primary first. 
+  */
+  /* Retaining slight Warmth for secondary or making it neutral? 
+     Let's make Secondary a very soft blue/slate. 
+  */
+  --secondary: oklch(0.97 0.02 260);
   --secondary-foreground: oklch(0.205 0 0);
 
   /* Accent - Used for highlights/CTA */
-  --accent: oklch(0.96 0 0);
-  /* Standard Neutral */
+  --accent: oklch(0.96 0.02 260);
   --accent-foreground: oklch(0.205 0 0);
 
-  --muted: oklch(0.96 0.01 85);
+  --muted: oklch(0.96 0.01 260);
   --muted-foreground: oklch(0.556 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
@@ -84,13 +90,13 @@
 
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.65 0.2 250);
+  --ring: oklch(0.48 0.16 260);
   /* Matches Primary */
 
-  --chart-1: oklch(0.48 0.16 150);
-  /* Green */
-  --chart-2: oklch(0.70 0.18 50);
-  /* Orange */
+  --chart-1: oklch(0.48 0.16 260);
+  /* Blue */
+  --chart-2: oklch(0.60 0.18 250);
+  /* Lighter Blue */
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
@@ -106,37 +112,37 @@
 }
 
 .dark {
-  --background: oklch(0.10 0.02 150);
-  /* Very dark green-tinted black */
+  --background: oklch(0.10 0.02 260);
+  /* Very dark blue-tinted black */
   --foreground: oklch(0.985 0 0);
 
-  --card: oklch(0.15 0.03 150);
+  --card: oklch(0.15 0.03 260);
   --card-foreground: oklch(0.985 0 0);
 
-  --popover: oklch(0.15 0.03 150);
+  --popover: oklch(0.15 0.03 260);
   --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(0.55 0.16 150);
-  /* Slightly lighter emerald for dark mode */
+  --primary: oklch(0.55 0.16 260);
+  /* Slightly lighter blue for dark mode */
   --primary-foreground: oklch(0.985 0 0);
 
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.20 0.05 260);
   --secondary-foreground: oklch(0.985 0 0);
 
-  --muted: oklch(0.20 0.02 150);
+  --muted: oklch(0.20 0.02 260);
   --muted-foreground: oklch(0.708 0 0);
 
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.20 0.05 260);
   --accent-foreground: oklch(0.985 0 0);
 
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.25 0.02 150);
-  --input: oklch(0.25 0.02 150);
-  --ring: oklch(0.55 0.16 150);
+  --border: oklch(0.25 0.02 260);
+  --input: oklch(0.25 0.02 260);
+  --ring: oklch(0.55 0.16 260);
 
-  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-1: oklch(0.55 0.16 260);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);

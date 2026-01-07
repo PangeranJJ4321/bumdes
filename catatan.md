@@ -35,3 +35,20 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
     - [x] Fitur Transaksi (Rekap Pesanan, Status Update, Invoice View).
     - [x] Fitur Users (Daftar Pengguna, Role, Status).
 - [x] Rekap Pesanan Masuk.
+
+---
+
+## 📅 Logbook: Malam Ini (Checkout & Reviews + Feedback Sekdes)
+
+**Target Utama:**
+1.  **Membereskan Logic Checkout**: Agar data persanan tersimpan otomatis ke database sebelum redirect ke WhatsApp (`Orders` table).
+2.  **Fitur Ulasan (Reviews)**: Menambahkan kolom komentar/rating untuk produk.
+
+**Saran & Masukan Pak Sekdes (To-Be Implemented):**
+*   **Theme**: Ubah warna dominan website menjadi **Biru & Putih**.
+*   **Stock**: Tambah fitur stok barang (khususnya LPG, Perikanan).
+*   **Home Page**: Tampilkan semua layanan & tambah section "Produk Unggulan Desa".
+*   **Kurir**: Tambah opsi pengiriman (Kurir / Ambil Sendiri).
+*   **WhatsApp**:
+    *   Floating Bubble WA di semua halaman.
+    *   Setup Nomor HP Admin di Profile untuk kontak produk.

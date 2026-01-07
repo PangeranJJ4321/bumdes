@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ServiceCard } from "./ServiceCard"
-import { Utensils, Ticket, ShoppingBag } from "lucide-react"
+import { Utensils, Ticket, ShoppingBag, CreditCard, Fish } from "lucide-react"
 
 const SERVICES = [
     {
@@ -34,7 +34,7 @@ const SERVICES = [
     {
         id: "mart",
         title: "BUMDes Mart",
-        description: "Belanja kebutuhan harian, sembako, galon, dan gas dengan mudah dan harga terjangkau.",
+        description: "Belanja kebutuhan harian, sembako, galon, dan gas dengan mudah dan harga terjangkau. Melayani pesan antar.",
         icon: ShoppingBag,
         href: "#mart",
         imageUrls: [
@@ -43,6 +43,32 @@ const SERVICES = [
             "https://placehold.co/600x800/047857/ffffff?text=Pelayanan",
         ],
         colorClass: "bg-emerald-600",
+    },
+    {
+        id: "agen",
+        title: "Agen Laku Pandai",
+        description: "Layanan keuangan praktis: Transfer uang, tarik tunai, pembayaran listrik, BPJS, dan pulsa tanpa ke bank jauh.",
+        icon: CreditCard,
+        href: "#agen",
+        imageUrls: [
+            "https://placehold.co/600x800/0ea5e9/ffffff?text=Agen+BRILink",
+            "https://placehold.co/600x800/0284c7/ffffff?text=Bayar+Listrik",
+            "https://placehold.co/600x800/0369a1/ffffff?text=Transfer",
+        ],
+        colorClass: "bg-sky-600",
+    },
+    {
+        id: "perikanan",
+        title: "Perikanan (Ketapang)",
+        description: "Unit usaha budidaya ikan air tawar di Dusun Ketapang. Menyediakan bibit dan ikan segar berkualitas.",
+        icon: Fish,
+        href: "#perikanan",
+        imageUrls: [
+            "https://placehold.co/600x800/8b5cf6/ffffff?text=Kolam+Ikan",
+            "https://placehold.co/600x800/7c3aed/ffffff?text=Ikan+Segar",
+            "https://placehold.co/600x800/6d28d9/ffffff?text=Budidaya",
+        ],
+        colorClass: "bg-violet-600",
     },
 ]
 
