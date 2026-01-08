@@ -112,7 +112,205 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
     - [ ] **Change Password** (Penting!).
 
 ### 4. Integrasi & Utilitas
-- [ ] **Authentication**: Login session (NextAuth atau custom JWT cookies).
+- [ ] **Authentication**: Login session (NextAuth).
 - [ ] **Image Upload**: Setup API route untuk upload file (bisa ke local storage `/public/uploads` atau cloud).
 - [ ] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
+
+---
+
+## 🔐 Panduan Cepat Implementasi Auth (Fast Track 1 Jam)
+
+Berikut adalah langkah-langkah *copy-paste* untuk setup NextAuth v5 dengan Login Session.
+
+### 1. Install Library
+Terminal (jalankan di folder project):
+```bash
+pnpm add next-auth@beta @auth/prisma-adapter bcryptjs
+pnpm add -D @types/bcryptjs
+```
+
+### 2. Update Database (`prisma/schema.prisma`)
+Ganti model `Admin` dengan `User` dan tambah tabel session.
+
+```prisma
+// ... (datasource block)
+
+// 1. UBAH/HAPUS model Admin lama, dan gunakan ini:
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String?   @unique
+  password      String?   // Hashed password
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          String    @default("STAFF") // SUPER_ADMIN, STAFF
+  accounts      Account[]
+  sessions      Session[]
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// 2. TAMBAHKAN model-model ini (Standard NextAuth):
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+```
+*Setelah update, jalankan: `npx prisma db push`*
+
+### 3. Config Env (`.env`)
+```bash
+AUTH_SECRET="rahasia_super_secure_bisa_generate_pake_openssl"
+```
+
+### 4. Setup Auth Config (`src/auth.ts`)
+Buat file baru: `src/auth.ts`
+
+```typescript
+import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "@/server/db"
+import Credentials from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
+import { z } from "zod"
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
+  pages: {
+    signIn: "/auth/login", // Halaman login kita sendiri
+  },
+  providers: [
+    Credentials({
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        const parsed = z
+          .object({ username: z.string(), password: z.string().min(1) })
+          .safeParse(credentials)
+
+        if (!parsed.success) return null
+        const { username, password } = parsed.data
+
+        const user = await prisma.user.findUnique({ where: { username } })
+        if (!user || !user.password) return null
+
+        const match = await bcrypt.compare(password, user.password)
+        if (match) return user
+        
+        return null
+      },
+    }),
+  ],
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.role = user.role
+        token.id = user.id
+      }
+      return token
+    },
+    session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string
+        session.user.id = token.id as string
+      }
+      return session
+    },
+  },
+})
+```
+
+### 5. Buat API Route (`src/app/api/auth/[...nextauth]/route.ts`)
+Buat file ini (perhatikan folder `[...nextauth]`):
+
+```typescript
+import { handlers } from "@/auth"
+export const { GET, POST } = handlers
+```
+
+### 6. Middleware Protection (`src/middleware.ts`)
+Buat file `src/middleware.ts` (sejajar dengan folder `app`):
+
+```typescript
+import NextAuth from "next-auth"
+import { auth } from "@/auth"
+
+export default auth((req) => {
+  const isLoggedIn = !!req.auth
+  const isOnDashboard = req.nextUrl.pathname.startsWith("/admin/dashboard")
+  
+  if (isOnDashboard) {
+    if (isLoggedIn) return true
+    return Response.redirect(new URL("/auth/login", req.nextUrl))
+  }
+  return true
+})
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+}
+```
+
+### 7. Login Page Integration
+Di halaman login (`src/app/auth/login/page.tsx`), panggil server action `signIn`.
+Contoh Server Action di form:
+```typescript
+import { signIn } from "@/auth"
+
+export default function Page() {
+  return (
+    <form
+      action={async (formData) => {
+        "use server"
+        await signIn("credentials", formData)
+      }}
+    >
+      <input name="username" type="text" placeholder="Username" />
+      <input name="password" type="password" placeholder="Password" />
+      <button type="submit">Sign in</button>
+    </form>
+  )
+}
+```
 
