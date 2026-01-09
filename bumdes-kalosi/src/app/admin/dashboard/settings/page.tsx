@@ -39,7 +39,7 @@ export default function Page() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto">
+                    <div className="flex flex-col gap-8 w-full">
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight">Pengaturan Website</h2>
                             <p className="text-muted-foreground">

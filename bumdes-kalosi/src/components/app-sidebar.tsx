@@ -73,11 +73,6 @@ const data = {
       url: "/admin/dashboard/users",
       icon: IconUsers,
     },
-    {
-      title: "Settings",
-      url: "/admin/dashboard/settings",
-      icon: IconSettings,
-    },
   ],
   navClouds: [
     {
@@ -127,6 +122,13 @@ const data = {
       ],
     },
   ],
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "/admin/dashboard/settings",
+      icon: IconSettings,
+    },
+  ],
   documents: [
     {
       name: "Rekap Bumdes",
@@ -158,6 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavDocuments items={data.documents} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
