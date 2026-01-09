@@ -119,6 +119,7 @@ model User {
   image         String?
   role          UserRole  @default(STAFF) // SUPER_ADMIN, STAFF
   isActive      Boolean   @default(true) @map("is_active")
+  phone         String?   // Add phone number field
   accounts      Account[]
   sessions      Session[]
   

@@ -84,4 +84,69 @@ export const userRouter = createTRPCRouter({
                 data: { isActive: input.isActive },
             });
         }),
+
+    // --- Profile Management (Self-Service) ---
+
+    getProfile: publicProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .query(async ({ ctx, input }) => {
+            // In a real app with Protected Procedures, we would use ctx.session.user.id
+            return ctx.prisma.user.findUnique({
+                where: { id: input.id },
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    image: true,
+                }
+            })
+        }),
+
+    updateProfile: publicProcedure
+        .input(z.object({
+            id: z.string().uuid(), // Ideally obtained from session
+            name: z.string().min(1).optional(),
+            username: z.string().min(3).optional(),
+            email: z.string().email().optional(),
+            phone: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, ...data } = input
+            return ctx.prisma.user.update({
+                where: { id },
+                data,
+            })
+        }),
+
+    changePassword: publicProcedure
+        .input(z.object({
+            id: z.string().uuid(),
+            oldPassword: z.string().min(1),
+            newPassword: z.string().min(6),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const user = await ctx.prisma.user.findUnique({
+                where: { id: input.id }
+            })
+
+            if (!user || !user.password) {
+                throw new Error("User not found or no password set.")
+            }
+
+            const isValid = await bcrypt.compare(input.oldPassword, user.password)
+
+            if (!isValid) {
+                throw new Error("Password lama salah.")
+            }
+
+            const hashedPassword = await bcrypt.hash(input.newPassword, 10)
+
+            return ctx.prisma.user.update({
+                where: { id: input.id },
+                data: { password: hashedPassword }
+            })
+        }),
 });

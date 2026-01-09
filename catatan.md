@@ -107,9 +107,9 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
     - [x] Cetak/View Invoice sederhana (opsional). ubkin dalam pdf hasinya (Data Ready).
 
 **C. Admin Settings**
-- [ ] **Profile (`/admin/dashboard/profile`)**:
-    - [ ] Update data diri (Nama, No HP).
-    - [ ] **Change Password** (Penting!).
+- [x] **Profile (`/admin/dashboard/profile`)**:
+    - [x] Update data diri (Nama, No HP) (Logic Ready).
+    - [x] **Change Password** (Penting!) (Logic Ready).
 
 ### 4. Integrasi & Utilitas
 - [X] **Authentication**: Login session (NextAuth).
