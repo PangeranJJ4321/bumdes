@@ -15,19 +15,19 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { UserForm } from "@/components/user-form"
-import { useParams } from "next/navigation"
+import { trpc as api } from "@/lib/trpc/client"
+import { use } from "react"
 
-export default function Page() {
-    const params = useParams()
-    const id = params.id as string
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params)
+    const { data: user, isLoading } = api.user.getById.useQuery({ id })
 
-    // In a real app, fetch data based on ID
-    const mockData = {
-        name: "John Doe",
-        email: "john@example.com",
-        role: "Admin",
-        position: "Manager",
-        status: "Active",
+    if (isLoading) {
+        return <div className="p-8">Loading...</div>
+    }
+
+    if (!user) {
+        return <div className="p-8">User tidak ditemukan</div>
     }
 
     return (
@@ -63,7 +63,18 @@ export default function Page() {
                                 Perbarui informasi user yang terdaftar.
                             </p>
                         </div>
-                        <UserForm initialData={mockData} isEdit />
+                        <UserForm
+                            initialData={{
+                                id: user.id,
+                                name: user.name,
+                                username: user.username,
+                                email: user.email,
+                                phone: user.phone || "",
+                                role: user.role,
+                                isActive: user.isActive,
+                            }}
+                            isEdit
+                        />
                     </div>
                 </div>
             </SidebarInset>

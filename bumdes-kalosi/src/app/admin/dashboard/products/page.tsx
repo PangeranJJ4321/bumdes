@@ -1,3 +1,4 @@
+"use client"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { ProductsTable } from "@/components/products-table"
@@ -5,10 +6,11 @@ import {
     SidebarInset,
     SidebarProvider,
 } from "@/components/ui/sidebar"
-
-import data from "./data.json"
+import { trpc as api } from "@/lib/trpc/client"
 
 export default function Page() {
+    const { data: products } = api.product.getAll.useQuery()
+
     return (
         <SidebarProvider
             style={
@@ -29,7 +31,7 @@ export default function Page() {
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <ProductsTable data={data} />
+                        <ProductsTable data={products || []} />
                     </div>
                 </div>
             </SidebarInset>

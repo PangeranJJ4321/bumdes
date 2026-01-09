@@ -1,4 +1,5 @@
 "use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
 import {
     SidebarInset,
@@ -13,12 +14,9 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { UsersTable } from "@/components/users-table"
-import { trpc as api } from "@/lib/trpc/client"
+import { SettingsForm } from "@/components/settings-form"
 
 export default function Page() {
-    const { data: users } = api.user.getAll.useQuery()
-
     return (
         <SidebarProvider>
             <AppSidebar variant="inset" />
@@ -34,15 +32,21 @@ export default function Page() {
                                     </BreadcrumbItem>
                                     <BreadcrumbSeparator />
                                     <BreadcrumbItem>
-                                        <BreadcrumbPage>Users</BreadcrumbPage>
+                                        <BreadcrumbPage>Settings</BreadcrumbPage>
                                     </BreadcrumbItem>
                                 </BreadcrumbList>
                             </Breadcrumb>
-                            <h2 className="text-3xl font-bold tracking-tight">Daftar Users</h2>
                         </div>
                     </div>
-                    <div className="flex-1 space-y-4">
-                        <UsersTable data={users || []} />
+
+                    <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto">
+                        <div>
+                            <h2 className="text-3xl font-bold tracking-tight">Pengaturan Website</h2>
+                            <p className="text-muted-foreground">
+                                Atur informasi kontak, alamat, dan jam operasional website.
+                            </p>
+                        </div>
+                        <SettingsForm />
                     </div>
                 </div>
             </SidebarInset>

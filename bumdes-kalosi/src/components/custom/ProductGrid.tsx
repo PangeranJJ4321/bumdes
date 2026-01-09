@@ -1,22 +1,49 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { MOCK_PRODUCTS } from "@/lib/mockData";
+import { trpc as api } from "@/lib/trpc/client";
+import { ProductCategory } from "@prisma/client";
+import { useSearchParams, useRouter } from "next/navigation";
 
-const CATEGORIES = ["Semua", "Kuliner", "Wisata", "Mart", "Agen", "Perikanan"];
+const CATEGORIES = [
+    { label: "Semua", value: "ALL" },
+    { label: "Kuliner", value: ProductCategory.KULINER },
+    { label: "Wisata", value: ProductCategory.WISATA },
+    { label: "Mart", value: ProductCategory.MART },
+    { label: "Agen", value: ProductCategory.AGEN },
+    { label: "Perikanan", value: ProductCategory.KETAPANG },
+];
 
 export function ProductGrid() {
-    const [selectedCategory, setSelectedCategory] = useState("Semua");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const initialCategory = searchParams.get("category") || "ALL";
+
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-        const matchesCategory = selectedCategory === "Semua" || product.category === selectedCategory;
-        const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
+    // Update URL when category changes
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        const params = new URLSearchParams(searchParams);
+        if (category === "ALL") {
+            params.delete("category");
+        } else {
+            params.set("category", category);
+        }
+        router.replace(`?${params.toString()}`, { scroll: false });
+    };
+
+    const { data: products, isLoading } = api.product.getAll.useQuery();
+
+    const filteredProducts = products?.filter((product) => {
+        const matchesCategory = selectedCategory === "ALL" || product.category === selectedCategory;
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
-    });
+    }) || [];
 
     return (
         <div className="space-y-8">
@@ -25,12 +52,12 @@ export function ProductGrid() {
                 <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 w-full md:w-auto scrollbar-hide">
                     {CATEGORIES.map((cat) => (
                         <Button
-                            key={cat}
-                            variant={selectedCategory === cat ? "default" : "outline"}
-                            onClick={() => setSelectedCategory(cat)}
+                            key={cat.value}
+                            variant={selectedCategory === cat.value ? "default" : "outline"}
+                            onClick={() => handleCategoryChange(cat.value)}
                             className="rounded-full whitespace-nowrap"
                         >
-                            {cat}
+                            {cat.label}
                         </Button>
                     ))}
                 </div>
@@ -47,11 +74,30 @@ export function ProductGrid() {
             </div>
 
             {/* Grid */}
-            {filteredProducts.length > 0 ? (
+            {isLoading ? (
+                <div className="text-center py-20">Loading...</div>
+            ) : filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
-                    {filteredProducts.map((product) => (
-                        <ProductCard key={product.id} {...product} />
-                    ))}
+                    {filteredProducts.map((product) => {
+                        const totalRating = product.reviews?.reduce((acc: number, r: any) => acc + r.rating, 0) || 0;
+                        const avgRating = product.reviews?.length ? totalRating / product.reviews.length : 0;
+
+                        return (
+                            <ProductCard
+                                key={product.id}
+                                id={product.id}
+                                title={product.name}
+                                description={product.description || ""}
+                                price={product.price}
+                                imageUrl={product.imageUrl || `https://placehold.co/600x400/png?text=${encodeURIComponent(product.name)}`}
+                                category={product.category}
+                                rating={avgRating}
+                                reviewCount={product.reviews?.length || 0}
+                                isPromo={product.isPromo}
+                                promoPrice={product.promoPrice || undefined}
+                            />
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="text-center py-20 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/25">

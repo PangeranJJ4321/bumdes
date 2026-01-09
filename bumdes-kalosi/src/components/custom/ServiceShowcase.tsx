@@ -10,7 +10,7 @@ const SERVICES = [
         title: "Food Court",
         description: "Nikmati aneka hidangan lezat lokal dari nasi goreng hingga sarebba hangat. Tempat bersantai terbaik bersama keluarga.",
         icon: Utensils,
-        href: "#kuliner",
+        href: "/layanan?category=KULINER",
         imageUrls: [
             "https://placehold.co/600x800/f97316/ffffff?text=Food+Court+1",
             "https://placehold.co/600x800/c2410c/ffffff?text=Suasana+Makan",
@@ -23,7 +23,7 @@ const SERVICES = [
         title: "Wisata Malam",
         description: "Wahana seru untuk keluarga: Istana Balon, Mobil Listrik, dan suasana malam yang indah di jantung Desa Kalosi.",
         icon: Ticket,
-        href: "#wisata",
+        href: "/layanan?category=WISATA",
         imageUrls: [
             "https://placehold.co/600x800/4f46e5/ffffff?text=Wisata+Malam",
             "https://placehold.co/600x800/3730a3/ffffff?text=Wahana+Main",
@@ -36,7 +36,7 @@ const SERVICES = [
         title: "BUMDes Mart",
         description: "Belanja kebutuhan harian, sembako, galon, dan gas dengan mudah dan harga terjangkau. Melayani pesan antar.",
         icon: ShoppingBag,
-        href: "#mart",
+        href: "/layanan?category=MART",
         imageUrls: [
             "https://placehold.co/600x800/10b981/ffffff?text=BUMDes+Mart",
             "https://placehold.co/600x800/059669/ffffff?text=Rak+Sembako",
@@ -49,7 +49,7 @@ const SERVICES = [
         title: "Agen Laku Pandai",
         description: "Layanan keuangan praktis: Transfer uang, tarik tunai, pembayaran listrik, BPJS, dan pulsa tanpa ke bank jauh.",
         icon: CreditCard,
-        href: "#agen",
+        href: "/layanan?category=AGEN",
         imageUrls: [
             "https://placehold.co/600x800/0ea5e9/ffffff?text=Agen+BRILink",
             "https://placehold.co/600x800/0284c7/ffffff?text=Bayar+Listrik",
@@ -62,7 +62,7 @@ const SERVICES = [
         title: "Perikanan (Ketapang)",
         description: "Unit usaha budidaya ikan air tawar di Dusun Ketapang. Menyediakan bibit dan ikan segar berkualitas.",
         icon: Fish,
-        href: "#perikanan",
+        href: "/layanan?category=KETAPANG",
         imageUrls: [
             "https://placehold.co/600x800/8b5cf6/ffffff?text=Kolam+Ikan",
             "https://placehold.co/600x800/7c3aed/ffffff?text=Ikan+Segar",

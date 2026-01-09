@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/custom/SectionHeader";
 import { AboutSection } from "@/components/custom/AboutSection";
 import { CTABanner } from "@/components/custom/CTABanner";
 import { FeaturedProducts } from "@/components/custom/FeaturedProducts";
+import { RecentNews } from "@/components/custom/RecentNews";
 
 export default function Home() {
   return (
@@ -29,6 +30,9 @@ export default function Home() {
 
         {/* Featured Products from DB */}
         <FeaturedProducts />
+
+        {/* Recent News from DB */}
+        <RecentNews />
 
         {/* Introduction / About Section */}
         <AboutSection />

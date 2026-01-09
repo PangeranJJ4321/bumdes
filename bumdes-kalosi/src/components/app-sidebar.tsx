@@ -73,6 +73,11 @@ const data = {
       url: "/admin/dashboard/users",
       icon: IconUsers,
     },
+    {
+      title: "Settings",
+      url: "/admin/dashboard/settings",
+      icon: IconSettings,
+    },
   ],
   navClouds: [
     {

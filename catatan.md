@@ -113,8 +113,15 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
 
 ### 4. Integrasi & Utilitas
 - [X] **Authentication**: Login session (NextAuth).
-- [ ] **Image Upload**: Setup API route untuk upload file (bisa ke local storage `/public/uploads` atau cloud).
+- [ ] **Image Upload**: Implementasi upload ke `/public/uploads` (Next Todo).
 - [x] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
+
+### 5. Public Page & Settings
+- [x] **Public Pages Integration**: Menggunakan konten real dari database untuk Home, Berita, dan Produk.
+- [x] **Admin Settings (Super Admin)**:
+    - [x] Tab Pengaturan Umum.
+    - [x] Form Kontak (Phone, Email, Alamat).
+    - [x] Form Jam Operasional (Footer).
 
 ---
 

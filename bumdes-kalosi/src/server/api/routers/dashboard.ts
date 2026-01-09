@@ -1,10 +1,10 @@
 
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { OrderStatus } from "@prisma/client";
 
 export const dashboardRouter = createTRPCRouter({
-    getStats: publicProcedure.query(async ({ ctx }) => {
+    getStats: protectedProcedure.query(async ({ ctx }) => {
         const [
             pendingOrders,
             totalProducts,
@@ -32,7 +32,7 @@ export const dashboardRouter = createTRPCRouter({
         };
     }),
 
-    getRecentActivity: publicProcedure.query(async ({ ctx }) => {
+    getRecentActivity: protectedProcedure.query(async ({ ctx }) => {
         const [recentOrders, recentReviews] = await Promise.all([
             ctx.prisma.order.findMany({
                 take: 5,

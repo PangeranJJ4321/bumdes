@@ -7,57 +7,22 @@ import { PageHero } from "@/components/custom/PageHero"
 import { NewsCard } from "@/components/custom/NewsCard"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-
-// Mock Data
-const NEWS_ITEMS = [
-    {
-        id: "1",
-        title: "BUMDes Kalosi Raih Penghargaan Inovasi Desa Digital 2025",
-        slug: "bumdes-kalosi-raih-penghargaan-2025",
-        excerpt: "Berkat transformasi digital layanan masyarakat dan wisata, BUMDes Kalosi dinobatkan sebagai desa inovatif terbaik tingkat kabupaten.",
-        date: "2 Januari 2026",
-        author: "Admin",
-        imageUrl: "https://placehold.co/600x400/1e293b/ffffff?text=Penghargaan+Desa",
-        category: "Inovasi"
-    },
-    {
-        id: "2",
-        title: "Festival Kuliner Malam Minggu Ramai Pengunjung",
-        slug: "festival-kuliner-malam-minggu",
-        excerpt: "Ratusan warga memadati area Food Court BUMDes untuk menikmati aneka jajanan lokal dan live music.",
-        date: "28 Desember 2025",
-        author: "Humas",
-        imageUrl: "https://placehold.co/600x400/f97316/ffffff?text=Festival+Kuliner",
-        category: "Kegiatan"
-    },
-    {
-        id: "3",
-        title: "Penambahan Wahana Baru di Area Wisata",
-        slug: "wahana-baru-wisata-kalosi",
-        excerpt: "Kini tersedia wahana kereta mini dan trampolin raksasa untuk anak-anak di area wisata BUMDes Kalosi.",
-        date: "15 Desember 2025",
-        author: "Admin",
-        imageUrl: "https://placehold.co/600x400/4f46e5/ffffff?text=Wahana+Baru",
-        category: "Wisata"
-    },
-    {
-        id: "4",
-        title: "Pelatihan Digital Marketing untuk UMKM Desa",
-        slug: "pelatihan-digital-marketing-umkm",
-        excerpt: "BUMDes bekerjasama dengan mahasiswa KKN mengadakan pelatihan pemasaran online bagi pelaku UMKM lokal.",
-        date: "10 Desember 2025",
-        author: "Humas",
-        imageUrl: "https://placehold.co/600x400/10b981/ffffff?text=Pelatihan+UMKM",
-        category: "Edukasi"
-    },
-]
+import { trpc as api } from "@/lib/trpc/client"
+import { format } from "date-fns"
+import { id } from "date-fns/locale"
 
 export default function BeritaPage() {
     const [searchQuery, setSearchQuery] = useState("")
 
-    const filteredNews = NEWS_ITEMS.filter(item =>
+    // Fetch all news for now, filtering properly should be done on backend usually but for small datasets client is fine
+    // Or we can add search to getList input
+    const { data: newsItems, isLoading } = api.news.getAll.useQuery({
+        limit: 50, // Fetch first 50
+    })
+
+    const filteredNews = newsItems?.items.filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    ) || []
 
     return (
         <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -80,10 +45,22 @@ export default function BeritaPage() {
                 </PageHero>
 
                 <div className="container mx-auto px-4 py-16">
-                    {filteredNews.length > 0 ? (
+                    {isLoading ? (
+                        <div className="text-center py-20">Loading...</div>
+                    ) : filteredNews.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredNews.map((item) => (
-                                <NewsCard key={item.id} {...item} />
+                                <NewsCard
+                                    key={item.id}
+                                    title={item.title}
+                                    excerpt={item.content.replace(/<[^>]*>?/gm, "").substring(0, 100) + "..."}
+                                    date={format(new Date(item.publishedAt), "d MMMM yyyy", { locale: id })}
+                                    author={item.author}
+                                    imageUrl={item.thumbnail || `https://placehold.co/600x400/1e293b/ffffff?text=${encodeURIComponent(item.title.substring(0, 10))}`}
+                                    slug={item.slug}
+                                    category="Berita"
+                                    views={0}
+                                />
                             ))}
                         </div>
                     ) : (

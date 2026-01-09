@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { OrderStatus } from '@prisma/client'
-import { createTRPCRouter, publicProcedure } from '../../trpc'
+import { createTRPCRouter, publicProcedure, protectedProcedure, adminProcedure } from '../../trpc'
 
 const orderStatusEnum = z.nativeEnum(OrderStatus)
 
 export const orderRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.prisma.order.findMany({
       include: {
         itemsDetail: {
@@ -18,7 +18,7 @@ export const orderRouter = createTRPCRouter({
     })
   }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       return ctx.prisma.order.findUnique({
@@ -33,7 +33,7 @@ export const orderRouter = createTRPCRouter({
       })
     }),
 
-  getByStatus: publicProcedure
+  getByStatus: protectedProcedure
     .input(z.object({ status: orderStatusEnum }))
     .query(async ({ ctx, input }) => {
       return ctx.prisma.order.findMany({
@@ -121,7 +121,7 @@ export const orderRouter = createTRPCRouter({
       return order
     }),
 
-  updateStatus: publicProcedure
+  updateStatus: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
@@ -135,7 +135,7 @@ export const orderRouter = createTRPCRouter({
       })
     }),
 
-  delete: publicProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.prisma.order.delete({

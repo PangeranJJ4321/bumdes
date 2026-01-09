@@ -181,3 +181,26 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
+model SiteSettings {
+    id              String   @id @default(cuid())
+    key             String   @unique // e.g., "general" to have only one row or allowing multiple config sets
+    
+    // Contact Info
+    contactName     String?  @default("BUMDes Kalosi") @map("contact_name")
+    contactEmail    String?  @map("contact_email")
+    contactPhone    String?  @map("contact_phone")
+    address         String?  @map("address")
+    
+    // Operating Hours (simple text for now, or JSON structure)
+    operatingHours  String?  @map("operating_hours")
+    
+    // Social Media
+    facebookUrl     String?  @map("facebook_url")
+    instagramUrl    String?  @map("instagram_url")
+    youtubeUrl      String?  @map("youtube_url")
+
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+    @@map("site_settings")
+}

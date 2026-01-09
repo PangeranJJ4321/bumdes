@@ -1,3 +1,4 @@
+"use client"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { NewsTable } from "@/components/news-table"
@@ -5,10 +6,12 @@ import {
     SidebarInset,
     SidebarProvider,
 } from "@/components/ui/sidebar"
-
-import data from "./data.json"
+import { trpc as api } from "@/lib/trpc/client"
 
 export default function Page() {
+    // Fetch all news, adjust limit as needed or add pagination support later
+    const { data: newsData } = api.news.getAll.useQuery({ limit: 50 })
+
     return (
         <SidebarProvider
             style={
@@ -29,7 +32,7 @@ export default function Page() {
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <NewsTable data={data} />
+                        <NewsTable data={newsData?.items || []} />
                     </div>
                 </div>
             </SidebarInset>

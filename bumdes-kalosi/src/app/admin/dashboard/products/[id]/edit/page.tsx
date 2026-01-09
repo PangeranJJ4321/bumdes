@@ -1,3 +1,5 @@
+"use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { ProductForm } from "@/components/product-form"
@@ -13,26 +15,23 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import data from "../../data.json"
+import { trpc as api } from "@/lib/trpc/client"
+import { use } from "react"
 
-export function generateStaticParams() {
-    return data.map((product) => ({
-        id: product.id,
-    }))
-}
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+    // Unwrap params using React.use()
+    const { id } = use(params)
 
-export default function Page({ params }: { params: { id: string } }) {
-    const product = data.find((item) => item.id === params.id)
+    // Fetch product data
+    const { data: product, isLoading } = api.product.getById.useQuery({ id })
 
-    if (!product) {
-        return <div>Produk tidak ditemukan</div>
+    if (isLoading) {
+        return <div className="p-8">Loading...</div>
     }
 
-    // Transform string ID to number/string based on form requirement (Form uses string/number coercion)
-    // Actually our form schema expects defaults but values come from DB usually.
-    // Let's rely on coercion in DefaultValues or just pass as is if compatible.
-    // Product in JSON: id (string), price (number), stock (number).
-    // Form expects: price(number), stock(number). So it matches.
+    if (!product) {
+        return <div className="p-8">Produk tidak ditemukan</div>
+    }
 
     return (
         <SidebarProvider
@@ -68,15 +67,20 @@ export default function Page({ params }: { params: { id: string } }) {
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight">Edit Produk</h2>
                             <p className="text-muted-foreground">
-                                Perbarui informasi produk "{product.name}".
+                                Perbarui informasi produk "{product.name}"
                             </p>
                         </div>
                         <div className="border rounded-lg p-6 bg-card">
                             <ProductForm
                                 initialData={{
-                                    ...product,
-                                    price: product.price.toString(),
-                                    stock: product.stock.toString(),
+                                    id: product.id,
+                                    name: product.name,
+                                    description: product.description || "",
+                                    price: product.price,
+                                    stock: product.stock,
+                                    category: product.category,
+                                    imageUrl: product.imageUrl || "",
+
                                 }}
                                 isEdit
                             />

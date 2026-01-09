@@ -22,50 +22,28 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { trpc as api } from "@/lib/trpc/client"
+import { ProductCategory } from "@prisma/client"
 
 const productFormSchema = z.object({
-    name: z
-        .string()
-        .min(2, {
-            message: "Nama produk harus minimal 2 karakter.",
-        })
-        .max(100, {
-            message: "Nama produk tidak boleh lebih dari 100 karakter.",
-        }),
-    category: z.string().min(1, {
-        message: "Silakan pilih kategori produk.",
-    }),
-    price: z.string().min(1, {
-        message: "Harga harus diisi.",
-    }),
-    stock: z.string().min(1, {
-        message: "Stok harus diisi.",
-    }),
-    status: z.string().min(1, {
-        message: "Silakan pilih status.",
-    }),
-    image: z.string().url({
-        message: "Masukkan URL gambar yang valid.",
-    }).optional().or(z.literal("")),
+    name: z.string().min(2, { message: "Nama produk harus minimal 2 karakter." }),
     description: z.string().optional(),
-    isFeatured: z.boolean().default(false),
+    price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
+    stock: z.coerce.number().min(0, { message: "Stok tidak boleh negatif." }),
+    category: z.nativeEnum(ProductCategory),
+    imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
 })
 
 type ProductFormValues = z.infer<typeof productFormSchema>
 
-// Default values for the form
 const defaultValues: Partial<ProductFormValues> = {
     name: "",
-    category: "",
-    price: "",
-    stock: "",
-    status: "Tersedia",
-    image: "",
     description: "",
-    isFeatured: false,
+    price: 0,
+    stock: 0,
+    imageUrl: "",
 }
 
 interface ProductFormProps {
@@ -75,33 +53,50 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
+
+    const createMutation = api.product.create.useMutation({
+        onSuccess: () => {
+            toast.success("Produk berhasil ditambahkan!")
+            router.push("/admin/dashboard/products")
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(`Gagal menambahkan produk: ${error.message}`)
+        }
+    })
+
+    const updateMutation = api.product.update.useMutation({
+        onSuccess: () => {
+            toast.success("Produk berhasil diperbarui!")
+            router.push("/admin/dashboard/products")
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(`Gagal memperbarui produk: ${error.message}`)
+        }
+    })
+
     const form = useForm<ProductFormValues>({
         resolver: zodResolver(productFormSchema),
-        defaultValues: initialData ? {
-            name: initialData.name,
-            category: initialData.category,
-            price: initialData.price,
-            stock: initialData.stock,
-            status: initialData.status,
-            image: initialData.image,
-            description: initialData.description || "",
-            isFeatured: initialData.isFeatured || false,
-        } : defaultValues,
+        defaultValues: initialData || defaultValues,
     })
 
     function onSubmit(data: ProductFormValues) {
-        toast.success(
-            isEdit
-                ? "Produk berhasil diperbarui!"
-                : "Produk berhasil ditambahkan!"
-        )
-        console.log(JSON.stringify(data, null, 2))
-
-        // Simulate API delay and redirect
-        setTimeout(() => {
-            router.push("/admin/dashboard/products")
-        }, 1000)
+        if (isEdit && initialData?.id) {
+            updateMutation.mutate({
+                id: initialData.id,
+                ...data,
+                imageUrl: data.imageUrl || undefined,
+            })
+        } else {
+            createMutation.mutate({
+                ...data,
+                imageUrl: data.imageUrl || undefined,
+            })
+        }
     }
+
+    const isPending = createMutation.isPending || updateMutation.isPending
 
     return (
         <Form {...form}>
@@ -112,9 +107,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Nama Produk</FormLabel>
+                                <FormLabel>Nama Produk / Layanan</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Contoh: Kopi Arabika 200g" {...field} />
+                                    <Input placeholder="Contoh: Kopi Arabika 200g" {...field} disabled={isPending} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -126,12 +121,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Deskripsi Produk</FormLabel>
+                                <FormLabel>Deskripsi</FormLabel>
                                 <FormControl>
                                     <Textarea
                                         placeholder="Jelaskan detail produk..."
                                         className="min-h-[120px]"
                                         {...field}
+                                        disabled={isPending}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -149,7 +145,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 <FormItem>
                                     <FormLabel>Harga (Rp)</FormLabel>
                                     <FormControl>
-                                        <Input type="number" placeholder="0" {...field} />
+                                        <Input type="number" placeholder="0" {...field} disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -163,8 +159,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 <FormItem>
                                     <FormLabel>Stok</FormLabel>
                                     <FormControl>
-                                        <Input type="number" placeholder="0" {...field} />
+                                        <Input type="number" placeholder="0" {...field} disabled={isPending} />
                                     </FormControl>
+                                    <FormDescription>Gunakan angka besar jika stok tidak terbatas (misal: jasa)</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -173,98 +170,53 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-4 pt-6">
-                    <FormField
-                        control={form.control}
-                        name="category"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Kategori</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Kategori</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Pilih kategori" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {Object.values(ProductCategory).map((category) => (
+                                                <SelectItem key={category} value={category}>
+                                                    {category}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>URL Gambar</FormLabel>
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih kategori" />
-                                        </SelectTrigger>
+                                        <Input placeholder="https://..." {...field} disabled={isPending} />
                                     </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Kuliner">Kuliner</SelectItem>
-                                        <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
-                                        <SelectItem value="Perikanan">Perikanan</SelectItem>
-                                        <SelectItem value="Agen LPG">Agen LPG</SelectItem>
-                                        <SelectItem value="Wisata">Wisata</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                <div className="space-y-4 pt-6">
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>URL Gambar</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                <div className="space-y-4 pt-6">
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Status</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih status" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Tersedia">Tersedia</SelectItem>
-                                        <SelectItem value="Habis">Habis</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="isFeatured"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <FormLabel className="text-base">Unggulan</FormLabel>
-                                    <FormDescription>
-                                        Tampilkan di Home
-                                    </FormDescription>
-                                </div>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-6">
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
+                    <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
                         Batal
                     </Button>
-                    <Button type="submit">{isEdit ? "Update Produk" : "Simpan Produk"}</Button>
+                    <Button type="submit" disabled={isPending}>{isEdit ? "Update Produk" : "Simpan Produk"}</Button>
                 </div>
             </form>
         </Form>

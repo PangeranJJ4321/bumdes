@@ -1,6 +1,6 @@
 
 import { z } from 'zod'
-import { createTRPCRouter, publicProcedure } from '../../trpc'
+import { createTRPCRouter, publicProcedure, protectedProcedure } from '../../trpc'
 
 export const newsRouter = createTRPCRouter({
     getAll: publicProcedure
@@ -58,8 +58,16 @@ export const newsRouter = createTRPCRouter({
             })
         }),
 
+    getById: protectedProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .query(async ({ ctx, input }) => {
+            return ctx.prisma.news.findUnique({
+                where: { id: input.id },
+            })
+        }),
+
     // Admin Management Procedures
-    create: publicProcedure // TODO: Protected procedure for admin
+    create: protectedProcedure
         .input(z.object({
             title: z.string().min(1),
             content: z.string().min(1),
@@ -81,7 +89,7 @@ export const newsRouter = createTRPCRouter({
             })
         }),
 
-    update: publicProcedure
+    update: protectedProcedure
         .input(z.object({
             id: z.string().uuid(),
             title: z.string().min(1).optional(),
@@ -92,9 +100,9 @@ export const newsRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             const { id, ...data } = input;
 
-            // If title is updated, should we update slug? 
+            // If title is updated, should we update slug?
             // Usually simpler not to, to preserve SEO links, or make it optional.
-            // For now, we won't auto-update slug on edit unless explicitly requested, 
+            // For now, we won't auto-update slug on edit unless explicitly requested,
             // but we'll stick to simple content updates.
 
             return ctx.prisma.news.update({
@@ -103,7 +111,7 @@ export const newsRouter = createTRPCRouter({
             })
         }),
 
-    delete: publicProcedure
+    delete: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async ({ ctx, input }) => {
             return ctx.prisma.news.delete({

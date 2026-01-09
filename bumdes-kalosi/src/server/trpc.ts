@@ -1,11 +1,16 @@
-import { initTRPC } from '@trpc/server'
+import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 import { prisma } from './db'
+import { auth } from '@/auth'
+import { UserRole } from '@prisma/client'
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+    const session = await auth()
+
     return {
         prisma,
+        session,
         ...opts,
     }
 }
@@ -26,3 +31,35 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 
 export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure
+
+/**
+ * Protected (Authenticated) Procedure
+ * Users must be logged in to access these procedures.
+ */
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+    return next({
+        ctx: {
+            ...ctx,
+            session: ctx.session,
+        },
+    })
+})
+
+/**
+ * Admin Procedure
+ * Only SUPER_ADMIN users can access these procedures.
+ */
+export const adminProcedure = t.procedure.use(({ ctx, next }) => {
+    if (!ctx.session?.user || ctx.session.user.role !== UserRole.SUPER_ADMIN) {
+        throw new TRPCError({ code: 'FORBIDDEN' })
+    }
+    return next({
+        ctx: {
+            ...ctx,
+            session: ctx.session,
+        },
+    })
+})

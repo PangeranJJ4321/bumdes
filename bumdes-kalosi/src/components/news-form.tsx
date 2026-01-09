@@ -14,84 +14,89 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { trpc as api } from "@/lib/trpc/client"
 
+// Schema matching backend requirements more closely
 const newsFormSchema = z.object({
-    title: z
-        .string()
-        .min(2, {
-            message: "Judul harus minimal 2 karakter.",
-        })
-        .max(100, {
-            message: "Judul tidak boleh lebih dari 100 karakter.",
-        }),
-    category: z.string().min(1, {
-        message: "Silakan pilih kategori.",
-    }),
-    author: z.string().min(2, {
-        message: "Penulis harus diisi.",
-    }),
-    status: z.string().min(1, {
-        message: "Silakan pilih status.",
-    }),
-    date: z.string().min(1, {
-        message: "Tanggal harus diisi.",
-    }),
-    image: z.string().url({
-        message: "Masukkan URL gambar yang valid.",
-    }).optional().or(z.literal("")),
-    content: z.string().min(10, {
-        message: "Konten berita minimal 10 karakter.",
-    }),
+    title: z.string().min(2, { message: "Judul harus minimal 2 karakter." }),
+    author: z.string().min(2, { message: "Penulis harus diisi." }),
+    thumbnail: z.string().optional(),
+    content: z.string().min(10, { message: "Konten berita minimal 10 karakter." }),
 })
 
 type NewsFormValues = z.infer<typeof newsFormSchema>
 
-// Default values for the form
 const defaultValues: Partial<NewsFormValues> = {
     title: "",
-    category: "",
-    author: "",
-    status: "Draft",
-    date: new Date().toISOString().split('T')[0], // Default today yyyy-mm-dd
-    image: "",
+    author: "Admin BUMDes",
+    thumbnail: "",
     content: "",
 }
 
 interface NewsFormProps {
-    initialData?: NewsFormValues & { id?: number };
+    initialData?: NewsFormValues & { id?: string };
     isEdit?: boolean;
 }
 
 export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
     const router = useRouter()
+
+    // TRPC Mutations
+    const createMutation = api.news.create.useMutation({
+        onSuccess: () => {
+            toast.success("Berita berhasil ditambahkan!")
+            router.push("/admin/dashboard/news")
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(`Gagal membuat berita: ${error.message}`)
+        }
+    })
+
+    const updateMutation = api.news.update.useMutation({
+        onSuccess: () => {
+            toast.success("Berita berhasil diperbarui!")
+            router.push("/admin/dashboard/news")
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(`Gagal memperbarui berita: ${error.message}`)
+        }
+    })
+
     const form = useForm<NewsFormValues>({
         resolver: zodResolver(newsFormSchema),
-        defaultValues: initialData || defaultValues,
+        defaultValues: initialData ? {
+            title: initialData.title,
+            author: initialData.author,
+            thumbnail: initialData.thumbnail || "",
+            content: initialData.content
+        } : defaultValues,
     })
 
     function onSubmit(data: NewsFormValues) {
-        toast.success(
-            isEdit
-                ? "Berita berhasil diperbarui!"
-                : "Berita berhasil ditambahkan!"
-        )
-        console.log(JSON.stringify(data, null, 2))
-
-        // Simulate API delay and redirect
-        setTimeout(() => {
-            router.push("/admin/dashboard/news")
-        }, 1000)
+        if (isEdit && initialData?.id) {
+            updateMutation.mutate({
+                id: initialData.id,
+                title: data.title,
+                content: data.content,
+                thumbnail: data.thumbnail || undefined, // Send undefined if empty string
+                author: data.author
+            })
+        } else {
+            createMutation.mutate({
+                title: data.title,
+                content: data.content,
+                thumbnail: data.thumbnail || undefined,
+                author: data.author
+            })
+        }
     }
+
+    const isPending = createMutation.isPending || updateMutation.isPending
 
     return (
         <Form {...form}>
@@ -104,10 +109,10 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                             <FormItem>
                                 <FormLabel>Judul Berita</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Masukkan judul berita..." {...field} />
+                                    <Input placeholder="Masukkan judul berita..." {...field} disabled={isPending} />
                                 </FormControl>
                                 <FormDescription>
-                                    Judul utama berita yang akan ditampilkan di halaman depan.
+                                    Judul utama berita.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -125,6 +130,7 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                                         placeholder="Tulis isi berita di sini..."
                                         className="min-h-[400px]"
                                         {...field}
+                                        disabled={isPending}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -137,100 +143,28 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
                             control={form.control}
-                            name="category"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Kategori</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih kategori" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="Berita">Berita</SelectItem>
-                                            <SelectItem value="Pengumuman">Pengumuman</SelectItem>
-                                            <SelectItem value="Kegiatan">Kegiatan</SelectItem>
-                                            <SelectItem value="Agenda">Agenda</SelectItem>
-                                            <SelectItem value="Laporan">Laporan</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
                             name="author"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Penulis</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Nama penulis..." {...field} />
+                                        <Input placeholder="Nama penulis..." {...field} disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                    </div>
-                </div>
-
-                <div className="space-y-4 pt-6">
-                    <h2 className="text-2xl font-bold">Media</h2>
-                    
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>URL Gambar</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://example.com/image.jpg" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    Gambar sampul untuk berita ini.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                <div className="space-y-4 pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Status</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih status" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="Published">Published</SelectItem>
-                                            <SelectItem value="Draft">Draft</SelectItem>
-                                            <SelectItem value="Archived">Archived</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         <FormField
                             control={form.control}
-                            name="date"
+                            name="thumbnail"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Tanggal</FormLabel>
+                                    <FormLabel>URL Thumbnail (Opsional)</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} />
+                                        <Input placeholder="https://..." {...field} disabled={isPending} />
                                     </FormControl>
+                                    <FormDescription>Link gambar untuk cover berita.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -239,10 +173,12 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-6">
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
+                    <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
                         Batal
                     </Button>
-                    <Button type="submit">{isEdit ? "Update" : "Simpan"}</Button>
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? "Menyimpan..." : (isEdit ? "Update" : "Simpan")}
+                    </Button>
                 </div>
             </form>
         </Form>

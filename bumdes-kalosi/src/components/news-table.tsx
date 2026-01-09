@@ -57,17 +57,22 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 
-export type News = {
-    id: number
+import { trpc as api } from "@/lib/trpc/client"
+import { useRouter } from "next/navigation"
+
+export type NewsItem = {
+    id: string
     title: string
-    category: string
+    slug: string
+    content: string
+    thumbnail: string | null
     author: string
-    date: string
-    status: string
-    image: string
+    publishedAt: Date
+    createdAt: Date
+    updatedAt: Date
 }
 
-export const columns: ColumnDef<News>[] = [
+export const columns: ColumnDef<NewsItem>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -91,15 +96,21 @@ export const columns: ColumnDef<News>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "image",
+        accessorKey: "thumbnail",
         header: "Gambar",
         cell: ({ row }) => (
             <div className="h-12 w-20 overflow-hidden rounded-md border bg-muted">
-                <img
-                    src={row.getValue("image")}
-                    alt={row.getValue("title")}
-                    className="h-full w-full object-cover"
-                />
+                {row.original.thumbnail ? (
+                    <img
+                        src={row.original.thumbnail}
+                        alt={row.original.title}
+                        className="h-full w-full object-cover"
+                    />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                        No Image
+                    </div>
+                )}
             </div>
         ),
     },
@@ -109,39 +120,32 @@ export const columns: ColumnDef<News>[] = [
         cell: ({ row }) => <div className="font-medium line-clamp-2 max-w-[300px]">{row.getValue("title")}</div>,
     },
     {
-        accessorKey: "category",
-        header: "Kategori",
-        cell: ({ row }) => (
-            <Badge variant="outline">{row.getValue("category")}</Badge>
-        ),
-    },
-    {
         accessorKey: "author",
         header: "Penulis",
         cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("author")}</div>,
     },
     {
-        accessorKey: "date",
+        accessorKey: "publishedAt",
         header: "Tanggal",
-        cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("date")}</div>,
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const status = row.getValue("status") as string
-            return (
-                <Badge variant={status === "Published" ? "default" : "secondary"}>
-                    {status}
-                </Badge>
-            )
-        },
+        cell: ({ row }) => <div className="text-muted-foreground">{new Date(row.getValue("publishedAt")).toLocaleDateString("id-ID")}</div>,
     },
     {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
             const news = row.original
+            const utils = api.useUtils();
+            const deleteMutation = api.news.delete.useMutation({
+                onSuccess: () => {
+                    toast.success("Berita berhasil dihapus")
+                    utils.news.getAll.invalidate()
+                    utils.news.getRecent.invalidate()
+                    utils.dashboard.getStats.invalidate()
+                },
+                onError: (error) => {
+                    toast.error(`Gagal menghapus berita: ${error.message}`)
+                }
+            })
 
             return (
                 <AlertDialog>
@@ -160,12 +164,7 @@ export const columns: ColumnDef<News>[] = [
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/news/${news.id.toString()}`}>
-                                    View details
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/news/${news.id.toString()}/edit`}>
+                                <Link href={`/admin/dashboard/news/${news.id}/edit`}>
                                     Edit news
                                 </Link>
                             </DropdownMenuItem>
@@ -187,12 +186,10 @@ export const columns: ColumnDef<News>[] = [
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => {
-                                    toast.success("Berita berhasil dihapus")
-                                    // In a real app, you would call an API here and refresh data
-                                }}
+                                onClick={() => deleteMutation.mutate({ id: news.id })}
+                                disabled={deleteMutation.isPending}
                             >
-                                Hapus
+                                {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -202,23 +199,20 @@ export const columns: ColumnDef<News>[] = [
     },
 ]
 
-export function NewsTable({ data: initialData }: { data: News[] }) {
-    const [data, setData] = React.useState<News[]>(initialData)
+export function NewsTable({ data: initialData }: { data: NewsItem[] }) {
+    const [data, setData] = React.useState<NewsItem[]>(initialData)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
-    const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
 
-    // Filter data based on category
-    const filteredData = React.useMemo(() => {
-        if (categoryFilter === "all") return data
-        return data.filter((item) => item.category === categoryFilter)
-    }, [data, categoryFilter])
+    // Update local state when initialData changes
+    React.useEffect(() => {
+        setData(initialData)
+    }, [initialData])
 
     const table = useReactTable({
-        data: filteredData,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -236,19 +230,6 @@ export function NewsTable({ data: initialData }: { data: News[] }) {
         },
     })
 
-    const handleBulkDelete = () => {
-        setBulkDeleteWarningOpen(true)
-    }
-
-    const confirmBulkDelete = () => {
-        const selectedRows = table.getFilteredSelectedRowModel().rows
-        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
-
-        setData(data.filter((item) => !selectedIdsSet.has(item.id)))
-        setRowSelection({})
-        setBulkDeleteWarningOpen(false)
-        toast.success(`${selectedIdsSet.size} berita berhasil dihapus`)
-    }
 
     return (
         <div className="w-full">
@@ -260,36 +241,10 @@ export function NewsTable({ data: initialData }: { data: News[] }) {
                         table.getColumn("title")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
+                    disabled={!table.getColumn("title")}
                 />
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="gap-2">
-                            <IconFilter className="h-4 w-4" />
-                            Filter Kategori: {categoryFilter === "all" ? "Semua" : categoryFilter}
-                            <IconChevronDown className="h-4 w-4 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[200px]">
-                        <DropdownMenuRadioGroup value={categoryFilter} onValueChange={setCategoryFilter}>
-                            <DropdownMenuRadioItem value="all">Semua Kategori</DropdownMenuRadioItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuRadioItem value="Berita">Berita</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Pengumuman">Pengumuman</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Kegiatan">Kegiatan</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Agenda">Agenda</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Laporan">Laporan</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
                 <div className="flex items-center gap-2 ml-auto">
-                    {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                        <Button variant="destructive" onClick={handleBulkDelete}>
-                            <IconTrash className="mr-2 h-4 w-4" />
-                            Hapus ({table.getFilteredSelectedRowModel().rows.length})
-                        </Button>
-                    )}
                     <Button variant="default" size="sm" asChild>
                         <Link href="/admin/dashboard/news/create">
                             <IconPlus className="mr-2 h-4 w-4" /> Tambah Berita
@@ -371,23 +326,6 @@ export function NewsTable({ data: initialData }: { data: News[] }) {
                     </Button>
                 </div>
             </div>
-
-            <AlertDialog open={bulkDeleteWarningOpen} onOpenChange={setBulkDeleteWarningOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Tindakan ini tidak dapat dibatalkan. {table.getFilteredSelectedRowModel().rows.length} berita yang dipilih akan dihapus secara permanen dari server.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmBulkDelete} className="bg-red-600 hover:bg-red-700">
-                            Hapus
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     )
 }

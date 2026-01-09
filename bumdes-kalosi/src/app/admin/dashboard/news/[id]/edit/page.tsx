@@ -1,3 +1,5 @@
+"use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { NewsForm } from "@/components/news-form"
@@ -13,19 +15,22 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import newsData from "../../data.json"
+import { trpc as api } from "@/lib/trpc/client"
+import { use } from "react"
 
-export function generateStaticParams() {
-    return newsData.map((news) => ({
-        id: news.id.toString(),
-    }))
-}
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+    // Unwrap params using React.use() for Next.js 15+ compatibility
+    const { id } = use(params)
 
-export default function Page({ params }: { params: { id: string } }) {
-    const newsItem = newsData.find((item) => item.id.toString() === params.id)
+    // Fetch news data
+    const { data: newsItem, isLoading } = api.news.getById.useQuery({ id })
+
+    if (isLoading) {
+        return <div className="p-8">Loading...</div>
+    }
 
     if (!newsItem) {
-        return <div>Berita tidak ditemukan</div>
+        return <div className="p-8">Berita tidak ditemukan</div>
     }
 
     return (
@@ -62,16 +67,18 @@ export default function Page({ params }: { params: { id: string } }) {
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight">Edit Berita</h2>
                             <p className="text-muted-foreground">
-                                Perbarui informasi berita "{newsItem.title}".
+                                Perbarui informasi berita "{newsItem.title}"
                             </p>
                         </div>
                         <div className="border rounded-lg p-6 bg-card">
                             <NewsForm
                                 isEdit={true}
                                 initialData={{
-                                    ...newsItem,
-                                    content: `Contoh konten berita untuk ${newsItem.title}. Ini adalah data dummy karena backend belum terhubung.`,
-                                    image: newsItem.image || ""
+                                    id: newsItem.id,
+                                    title: newsItem.title,
+                                    author: newsItem.author,
+                                    content: newsItem.content,
+                                    thumbnail: newsItem.thumbnail || "",
                                 }}
                             />
                         </div>

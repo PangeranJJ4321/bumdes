@@ -48,6 +48,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
@@ -60,16 +62,21 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import { trpc as api } from "@/lib/trpc/client"
+import { ProductCategory } from "@prisma/client"
 
 export type Product = {
     id: string
     name: string
-    category: string
+    description: string | null
     price: number
     stock: number
-    status: string
-    image: string
-    isFeatured?: boolean
+    category: ProductCategory
+    imageUrl: string | null
+    promoPrice: number | null
+    isPromo: boolean
+    createdAt: Date
+    updatedAt: Date
 }
 
 const formatCurrency = (value: number) => {
@@ -104,15 +111,19 @@ export const columns: ColumnDef<Product>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "image",
+        accessorKey: "imageUrl",
         header: "Gambar",
         cell: ({ row }) => (
-            <div className="h-12 w-12 overflow-hidden rounded-md border bg-muted">
-                <img
-                    src={row.getValue("image")}
-                    alt={row.getValue("name")}
-                    className="h-full w-full object-cover"
-                />
+            <div className="h-12 w-12 overflow-hidden rounded-md border bg-muted flex items-center justify-center">
+                {row.original.imageUrl ? (
+                    <img
+                        src={row.original.imageUrl}
+                        alt={row.original.name}
+                        className="h-full w-full object-cover"
+                    />
+                ) : (
+                    <span className="text-xs text-muted-foreground">No Img</span>
+                )}
             </div>
         ),
     },
@@ -127,9 +138,9 @@ export const columns: ColumnDef<Product>[] = [
         cell: ({ row }) => (
             <div className="flex flex-col gap-1">
                 <Badge variant="outline" className="w-fit">{row.getValue("category")}</Badge>
-                {row.original.isFeatured && (
-                    <Badge variant="default" className="w-fit bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600">
-                        Unggulan
+                {row.original.isPromo && (
+                    <Badge variant="default" className="w-fit bg-red-500 hover:bg-red-600 text-white border-red-600">
+                        Promo
                     </Badge>
                 )}
             </div>
@@ -138,7 +149,18 @@ export const columns: ColumnDef<Product>[] = [
     {
         accessorKey: "price",
         header: "Harga",
-        cell: ({ row }) => <div>{formatCurrency(row.getValue("price"))}</div>,
+        cell: ({ row }) => (
+            <div>
+                {row.original.isPromo && row.original.promoPrice ? (
+                    <div className="flex flex-col">
+                        <span className="text-destructive font-bold">{formatCurrency(row.original.promoPrice)}</span>
+                        <span className="text-muted-foreground line-through text-xs">{formatCurrency(row.original.price)}</span>
+                    </div>
+                ) : (
+                    formatCurrency(row.getValue("price"))
+                )}
+            </div>
+        ),
     },
     {
         accessorKey: "stock",
@@ -146,22 +168,23 @@ export const columns: ColumnDef<Product>[] = [
         cell: ({ row }) => <div>{row.getValue("stock")}</div>,
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const status = row.getValue("status") as string
-            return (
-                <Badge variant={status === "Tersedia" ? "default" : "secondary"}>
-                    {status}
-                </Badge>
-            )
-        },
-    },
-    {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
             const product = row.original
+            const utils = api.useUtils();
+            const deleteMutation = api.product.delete.useMutation({
+                onSuccess: () => {
+                    toast.success("Produk berhasil dihapus")
+                    utils.product.getAll.invalidate()
+                    utils.product.getProductsGroup.invalidate()
+                    utils.product.getServices.invalidate()
+                    utils.dashboard.getStats.invalidate()
+                },
+                onError: (error) => {
+                    toast.error(`Gagal menghapus produk: ${error.message}`)
+                }
+            })
 
             return (
                 <AlertDialog>
@@ -176,14 +199,9 @@ export const columns: ColumnDef<Product>[] = [
                             <DropdownMenuItem
                                 onClick={() => navigator.clipboard.writeText(product.name)}
                             >
-                                Copy detail
+                                Copy nama
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/products/${product.id}`}>
-                                    Lihat Detail
-                                </Link>
-                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={`/admin/dashboard/products/${product.id}/edit`}>
                                     Edit Produk
@@ -207,11 +225,10 @@ export const columns: ColumnDef<Product>[] = [
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => {
-                                    toast.success("Produk berhasil dihapus")
-                                }}
+                                onClick={() => deleteMutation.mutate({ id: product.id })}
+                                disabled={deleteMutation.isPending}
                             >
-                                Hapus
+                                {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -228,9 +245,13 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
-    const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
 
-    // Filter data based on category (controlled by Tabs)
+    // Update local state when initialData changes
+    React.useEffect(() => {
+        setData(initialData)
+    }, [initialData])
+
+    // Filter data based on category
     const filteredData = React.useMemo(() => {
         if (categoryFilter === "all") return data
         return data.filter((item) => item.category === categoryFilter)
@@ -254,20 +275,6 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
             rowSelection,
         },
     })
-
-    const handleBulkDelete = () => {
-        setBulkDeleteWarningOpen(true)
-    }
-
-    const confirmBulkDelete = () => {
-        const selectedRows = table.getFilteredSelectedRowModel().rows
-        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
-
-        setData(data.filter((item) => !selectedIdsSet.has(item.id)))
-        setRowSelection({})
-        setBulkDeleteWarningOpen(false)
-        toast.success(`${selectedIdsSet.size} produk berhasil dihapus`)
-    }
 
     return (
         <div className="w-full space-y-4">
@@ -297,22 +304,14 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Semua Kategori</SelectItem>
-                                <SelectItem value="Kuliner">Kuliner</SelectItem>
-                                <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
-                                <SelectItem value="Perikanan">Perikanan</SelectItem>
-                                <SelectItem value="Agen LPG">Agen LPG</SelectItem>
-                                <SelectItem value="Wisata">Wisata</SelectItem>
+                                {Object.values(ProductCategory).map((category) => (
+                                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                        <Button variant="destructive" onClick={handleBulkDelete}>
-                            <IconTrash className="mr-2 h-4 w-4" />
-                            Hapus ({table.getFilteredSelectedRowModel().rows.length})
-                        </Button>
-                    )}
                     <Button variant="default" asChild>
                         <Link href="/admin/dashboard/products/create">
                             <IconPlus className="mr-2 h-4 w-4" /> Tambah Produk
@@ -395,23 +394,6 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
                     </Button>
                 </div>
             </div>
-
-            <AlertDialog open={bulkDeleteWarningOpen} onOpenChange={setBulkDeleteWarningOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Tindakan ini tidak dapat dibatalkan. {table.getFilteredSelectedRowModel().rows.length} produk yang dipilih akan dihapus secara permanen dari sistem.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmBulkDelete} className="bg-red-600 hover:bg-red-700">
-                            Hapus
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     )
 }

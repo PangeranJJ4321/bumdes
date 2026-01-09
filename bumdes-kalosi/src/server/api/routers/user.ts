@@ -1,13 +1,14 @@
-
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure, protectedProcedure } from "../../trpc";
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const userRoleEnum = z.nativeEnum(UserRole);
 
 export const userRouter = createTRPCRouter({
-    getAll: publicProcedure.query(async ({ ctx }) => {
+    // --- Admin Only Procedures ---
+
+    getAll: adminProcedure.query(async ({ ctx }) => {
         return ctx.prisma.user.findMany({
             orderBy: { createdAt: "desc" },
             select: {
@@ -15,6 +16,7 @@ export const userRouter = createTRPCRouter({
                 name: true,
                 username: true,
                 email: true,
+                phone: true,
                 role: true,
                 isActive: true,
                 image: true,
@@ -23,7 +25,15 @@ export const userRouter = createTRPCRouter({
         });
     }),
 
-    create: publicProcedure
+    getById: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return ctx.prisma.user.findUnique({
+                where: { id: input.id },
+            });
+        }),
+
+    create: adminProcedure
         .input(
             z.object({
                 name: z.string().min(1),
@@ -32,6 +42,7 @@ export const userRouter = createTRPCRouter({
                 password: z.string().min(6),
                 role: userRoleEnum,
                 isActive: z.boolean().default(true),
+                phone: z.string().optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -44,12 +55,13 @@ export const userRouter = createTRPCRouter({
                     email: input.email,
                     password: hashedPassword,
                     role: input.role,
+                    phone: input.phone,
                     isActive: input.isActive,
                 },
             });
         }),
 
-    update: publicProcedure
+    update: adminProcedure
         .input(
             z.object({
                 id: z.string(),
@@ -58,6 +70,7 @@ export const userRouter = createTRPCRouter({
                 email: z.string().email().optional(),
                 role: userRoleEnum.optional(),
                 isActive: z.boolean().optional(),
+                phone: z.string().optional(),
                 password: z.string().min(6).optional(),
             })
         )
@@ -76,7 +89,7 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
-    toggleStatus: publicProcedure
+    toggleStatus: adminProcedure
         .input(z.object({ id: z.string(), isActive: z.boolean() }))
         .mutation(async ({ ctx, input }) => {
             return ctx.prisma.user.update({
@@ -85,14 +98,20 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
+    delete: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.prisma.user.delete({
+                where: { id: input.id },
+            });
+        }),
+
     // --- Profile Management (Self-Service) ---
 
-    getProfile: publicProcedure
-        .input(z.object({ id: z.string().uuid() }))
-        .query(async ({ ctx, input }) => {
-            // In a real app with Protected Procedures, we would use ctx.session.user.id
+    getProfile: protectedProcedure
+        .query(async ({ ctx }) => {
             return ctx.prisma.user.findUnique({
-                where: { id: input.id },
+                where: { id: ctx.session.user.id },
                 select: {
                     id: true,
                     name: true,
@@ -101,35 +120,33 @@ export const userRouter = createTRPCRouter({
                     phone: true,
                     role: true,
                     image: true,
+                    createdAt: true,
                 }
             })
         }),
 
-    updateProfile: publicProcedure
+    updateProfile: protectedProcedure
         .input(z.object({
-            id: z.string().uuid(), // Ideally obtained from session
             name: z.string().min(1).optional(),
             username: z.string().min(3).optional(),
             email: z.string().email().optional(),
             phone: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { id, ...data } = input
             return ctx.prisma.user.update({
-                where: { id },
-                data,
+                where: { id: ctx.session.user.id },
+                data: input,
             })
         }),
 
-    changePassword: publicProcedure
+    changePassword: protectedProcedure
         .input(z.object({
-            id: z.string().uuid(),
             oldPassword: z.string().min(1),
             newPassword: z.string().min(6),
         }))
         .mutation(async ({ ctx, input }) => {
             const user = await ctx.prisma.user.findUnique({
-                where: { id: input.id }
+                where: { id: ctx.session.user.id }
             })
 
             if (!user || !user.password) {
@@ -145,7 +162,7 @@ export const userRouter = createTRPCRouter({
             const hashedPassword = await bcrypt.hash(input.newPassword, 10)
 
             return ctx.prisma.user.update({
-                where: { id: input.id },
+                where: { id: ctx.session.user.id },
                 data: { password: hashedPassword }
             })
         }),

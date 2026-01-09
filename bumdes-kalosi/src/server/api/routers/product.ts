@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { ProductCategory, ReviewStatus } from '@prisma/client'
-import { createTRPCRouter, publicProcedure } from '../../trpc'
+import { createTRPCRouter, publicProcedure, protectedProcedure } from '../../trpc'
 
 // Enum untuk Zod validation
 const productCategoryEnum = z.nativeEnum(ProductCategory)
@@ -10,6 +10,13 @@ export const productRouter = createTRPCRouter({
     getAll: publicProcedure.query(async ({ ctx }) => {
         return ctx.prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
+            include: {
+                reviews: {
+                    select: {
+                        rating: true
+                    }
+                }
+            }
         })
     }),
 
@@ -63,7 +70,7 @@ export const productRouter = createTRPCRouter({
         })
     }),
 
-    create: publicProcedure
+    create: protectedProcedure
         .input(
             z.object({
                 name: z.string().min(1),
@@ -82,7 +89,7 @@ export const productRouter = createTRPCRouter({
             })
         }),
 
-    update: publicProcedure
+    update: protectedProcedure
         .input(
             z.object({
                 id: z.string().uuid(),
@@ -104,7 +111,7 @@ export const productRouter = createTRPCRouter({
             })
         }),
 
-    delete: publicProcedure
+    delete: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async ({ ctx, input }) => {
             return ctx.prisma.product.delete({
