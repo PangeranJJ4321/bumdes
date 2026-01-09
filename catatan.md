@@ -65,12 +65,12 @@ Rencana lengkap untuk menghidupkan seluruh fitur dashboard dan frontend.
 
 ### 1. Database & Schema Updates (`schema.prisma`)
 Sebelum coding logic, kita perlu melengkapi tabel database.
-- [ ] **Model `News` (Berita)**:
+- [x] **Model `News` (Berita)**:
     - Field: `title`, `slug` (unique), `content` (Rich Text/HTML), `thumbnail`, `author`, `publishedAt`.
-- [ ] **Model `User` (Manajemen Pengguna)**:
+- [x] **Model `User` (Manajemen Pengguna)**:
     - *Refactor*: Rename/Update model `Admin` menjadi `User`.
     - Field: `role` (Enum: `SUPER_ADMIN`, `STAFF`), `isActive`.
-- [ ] **Seeding Data**:
+- [x] **Seeding Data**:
     - Buat script `prisma/seed.ts` yang mengisi data awal utk semua modul (5 Berita, 3 User, 10 Produk).
 
 ### 2. Logic: Public (Pengunjung Website)
@@ -112,7 +112,7 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
     - [ ] **Change Password** (Penting!).
 
 ### 4. Integrasi & Utilitas
-- [ ] **Authentication**: Login session (NextAuth).
+- [X] **Authentication**: Login session (NextAuth).
 - [ ] **Image Upload**: Setup API route untuk upload file (bisa ke local storage `/public/uploads` atau cloud).
 - [ ] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
 

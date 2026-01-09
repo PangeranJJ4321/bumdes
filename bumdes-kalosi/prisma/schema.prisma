@@ -103,6 +103,12 @@ model Review {
   @@map("reviews")
 }
 
+
+enum UserRole {
+  SUPER_ADMIN
+  STAFF
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -111,7 +117,8 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
-  role          String    @default("STAFF") // SUPER_ADMIN, STAFF
+  role          UserRole  @default(STAFF) // SUPER_ADMIN, STAFF
+  isActive      Boolean   @default(true) @map("is_active")
   accounts      Account[]
   sessions      Session[]
   
@@ -119,6 +126,20 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model News {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // Rich Text/HTML
+  thumbnail   String?
+  author      String
+  publishedAt DateTime @default(now()) @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("news")
 }
 
 model Account {
