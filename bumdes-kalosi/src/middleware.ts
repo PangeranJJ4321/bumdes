@@ -5,11 +5,18 @@ const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
     const isLoggedIn = !!req.auth
-    const isOnDashboard = req.nextUrl.pathname.startsWith("/admin/dashboard")
+    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin")
+    const isAuthRoute = req.nextUrl.pathname.startsWith("/admin/login")
 
-    if (isOnDashboard) {
+    // Protect all /admin routes
+    if (isAdminRoute && !isAuthRoute) {
         if (isLoggedIn) return
         return Response.redirect(new URL("/admin/login", req.nextUrl))
+    }
+
+    // Redirect to dashboard if logged in and trying to access login page
+    if (isAuthRoute && isLoggedIn) {
+        return Response.redirect(new URL("/admin/dashboard", req.nextUrl))
     }
 })
 

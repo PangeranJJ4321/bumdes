@@ -114,7 +114,7 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
 ### 4. Integrasi & Utilitas
 - [X] **Authentication**: Login session (NextAuth).
 - [ ] **Image Upload**: Setup API route untuk upload file (bisa ke local storage `/public/uploads` atau cloud).
-- [ ] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
+- [x] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
 
 ---
 
