@@ -74,15 +74,15 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
     - Buat script `prisma/seed.ts` yang mengisi data awal utk semua modul (5 Berita, 3 User, 10 Produk).
 
 ### 2. Logic: Public (Pengunjung Website)
-- [ ] **Berita (News)**:
+- [x] **Berita (News)**:
     - `getNewsList`: Pagination (misal 6 berita per halaman) + Search.
     - `getNewsDetail`: Baca berita lengkap berdasarkan slug.
     - `getRecentNews`: Widget "Berita Terbaru" di sidebar/home.
-- [ ] **Layanan & Produk**:
+- [x] **Layanan & Produk**:
     - Unifikasi logic `Product` namun difilter berdasarkan Kategori (`WISATA` = Layanan, `MART` = Produk).
     - `getAllServices`: Fetch data kategori Wisata/Jasa.
     - `getAllProducts`: Fetch data kategori Mart/Kuliner.
-- [ ] **Checkout System**: (Prioritas Tinggi)
+- [x] **Checkout System**: (Prioritas Tinggi)
     - Logic simpan Order ke DB -> Redirect WA.
 
 ### 3. Logic: Admin Dashboard

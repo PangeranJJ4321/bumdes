@@ -36,6 +36,33 @@ export const productRouter = createTRPCRouter({
             })
         }),
 
+    getServices: publicProcedure.query(async ({ ctx }) => {
+        return ctx.prisma.product.findMany({
+            where: {
+                category: {
+                    in: [ProductCategory.WISATA]
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        })
+    }),
+
+    getProductsGroup: publicProcedure.query(async ({ ctx }) => {
+        return ctx.prisma.product.findMany({
+            where: {
+                category: {
+                    in: [
+                        ProductCategory.MART,
+                        ProductCategory.KULINER,
+                        ProductCategory.AGEN,
+                        ProductCategory.KETAPANG
+                    ]
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        })
+    }),
+
     create: publicProcedure
         .input(
             z.object({
