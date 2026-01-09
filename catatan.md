@@ -87,24 +87,24 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
 
 ### 3. Logic: Admin Dashboard
 **A. Dashboard Overview (`/admin/dashboard`)**
-- [ ] **KPI Stats**: Hitung total `Pending Orders`, `Total Products`, `Total News`.
-- [ ] **Recent Activity**: List 5 pesanan/review terbaru.
+- [x] **KPI Stats**: Hitung total `Pending Orders`, `Total Products`, `Total News`.
+- [x] **Recent Activity**: List 5 pesanan/review terbaru.
 
 **B. Modul Manajemen (`CRUD`)**
-- [ ] **News Management (`/admin/dashboard/news`)**:
-    - [ ] Create/Edit dengan Rich Text Editor sederhana.
-    - [ ] Upload Thumbnail Berita.
-- [ ] **Products & Services (`/admin/dashboard/products` & `/services`)**:
-    - [ ] Bedakan UI input berdasarkan kategori (misal: "Layanan" butuh info *Durasi*, "Produk" butuh info *Stok*).
-    - [ ] Upload Gallery foto produk.
-- [ ] **Users Management (`/admin/dashboard/users`)**:
-    - [ ] List semua staff/admin.
-    - [ ] Fitur *Add New User* (misal untuk pegawai baru).
-    - [ ] Fitur *Change Role* atau *Deactivate Account*.
-- [ ] **Transactions (`/admin/dashboard/transactions`)**:
-    - [ ] Filter by Status (Pending, Completed).
-    - [ ] Button "Mark as Done" / "Cancel".
-    - [ ] Cetak/View Invoice sederhana (opsional).
+- [x] **News Management (`/admin/dashboard/news`)**:
+    - [x] Create/Edit dengan Rich Text Editor sederhana (Logic Ready).
+    - [x] Upload Thumbnail Berita (Field Ready).
+- [x] **Products & Services (`/admin/dashboard/products` & `/services`)**:
+    - [x] Bedakan UI input berdasarkan kategori (misal: "Layanan" butuh info *Durasi*, "Produk" butuh info *Stok*) (Logic Ready).
+    - [x] Upload Gallery foto produk (Field Ready).
+- [x] **Users Management (`/admin/dashboard/users`)**:
+    - [x] List semua staff/admin.
+    - [x] Fitur *Add New User* (misal untuk pegawai baru).
+    - [x] Fitur *Change Role* atau *Deactivate Account*.
+- [x] **Transactions (`/admin/dashboard/transactions`)**:
+    - [x] Filter by Status (Pending, Completed).
+    - [x] Button "Mark as Done" / "Cancel" (Status Update Ready).
+    - [x] Cetak/View Invoice sederhana (opsional). ubkin dalam pdf hasinya (Data Ready).
 
 **C. Admin Settings**
 - [ ] **Profile (`/admin/dashboard/profile`)**:

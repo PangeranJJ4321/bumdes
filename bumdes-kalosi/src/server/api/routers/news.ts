@@ -80,4 +80,34 @@ export const newsRouter = createTRPCRouter({
                 }
             })
         }),
+
+    update: publicProcedure
+        .input(z.object({
+            id: z.string().uuid(),
+            title: z.string().min(1).optional(),
+            content: z.string().min(1).optional(),
+            thumbnail: z.string().optional(),
+            author: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, ...data } = input;
+
+            // If title is updated, should we update slug? 
+            // Usually simpler not to, to preserve SEO links, or make it optional.
+            // For now, we won't auto-update slug on edit unless explicitly requested, 
+            // but we'll stick to simple content updates.
+
+            return ctx.prisma.news.update({
+                where: { id },
+                data,
+            })
+        }),
+
+    delete: publicProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.prisma.news.delete({
+                where: { id: input.id },
+            })
+        }),
 })
