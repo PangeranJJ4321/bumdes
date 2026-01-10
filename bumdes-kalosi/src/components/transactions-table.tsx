@@ -87,29 +87,77 @@ const formatCurrency = (value: number) => {
     }).format(value)
 }
 
-interface TransactionsTableProps {
-    data: Transaction[]
-}
 
-export function TransactionsTable({ data: initialData }: TransactionsTableProps) {
-    const [data, setData] = React.useState<Transaction[]>(initialData)
+import { trpc as api } from "@/lib/trpc/client"
+import { toast } from "sonner"
+import { OrderStatus } from "@prisma/client"
+
+// ... imports remain same ...
+
+export function TransactionsTable() {
+    // 1. Fetch Data
+    const { data: orders, isLoading, refetch } = api.order.getAll.useQuery()
+
+    // 2. Mutations
+    const deleteMutation = api.order.delete.useMutation({
+        onSuccess: () => {
+            toast.success("Transaksi berhasil dihapus")
+            refetch()
+        },
+        onError: (err) => toast.error("Gagal menghapus: " + err.message)
+    })
+
+    const updateStatusMutation = api.order.updateStatus.useMutation({
+        onSuccess: () => {
+            toast.success("Status berhasil diperbarui")
+            refetch()
+        },
+        onError: (err) => toast.error("Gagal update status: " + err.message)
+    })
+
+    // 3. Transform Data to Table Format
+    const data = React.useMemo(() => {
+        if (!orders) return []
+        return orders.map((order) => {
+            // Parse items from JSON
+            const items = (order.items as any[]) || []
+
+            return {
+                id: order.id,
+                date: order.created_at.toISOString(),
+                category: "Campuran", // Simplified logic, could be derived from items
+                customer: {
+                    name: order.customerName,
+                    email: order.customerPhone || "-", // Using phone as identifier/contact
+                },
+                amount: order.totalPrice,
+                status: order.status,
+                items: items.map((i: any) => ({
+                    name: i.title,
+                    quantity: i.quantity,
+                    price: i.price
+                }))
+            }
+        })
+    }, [orders])
+
+    // Table States
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
-    // Status Dialog State
+    // Dialog States
     const [statusDialogOpen, setStatusDialogOpen] = React.useState(false)
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null)
-
-    // Delete Warning State
     const [deleteWarningOpen, setDeleteWarningOpen] = React.useState(false)
     const [transactionToDelete, setTransactionToDelete] = React.useState<Transaction | null>(null)
-
-    // Bulk Delete State
     const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
 
     const handleEditStatus = (transaction: Transaction) => {
+        // We will pass the transaction but the dialog needs to call mutation
+        // For simplicity, let's keep the dialog but we need to inject the update function to it
+        // Or handle update here if the dialog returns the new status
         setSelectedTransaction(transaction)
         setStatusDialogOpen(true)
     }
@@ -121,7 +169,7 @@ export function TransactionsTable({ data: initialData }: TransactionsTableProps)
 
     const confirmDelete = () => {
         if (transactionToDelete) {
-            setData(data.filter((t) => t.id !== transactionToDelete.id))
+            deleteMutation.mutate({ id: transactionToDelete.id })
             setDeleteWarningOpen(false)
             setTransactionToDelete(null)
         }
@@ -132,16 +180,20 @@ export function TransactionsTable({ data: initialData }: TransactionsTableProps)
     }
 
     const confirmBulkDelete = () => {
-        const selectedIds = Object.keys(rowSelection)
-        // Note: In a real app, rowSelection keys are the indices if using default getRowId
-        // But here we need to correctly map selection to data. 
-        // Let's assume we filter out rows that are selected.
+        // Bulk delete logic not yet implemented in backend, loop for now or add bulkDelete endpoint
         const selectedRows = table.getFilteredSelectedRowModel().rows
-        const selectedIdsSet = new Set(selectedRows.map(r => r.original.id))
+        const promises = selectedRows.map(row =>
+            deleteMutation.mutateAsync({ id: row.original.id })
+        )
 
-        setData(data.filter((t) => !selectedIdsSet.has(t.id)))
-        setRowSelection({})
-        setBulkDeleteWarningOpen(false)
+        Promise.all(promises)
+            .then(() => {
+                toast.success(`${selectedRows.length} transaksi dihapus`)
+                setRowSelection({})
+                setBulkDeleteWarningOpen(false)
+                refetch()
+            })
+            .catch(err => toast.error("Gagal menghapus beberapa item"))
     }
 
     const columns: ColumnDef<Transaction>[] = [

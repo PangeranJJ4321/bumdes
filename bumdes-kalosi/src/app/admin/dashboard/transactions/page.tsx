@@ -13,7 +13,6 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { TransactionsTable } from "@/components/transactions-table"
-import data from "./data.json"
 
 export default function Page() {
     return (
@@ -39,7 +38,7 @@ export default function Page() {
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <TransactionsTable data={data} />
+                        <TransactionsTable />
                     </div>
                 </div>
             </SidebarInset>

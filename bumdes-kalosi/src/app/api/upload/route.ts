@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import sharp from "sharp";
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,10 +16,9 @@ export async function POST(request: NextRequest) {
         }
 
         const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        let buffer = Buffer.from(bytes);
 
         // Define upload directory
-        const relativeUploadDir = "/storage/uploads";
         const uploadDir = join(process.cwd(), "storage", "uploads");
 
         // Ensure directory exists
@@ -29,10 +29,36 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate unique filename
-        // Sanitized original name
-        const originalName = file.name.replace(/[^a-zA-Z0-9.]/g, "-");
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        const filename = `${uniqueSuffix}-${originalName}`;
+        let filename = file.name.replace(/[^a-zA-Z0-9.]/g, "-");
+
+        // Check if file is an image
+        const isImage = file.type.startsWith("image/");
+
+        if (isImage) {
+            try {
+                // Optimize with Sharp
+                // Rename extension to .webp
+                const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
+                filename = `${uniqueSuffix}-${nameWithoutExt}.webp`;
+
+                buffer = await sharp(buffer)
+                    .resize(1920, 1080, { // Max dimensions
+                        fit: 'inside',
+                        withoutEnlargement: true
+                    })
+                    .webp({ quality: 80 })
+                    .toBuffer();
+
+            } catch (sharpError) {
+                console.error("Optimization failed, saving original:", sharpError);
+                // Fallback to original filename/buffer if sharp fails
+                filename = `${uniqueSuffix}-${filename}`;
+            }
+        } else {
+            // Non-image files (e.g. PDF)
+            filename = `${uniqueSuffix}-${filename}`;
+        }
 
         const filePath = join(uploadDir, filename);
 
@@ -40,7 +66,6 @@ export async function POST(request: NextRequest) {
         await writeFile(filePath, buffer);
 
         // Return the URL
-        // We will serve these files via a route handler at /uploads/[filename]
         const url = `/uploads/${filename}`;
 
         return NextResponse.json({ success: true, url });

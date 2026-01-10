@@ -1,146 +1,42 @@
-import { z } from 'zod'
-import { OrderStatus } from '@prisma/client'
-import { createTRPCRouter, publicProcedure, protectedProcedure, adminProcedure } from '../../trpc'
 
-const orderStatusEnum = z.nativeEnum(OrderStatus)
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../../trpc";
+import { OrderStatus } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.order.findMany({
-      include: {
-        itemsDetail: {
-          include: {
-            product: true,
-          },
-        },
-      },
-      orderBy: { created_at: 'desc' },
-    })
+    return ctx.db.order.findMany({
+      orderBy: { created_at: "desc" },
+    });
   }),
 
+  // getById is complex because items are stored as JSON, but mapped to OrderItem relation too
   getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.order.findUnique({
+      return ctx.db.order.findUnique({
         where: { id: input.id },
-        include: {
-          itemsDetail: {
-            include: {
-              product: true,
-            },
-          },
-        },
+        include: { items: { include: { product: true } } }
       })
-    }),
-
-  getByStatus: protectedProcedure
-    .input(z.object({ status: orderStatusEnum }))
-    .query(async ({ ctx, input }) => {
-      return ctx.prisma.order.findMany({
-        where: { status: input.status },
-        include: {
-          itemsDetail: {
-            include: {
-              product: true,
-            },
-          },
-        },
-        orderBy: { created_at: 'desc' },
-      })
-    }),
-
-  create: publicProcedure
-    .input(
-      z.object({
-        customerName: z.string().min(1),
-        customerAddress: z.string().min(1),
-        customerPhone: z.string().optional(),
-        items: z.array(
-          z.object({
-            productId: z.string().uuid(),
-            quantity: z.number().int().positive(),
-            price: z.number().int().positive(),
-          })
-        ),
-        totalPrice: z.number().int().positive(),
-        notes: z.string().optional(),
-        whatsappUrl: z.string().url().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { items, ...orderData } = input
-
-      // 1. Fetch Products to get Names for WhatsApp Message
-      const productIds = items.map((i) => i.productId)
-      const products = await ctx.prisma.product.findMany({
-        where: { id: { in: productIds } }
-      })
-
-      const productMap = new Map(products.map(p => [p.id, p]))
-
-      // 2. Construct WhatsApp Message
-      let message = `Halo Admin BUMDes Kalosi 👋%0ASaya ingin memesan:%0A%0A`
-
-      items.forEach((item, index) => {
-        const product = productMap.get(item.productId)
-        const productName = product ? product.name : 'Unknown Product'
-        message += `${index + 1}. ${productName} (x${item.quantity}) - Rp ${item.price.toLocaleString('id-ID')}%0A`
-      })
-
-      message += `%0ATotal: Rp ${input.totalPrice.toLocaleString('id-ID')}%0A`
-      message += `%0AAtas Nama: ${input.customerName}%0A`
-      message += `Alamat: ${input.customerAddress}%0A`
-      if (input.notes) message += `Catatan: ${input.notes}%0A`
-
-      const adminPhoneNumber = process.env.ADMIN_PHONE || '6285210082729' // Fallback number
-      const generatedWhatsappUrl = `https://wa.me/${adminPhoneNumber}?text=${message}`
-
-      // 3. Create Order
-      const order = await ctx.prisma.order.create({
-        data: {
-          ...orderData,
-          whatsappUrl: generatedWhatsappUrl,
-          items: items as unknown as object, // Store as JSON snapshot
-          itemsDetail: {
-            create: items.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          },
-        },
-        include: {
-          itemsDetail: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      })
-
-      return order
     }),
 
   updateStatus: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        status: orderStatusEnum,
-      })
-    )
+    .input(z.object({
+      id: z.string(),
+      status: z.nativeEnum(OrderStatus),
+    }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.prisma.order.update({
+      return ctx.db.order.update({
         where: { id: input.id },
         data: { status: input.status },
-      })
+      });
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string().uuid() }))
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.prisma.order.delete({
+      return ctx.db.order.delete({
         where: { id: input.id },
-      })
+      });
     }),
-})
-
+});
