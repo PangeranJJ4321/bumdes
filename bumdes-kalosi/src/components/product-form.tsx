@@ -26,6 +26,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
 import { ProductCategory } from "@prisma/client"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 const productFormSchema = z.object({
     name: z.string().min(2, { message: "Nama produk harus minimal 2 karakter." }),
@@ -201,9 +202,14 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                             name="imageUrl"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>URL Gambar</FormLabel>
+                                    <FormLabel>Gambar Produk</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://..." {...field} disabled={isPending} />
+                                        <ImageUpload
+                                            value={field.value}
+                                            onChange={(url) => field.onChange(url)}
+                                            disabled={isPending}
+                                            label="Upload Gambar Produk"
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

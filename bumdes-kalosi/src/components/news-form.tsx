@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 // Schema matching backend requirements more closely
 const newsFormSchema = z.object({
@@ -160,11 +161,16 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                             name="thumbnail"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>URL Thumbnail (Opsional)</FormLabel>
+                                    <FormLabel>Thumbnail Berita</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://..." {...field} disabled={isPending} />
+                                        <ImageUpload
+                                            value={field.value}
+                                            onChange={(url) => field.onChange(url)}
+                                            disabled={isPending}
+                                            label="Klik untuk upload cover berita"
+                                        />
                                     </FormControl>
-                                    <FormDescription>Link gambar untuk cover berita.</FormDescription>
+                                    <FormDescription>Gambar utama yang akan muncul di daftar berita.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}

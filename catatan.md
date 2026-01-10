@@ -113,7 +113,7 @@ Sebelum coding logic, kita perlu melengkapi tabel database.
 
 ### 4. Integrasi & Utilitas
 - [X] **Authentication**: Login session (NextAuth).
-- [ ] **Image Upload**: Implementasi upload ke folder lokal VPS (`/public/uploads`) agar data mandiri. (Pastikan folder ini persistent).
+- [x] **Image Upload**: Implementasi upload ke folder lokal VPS (`/storage/uploads`) agar data mandiri. (Pastikan folder ini persistent).
 - [x] **Middleware**: Proteksi rute `/admin/*` agar tidak bisa ditembus tanpa login.
 
 ### 5. Public Page & Settings
