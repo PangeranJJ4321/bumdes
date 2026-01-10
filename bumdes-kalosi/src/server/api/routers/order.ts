@@ -5,7 +5,7 @@ import { OrderStatus } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.order.findMany({
+    return ctx.prisma.order.findMany({
       orderBy: { created_at: "desc" },
     });
   }),
@@ -14,9 +14,9 @@ export const orderRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.order.findUnique({
+      return ctx.prisma.order.findUnique({
         where: { id: input.id },
-        include: { items: { include: { product: true } } }
+        include: { itemsDetail: { include: { product: true } } }
       })
     }),
 
@@ -26,7 +26,7 @@ export const orderRouter = createTRPCRouter({
       status: z.nativeEnum(OrderStatus),
     }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.order.update({
+      return ctx.prisma.order.update({
         where: { id: input.id },
         data: { status: input.status },
       });
@@ -35,7 +35,7 @@ export const orderRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.order.delete({
+      return ctx.prisma.order.delete({
         where: { id: input.id },
       });
     }),

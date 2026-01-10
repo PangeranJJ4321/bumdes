@@ -55,9 +55,33 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 
 ---
 
-## 🕒 Update Terkini: Refactoring Tampilan
+## 🕒 Update Terkini: Progress Hari Ini (Selesai)
 **Baru Saja Dikerjakan:**
-- [x] **Refactor ServiceShowcase**: Memperbaiki layout grid pada `ServiceShowcase` agar neat dan responsif (Mobile/Desktop friendly). Memastikan susunan kartu layanan, spacing, dan tipografi konsisten.
+- [x] **Refactor ServiceShowcase**: Memperbaiki layout grid.
+- [x] **Image Upload Mandiri**: Implementasi fitur upload gambar ke folder lokal VPS (`/storage/uploads`) dengan optimasi otomatis (Resize & WebP) menggunakan `sharp`.
+- [x] **Form Upload**: Integrasi `ImageUpload` component ke Form Berita dan Form Produk.
+- [x] **Real Data Transaksi**: Menghubungkan tabel transaksi di Admin Dashboard dengan database asli. Admin bisa lihat pesanan yang masuk real-time, update status, dan hapus.
+
+## 📝 To-Do List Besok (Prioritas)
+
+Berikut adalah daftar pekerjaan untuk sesi selanjutnya:
+
+1.  **Validasi & Testing Full Flow**:
+    - [ ] Coba order barang dari halaman depan sebagai user.
+    - [ ] Cek apakah masuk ke database dan muncul di Admin Dashboard.
+    - [ ] Cek fitur "Pesan via WhatsApp" apakah format pesannya rapi.
+
+2.  **Fitur Invoice/Detail Transaksi**:
+    - [ ] Pastikan link "Lihat Invoice" didashboard berfungsi dengan baik (halaman `/admin/dashboard/transactions/[id]`).
+    - [ ] Desain tampilan Invoice sederhana yang siap cetak (layak pandang).
+
+3.  **Refinement Halaman Publik**:
+    - [ ] Cek ulang halaman "Tentang Kami", pastikan kontennya bukan placeholder.
+    - [ ] Polish UI kecil-kecilan (spacing, warna) jika ada yang kurang pas.
+
+4.  **Persiapan Deployment (Opsional)**:
+    - [ ] Cek kembali konfigurasi environment variable.
+    - [ ] Pastikan folder upload persistent.
 
 ## 🚀 Roadmap Backend & Full-Stack Integration
 
