@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "react-use-cart";
 import { useState, useEffect } from "react";
@@ -10,6 +9,17 @@ import { Phone, MapPin, User, ShoppingBag, Send, ArrowLeft, CheckCircle2 } from 
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Field,
+    FieldLabel,
+    FieldContent,
+    FieldError,
+} from "@/components/ui/field";
+
+import { checkoutSchema, CheckoutFormValues } from "@/lib/schemas";
 
 export function CheckoutContent() {
     const { items, cartTotal, isEmpty, emptyCart } = useCart();
@@ -17,12 +27,18 @@ export function CheckoutContent() {
     const [mounted, setMounted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [formData, setFormData] = useState({
-        nama: "",
-        noHp: "",
-        alamatLengkap: "",
-        metodePengiriman: "PICKUP", // PICKUP or COURIER
+    const form = useForm<CheckoutFormValues>({
+        resolver: zodResolver(checkoutSchema),
+        defaultValues: {
+            nama: "",
+            noHp: "",
+            alamatLengkap: "",
+            metodePengiriman: "PICKUP",
+        },
     });
+
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
+    const metodePengiriman = watch("metodePengiriman");
 
     useEffect(() => {
         setMounted(true);
@@ -52,22 +68,7 @@ export function CheckoutContent() {
         );
     }
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSelectChange = (value: string) => {
-        setFormData(prev => ({ ...prev, metodePengiriman: value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!formData.nama || !formData.noHp || !formData.alamatLengkap) {
-            toast.error("Mohon lengkapi semua data pemsana.");
-            return;
-        }
-
+    const onSubmit = async (data: CheckoutFormValues) => {
         setIsSubmitting(true);
 
         try {
@@ -76,36 +77,36 @@ export function CheckoutContent() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    customerName: formData.nama,
-                    customerPhone: formData.noHp,
-                    customerAddress: formData.alamatLengkap,
-                    deliveryMethod: formData.metodePengiriman,
+                    customerName: data.nama,
+                    customerPhone: data.noHp,
+                    customerAddress: data.alamatLengkap,
+                    deliveryMethod: data.metodePengiriman,
                     items: items,
                     totalPrice: cartTotal,
-                    notes: `Metode: ${formData.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`
+                    notes: `Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`
                 })
             });
 
-            const data = await response.json();
+            const resData = await response.json();
 
-            if (!data.success) {
-                toast.error("Gagal memproses pesanan: " + data.message);
+            if (!resData.success) {
+                toast.error("Gagal memproses pesanan: " + resData.message);
                 setIsSubmitting(false);
                 return;
             }
 
             // 2. Redirect to WhatsApp
             const adminPhone = "6282393318287";
-            const orderIdShort = data.orderId.substring(0, 8).toUpperCase();
+            const orderIdShort = resData.orderId.substring(0, 8).toUpperCase();
 
             let message = `*PESANAN BARU - BUMDES KALOSI*\n`;
             message += `#ORDER ID: ${orderIdShort}\n`;
             message += `------------------------------------------\n\n`;
             message += `👤 *Data Pemesan:*\n`;
-            message += `Nama: ${formData.nama}\n`;
-            message += `No HP: ${formData.noHp}\n`;
-            message += `Alamat: ${formData.alamatLengkap}\n`;
-            message += `Metode: ${formData.metodePengiriman === 'COURIER' ? '🚚 Diantar Kurir' : '🏪 Ambil Sendiri'}\n\n`;
+            message += `Nama: ${data.nama}\n`;
+            message += `No HP: ${data.noHp}\n`;
+            message += `Alamat: ${data.alamatLengkap || "-"}\n`;
+            message += `Metode: ${data.metodePengiriman === 'COURIER' ? '🚚 Diantar Kurir' : '🏪 Ambil Sendiri'}\n\n`;
 
             message += `🛒 *Detail Pesanan:*\n`;
             items.forEach((item, index) => {
@@ -156,73 +157,79 @@ export function CheckoutContent() {
                                     <h2 className="text-xl font-bold text-slate-800">Informasi Pengiriman</h2>
                                 </div>
 
-                                <form className="space-y-5">
+                                <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="nama" className="text-slate-700 font-medium">Nama Lengkap</Label>
+                                        <Field>
+                                            <FieldLabel htmlFor="nama" className="text-slate-700 font-medium">Nama Lengkap</FieldLabel>
                                             <div className="relative">
-                                                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    id="nama"
-                                                    name="nama"
-                                                    placeholder="Andi Wijaya"
-                                                    className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
-                                                    value={formData.nama}
-                                                    onChange={handleInputChange}
-                                                />
+                                                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
+                                                <FieldContent>
+                                                    <Input
+                                                        id="nama"
+                                                        placeholder="Masukan nama anda"
+                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        {...register("nama")}
+                                                    />
+                                                </FieldContent>
                                             </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="noHp" className="text-slate-700 font-medium">Nomor WhatsApp</Label>
+                                            <FieldError errors={[{ message: errors.nama?.message }]} />
+                                        </Field>
+
+                                        <Field>
+                                            <FieldLabel htmlFor="noHp" className="text-slate-700 font-medium">Nomor WhatsApp</FieldLabel>
                                             <div className="relative">
-                                                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    id="noHp"
-                                                    name="noHp"
-                                                    type="tel"
-                                                    placeholder="081234..."
-                                                    className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
-                                                    value={formData.noHp}
-                                                    onChange={handleInputChange}
-                                                />
+                                                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
+                                                <FieldContent>
+                                                    <Input
+                                                        id="noHp"
+                                                        type="tel"
+                                                        placeholder="081234..."
+                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        {...register("noHp")}
+                                                    />
+                                                </FieldContent>
                                             </div>
-                                        </div>
+                                            <FieldError errors={[{ message: errors.noHp?.message }]} />
+                                        </Field>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-slate-700 font-medium">Metode Pengiriman</Label>
-                                        <div className="grid grid-cols-2 gap-4">
+                                    <Field>
+                                        <FieldLabel className="text-slate-700 font-medium">Metode Pengiriman</FieldLabel>
+                                        <div className="grid grid-cols-2 gap-4 mt-2">
                                             <div
-                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${formData.metodePengiriman === 'PICKUP' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
-                                                onClick={() => handleSelectChange('PICKUP')}
+                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'PICKUP' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                                                onClick={() => setValue('metodePengiriman', 'PICKUP')}
                                             >
-                                                <ShoppingBag className={`h-6 w-6 ${formData.metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-400'}`} />
-                                                <span className={`font-semibold ${formData.metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-600'}`}>Ambil Sendiri</span>
+                                                <ShoppingBag className={`h-6 w-6 ${metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-400'}`} />
+                                                <span className={`font-semibold ${metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-600'}`}>Ambil Sendiri</span>
                                             </div>
                                             <div
-                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${formData.metodePengiriman === 'COURIER' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
-                                                onClick={() => handleSelectChange('COURIER')}
+                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'COURIER' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                                                onClick={() => setValue('metodePengiriman', 'COURIER')}
                                             >
                                                 <div className="relative">
-                                                    <MapPin className={`h-6 w-6 ${formData.metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-400'}`} />
-                                                    {formData.metodePengiriman === 'COURIER' && <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-green-500" />}
+                                                    <MapPin className={`h-6 w-6 ${metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-400'}`} />
+                                                    {metodePengiriman === 'COURIER' && <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-green-500" />}
                                                 </div>
-                                                <span className={`font-semibold ${formData.metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-600'}`}>Diantar Kurir</span>
+                                                <span className={`font-semibold ${metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-600'}`}>Diantar Kurir</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Field>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="alamatLengkap" className="text-slate-700 font-medium">Detail Alamat / Patokan</Label>
-                                        <Textarea
-                                            id="alamatLengkap"
-                                            name="alamatLengkap"
-                                            placeholder="Contoh: Rumah warna hijau depan masjid, Jl. Poros Kalosi..."
-                                            className="resize-none h-24 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl p-4"
-                                            value={formData.alamatLengkap}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
+                                    {metodePengiriman === 'COURIER' && (
+                                        <Field>
+                                            <FieldLabel htmlFor="alamatLengkap" className="text-slate-700 font-medium">Detail Alamat / Patokan</FieldLabel>
+                                            <FieldContent>
+                                                <Textarea
+                                                    id="alamatLengkap"
+                                                    placeholder="Contoh: Rumah warna hijau depan masjid, Jl. Poros Kalosi..."
+                                                    className="resize-none h-24 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl p-4"
+                                                    {...register("alamatLengkap")}
+                                                />
+                                            </FieldContent>
+                                            <FieldError errors={[{ message: errors.alamatLengkap?.message }]} />
+                                        </Field>
+                                    )}
                                 </form>
                             </div>
 
@@ -269,7 +276,7 @@ export function CheckoutContent() {
                                     </div>
                                     <div className="flex justify-between items-center text-slate-500">
                                         <span className="text-sm">Biaya Pengiriman</span>
-                                        {formData.metodePengiriman === 'COURIER' ? (
+                                        {metodePengiriman === 'COURIER' ? (
                                             <span className="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded-full">Info via WA</span>
                                         ) : (
                                             <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase">Gratis</span>
@@ -285,7 +292,8 @@ export function CheckoutContent() {
                                 </div>
 
                                 <Button
-                                    onClick={handleSubmit}
+                                    type="submit"
+                                    form="checkout-form"
                                     disabled={isSubmitting}
                                     className="w-full mt-8 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-extrabold h-14 rounded-2xl text-lg shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
