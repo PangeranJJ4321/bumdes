@@ -61,13 +61,14 @@ Berdasarkan Roadmap, berikut adalah halaman/tampilan yang perlu dibuat selanjutn
 - [x] **Image Upload Mandiri**: Implementasi fitur upload gambar ke folder lokal VPS (`/storage/uploads`) dengan optimasi otomatis (Resize & WebP) menggunakan `sharp`.
 - [x] **Form Upload**: Integrasi `ImageUpload` component ke Form Berita dan Form Produk.
 - [x] **Real Data Transaksi**: Menghubungkan tabel transaksi di Admin Dashboard dengan database asli. Admin bisa lihat pesanan yang masuk real-time, update status, dan hapus.
+- [x] **Implementasi Validasi & Perbaikan Checkout**: Menerapkan Zod & React Hook Form pada halaman checkout, membuat validasi alamat kondisional (Pickup vs Kurir), serta memperbaiki API route untuk menangani error database dengan respon JSON yang tepat.
 
 ## 📝 To-Do List Besok (Prioritas)
 
 Berikut adalah daftar pekerjaan untuk sesi selanjutnya:
 
 1.  **Validasi & Testing Full Flow**:
-    - [ ] Coba order barang dari halaman depan sebagai user.
+    - [x] Coba order barang dari halaman depan sebagai user.
     - [ ] Cek apakah masuk ke database dan muncul di Admin Dashboard.
     - [ ] Cek fitur "Pesan via WhatsApp" apakah format pesannya rapi.
 
@@ -83,12 +84,16 @@ Berikut adalah daftar pekerjaan untuk sesi selanjutnya:
     - [ ] Cek kembali konfigurasi environment variable.
     - [ ] Pastikan folder upload persistent.
 
+5.  **Integrasi Fonnte (WhatsApp Gateway)**:
+    - [ ] Integrasi API Fonnte untuk notifikasi otomatis pesan WhatsApp.
+    - [ ] Kirim pesan konfirmasi otomatis ke User & Admin saat pesanan masuk.
+
 ## 🚀 Roadmap Backend & Full-Stack Integration
 
 Rencana lengkap untuk menghidupkan seluruh fitur dashboard dan frontend.
 
 ### 1. Database & Schema Updates (`schema.prisma`)
-Sebelum coding logic, kita perlu melengkapi tabel database.
+Before coding logic, kita perlu melengkapi tabel database.
 - [x] **Model `News` (Berita)**:
     - Field: `title`, `slug` (unique), `content` (Rich Text/HTML), `thumbnail`, `author`, `publishedAt`.
 - [x] **Model `User` (Manajemen Pengguna)**:
@@ -344,4 +349,3 @@ export default function Page() {
   )
 }
 ```
-

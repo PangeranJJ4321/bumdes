@@ -138,7 +138,7 @@ export function CheckoutContent() {
             <div className="container mx-auto px-4">
                 <div className="max-w-5xl mx-auto">
                     {/* Header & Breadcrumb */}
-                    <div className="mb-10 text-center lg:text-left">
+                    <div className="mb-10 lg:text-left">
                         <Link href="/layanan" className="inline-flex items-center text-sm text-primary font-medium mb-4 hover:gap-2 transition-all gap-1">
                             <ArrowLeft className="w-4 h-4" /> Kembali ke Layanan
                         </Link>
