@@ -63,8 +63,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             img: product.imageUrl, // react-use-cart might use 'img' or custom field, I'll put both
             imageUrl: product.imageUrl,
             category: product.category,
-            quantity: quantity,
-        } as any);
+        } as any, quantity);
 
         toast.success("Berhasil ditambahkan ke keranjang", {
             description: `${quantity}x ${product.title}`,
@@ -216,7 +215,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
             {/* Mobile Sticky Action Bar */}
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50 lg:hidden flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] safe-area-bottom">
-                 <Button
+                <Button
                     size="lg"
                     variant="outline"
                     className="h-12 w-12 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl p-0 flex-shrink-0"
