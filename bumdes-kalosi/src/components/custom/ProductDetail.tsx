@@ -100,7 +100,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
                                 onClick={prevImage}
                             >
                                 <ChevronLeft className="h-6 w-6 text-slate-900" />
@@ -108,7 +108,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
                                 onClick={nextImage}
                             >
                                 <ChevronRight className="h-6 w-6 text-slate-900" />
@@ -147,9 +147,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Badge variant="destructive" className="text-sm px-3 py-1 animate-pulse">Sisa {stock} Unit</Badge>
                         )}
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{product.title}</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">{product.title}</h1>
                     <div className="flex items-end gap-3 mb-6">
-                        <div className="text-3xl font-bold text-primary">
+                        <div className="text-2xl md:text-3xl font-bold text-primary">
                             Rp {currentPrice.toLocaleString("id-ID")}
                         </div>
                         {product.isPromo && (
@@ -193,7 +193,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="hidden lg:flex gap-4">
                     <Button
                         size="lg"
                         className="flex-1 h-12 text-lg rounded-xl font-bold shadow-lg shadow-blue-900/10"
@@ -212,6 +212,27 @@ export function ProductDetail({ product }: ProductDetailProps) {
                         <Share2 className="mr-2 h-5 w-5" /> Tanya Penjual
                     </Button>
                 </div>
+            </div>
+
+            {/* Mobile Sticky Action Bar */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50 lg:hidden flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] safe-area-bottom">
+                 <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 w-12 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl p-0 flex-shrink-0"
+                    onClick={handleChatSeller}
+                >
+                    <Share2 className="h-5 w-5" />
+                </Button>
+                <Button
+                    size="lg"
+                    className="flex-1 h-12 text-base rounded-xl font-bold shadow-sm"
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    {isOutOfStock ? "Stok Habis" : "Beli Sekarang"}
+                </Button>
             </div>
         </div>
     );
