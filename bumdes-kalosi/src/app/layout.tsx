@@ -6,6 +6,7 @@ import { AOSProvider } from "@/components/providers/AOSProvider";
 import { CartProvider } from "@/components/providers/CartProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { WhatsAppButton } from "@/components/custom/WhatsappButton";
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,13 +33,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TRPCReactProvider>
-          <CartProvider>
-            <AOSProvider>{children}</AOSProvider>
-            <WhatsAppButton phoneNumber="6282393318287" message="Halo Admin BUMDes Kalosi, saya butuh bantuan..." />
-            <Toaster />
-          </CartProvider>
-        </TRPCReactProvider>
+        <NextAuthProvider>
+          <TRPCReactProvider>
+            <CartProvider>
+              <AOSProvider>{children}</AOSProvider>
+              <WhatsAppButton phoneNumber="6282393318287" message="Halo Admin BUMDes Kalosi, saya butuh bantuan..." />
+              <Toaster />
+            </CartProvider>
+          </TRPCReactProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

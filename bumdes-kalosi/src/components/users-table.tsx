@@ -56,7 +56,7 @@ import {
 import { toast } from "sonner"
 import Link from "next/link"
 import { trpc as api } from "@/lib/trpc/client"
-import { UserRole } from "@prisma/client"
+import { UserRole, ProductCategory } from "@prisma/client"
 
 export type User = {
     id: string
@@ -67,6 +67,7 @@ export type User = {
     isActive: boolean
     image: string | null
     phone: string | null
+    unit: ProductCategory | null
     createdAt: Date
 }
 
@@ -134,6 +135,24 @@ export const columns: ColumnDef<User>[] = [
                     <span>{role}</span>
                 </div>
             )
+        },
+    },
+    {
+        id: "keterangan",
+        header: "Keterangan",
+        cell: ({ row }) => {
+            const user = row.original
+            if (user.role === 'SUPER_ADMIN') {
+                return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Full Access</Badge>
+            }
+            if (user.role === 'STAFF') {
+                return user.unit ? (
+                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Unit: {user.unit}</Badge>
+                ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                )
+            }
+            return <span className="text-xs text-muted-foreground">-</span>
         },
     },
     {
@@ -226,12 +245,16 @@ export const columns: ColumnDef<User>[] = [
     },
 ]
 
-export function UsersTable({ data: initialData }: { data: User[] }) {
+import { Skeleton } from "@/components/ui/skeleton"
+
+export function UsersTable({ data: initialData, isLoading }: { data: User[]; isLoading?: boolean }) {
     const [data, setData] = React.useState<User[]>(initialData)
+    // ... hooks
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [isBulkDeleteOpen, setIsBulkDeleteOpen] = React.useState(false)
 
     React.useEffect(() => {
         setData(initialData)
@@ -256,9 +279,54 @@ export function UsersTable({ data: initialData }: { data: User[] }) {
         },
     })
 
+    const utils = api.useUtils()
+    const deleteMutation = api.user.delete.useMutation({
+        onSuccess: () => { },
+        onError: (error) => toast.error(`Gagal menghapus user: ${error.message}`)
+    })
+
+    const executeBulkDelete = async () => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        if (selectedRows.length === 0) return
+
+        setIsBulkDeleteOpen(false)
+
+        const toastId = toast.loading("Menghapus user...")
+        try {
+            await Promise.all(selectedRows.map(row => deleteMutation.mutateAsync({ id: row.original.id })))
+            toast.success("User berhasil dihapus", { id: toastId })
+            setRowSelection({})
+            utils.user.getAll.invalidate()
+            utils.dashboard.getStats.invalidate()
+        } catch (error) {
+            toast.error("Gagal menghapus user", { id: toastId })
+        }
+    }
+
     return (
         <>
+            <AlertDialog open={isBulkDeleteOpen} onOpenChange={setIsBulkDeleteOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus User Terpilih?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Anda akan menghapus {table.getFilteredSelectedRowModel().rows.length} user permanen.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
+                            onClick={executeBulkDelete}
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <div className="w-full space-y-4">
+                {/* ... header controls */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-1">
                         <div className="relative flex-1 md:max-w-sm">
@@ -274,6 +342,12 @@ export function UsersTable({ data: initialData }: { data: User[] }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                            <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleteOpen(true)}>
+                                <IconTrash className="mr-2 h-4 w-4" />
+                                Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                            </Button>
+                        )}
                         <Button asChild>
                             <Link href="/admin/dashboard/users/create">
                                 <IconPlus className="mr-2 h-4 w-4" /> Tambah User
@@ -303,7 +377,28 @@ export function UsersTable({ data: initialData }: { data: User[] }) {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Skeleton className="h-8 w-8 rounded-full" />
+                                                <div className="flex flex-col gap-1">
+                                                    <Skeleton className="h-4 w-24" />
+                                                    <Skeleton className="h-3 w-16" />
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}

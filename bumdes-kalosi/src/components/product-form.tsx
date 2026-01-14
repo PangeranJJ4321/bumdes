@@ -1,5 +1,8 @@
 "use client"
 
+import * as React from "react"
+import { useSession } from "next-auth/react"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -175,26 +178,45 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         <FormField
                             control={form.control}
                             name="category"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Kategori</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih kategori" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {Object.values(ProductCategory).map((category) => (
-                                                <SelectItem key={category} value={category}>
-                                                    {category}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            render={({ field }) => {
+                                const { data: session } = useSession()
+                                const user = session?.user
+
+                                const availableCategories = React.useMemo(() => {
+                                    if (user?.role === 'STAFF' && user?.unit) {
+                                        return [user.unit]
+                                    }
+                                    return Object.values(ProductCategory)
+                                }, [user])
+
+                                // Auto-select if only one option and no value
+                                React.useEffect(() => {
+                                    if (availableCategories.length === 1 && !field.value) {
+                                        field.onChange(availableCategories[0])
+                                    }
+                                }, [availableCategories, field])
+
+                                return (
+                                    <FormItem>
+                                        <FormLabel>Kategori</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending || (availableCategories.length === 1)}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih kategori" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {availableCategories.map((category) => (
+                                                    <SelectItem key={category} value={category}>
+                                                        {category}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
                         />
 
                         <FormField

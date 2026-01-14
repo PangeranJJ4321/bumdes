@@ -20,8 +20,37 @@ export const productRouter = createTRPCRouter({
         })
     }),
 
+    getDashboardProducts: protectedProcedure.query(async ({ ctx }) => {
+        const user = ctx.session.user
+        const where: any = {}
+
+        if (user.role === 'STAFF') {
+            // Filter by ownership if createdById exists, or fallback to unit if legacy
+            if (user.unit) {
+                where.OR = [
+                    { createdById: user.id },
+                    { category: user.unit, createdById: null } // Fallback for old products
+                ]
+            } else {
+                where.createdById = user.id
+            }
+        }
+
+        return ctx.prisma.product.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                reviews: {
+                    select: {
+                        rating: true
+                    }
+                }
+            }
+        })
+    }),
+
     getById: publicProcedure
-        .input(z.object({ id: z.string().uuid() }))
+        .input(z.object({ id: z.string() }))
         .query(async ({ ctx, input }) => {
             return ctx.prisma.product.findUnique({
                 where: { id: input.id },
@@ -84,15 +113,26 @@ export const productRouter = createTRPCRouter({
             })
         )
         .mutation(async ({ ctx, input }) => {
+            const user = ctx.session.user
+
+            if (user.role === 'STAFF' && user.unit) {
+                if (input.category !== user.unit) {
+                    throw new Error("Anda tidak memiliki izin untuk membuat produk di kategori ini.")
+                }
+            }
+
             return ctx.prisma.product.create({
-                data: input,
+                data: {
+                    ...input,
+                    createdById: user.id, // Assign owner
+                },
             })
         }),
 
     update: protectedProcedure
         .input(
             z.object({
-                id: z.string().uuid(),
+                id: z.string(),
                 name: z.string().min(1).optional(),
                 price: z.number().int().positive().optional(),
                 promoPrice: z.number().int().positive().optional(),
@@ -105,6 +145,29 @@ export const productRouter = createTRPCRouter({
         )
         .mutation(async ({ ctx, input }) => {
             const { id, ...data } = input
+            const user = ctx.session.user
+
+            // Check permission
+            if (user.role === 'STAFF') {
+                const product = await ctx.prisma.product.findUnique({ where: { id } })
+
+                if (!product) {
+                    throw new Error("Produk tidak ditemukan.")
+                }
+
+                // Check ownership or unit fallback
+                const isOwner = product.createdById === user.id
+                const isUnitMatch = user.unit && product.category === user.unit && product.createdById === null
+
+                if (!isOwner && !isUnitMatch) {
+                    throw new Error("Anda tidak memiliki izin untuk mengedit produk ini.")
+                }
+
+                if (data.category && user.unit && data.category !== user.unit) {
+                    throw new Error("Anda tidak bisa mengubah kategori produk ke luar unit anda.")
+                }
+            }
+
             return ctx.prisma.product.update({
                 where: { id },
                 data,
@@ -112,8 +175,21 @@ export const productRouter = createTRPCRouter({
         }),
 
     delete: protectedProcedure
-        .input(z.object({ id: z.string().uuid() }))
+        .input(z.object({ id: z.string() }))
         .mutation(async ({ ctx, input }) => {
+            const user = ctx.session.user
+            if (user.role === 'STAFF') {
+                const product = await ctx.prisma.product.findUnique({ where: { id: input.id } })
+
+                if (!product) return // Already deleted/not found
+
+                const isOwner = product.createdById === user.id
+                const isUnitMatch = user.unit && product.category === user.unit && product.createdById === null
+
+                if (!isOwner && !isUnitMatch) {
+                    throw new Error("Anda tidak memiliki izin untuk menghapus produk ini.")
+                }
+            }
             return ctx.prisma.product.delete({
                 where: { id: input.id },
             })

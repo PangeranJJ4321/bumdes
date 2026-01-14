@@ -15,8 +15,6 @@ import {
 } from "@tanstack/react-table"
 import {
     IconDotsVertical,
-    IconFilter,
-    IconChevronDown,
     IconPlus,
     IconTrash,
 } from "@tabler/icons-react"
@@ -32,18 +30,16 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
@@ -54,11 +50,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 
 import { trpc as api } from "@/lib/trpc/client"
-import { useRouter } from "next/navigation"
 
 export type NewsItem = {
     id: string
@@ -199,12 +193,13 @@ export const columns: ColumnDef<NewsItem>[] = [
     },
 ]
 
-export function NewsTable({ data: initialData }: { data: NewsItem[] }) {
+export function NewsTable({ data: initialData, isLoading }: { data: NewsItem[]; isLoading?: boolean }) {
     const [data, setData] = React.useState<NewsItem[]>(initialData)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [isBulkDeleteOpen, setIsBulkDeleteOpen] = React.useState(false)
 
     // Update local state when initialData changes
     React.useEffect(() => {
@@ -230,9 +225,53 @@ export function NewsTable({ data: initialData }: { data: NewsItem[] }) {
         },
     })
 
+    const utils = api.useUtils()
+    const deleteMutation = api.news.delete.useMutation({
+        onSuccess: () => { },
+        onError: (error) => toast.error(`Gagal menghapus berita: ${error.message}`)
+    })
+
+    const executeBulkDelete = async () => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        if (selectedRows.length === 0) return
+
+        setIsBulkDeleteOpen(false)
+
+        const toastId = toast.loading("Menghapus berita...")
+        try {
+            await Promise.all(selectedRows.map(row => deleteMutation.mutateAsync({ id: row.original.id })))
+            toast.success("Berita berhasil dihapus", { id: toastId })
+            setRowSelection({})
+            utils.news.getAll.invalidate()
+            utils.news.getRecent.invalidate()
+            utils.dashboard.getStats.invalidate()
+        } catch (error) {
+            toast.error("Gagal menghapus berita", { id: toastId })
+        }
+    }
+
 
     return (
         <div className="w-full">
+            <AlertDialog open={isBulkDeleteOpen} onOpenChange={setIsBulkDeleteOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Berita Terpilih?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Anda akan menghapus {table.getFilteredSelectedRowModel().rows.length} berita. Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={executeBulkDelete}
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <div className="flex items-center gap-4 py-4">
                 <Input
                     placeholder="Filter judul..."
@@ -245,6 +284,12 @@ export function NewsTable({ data: initialData }: { data: NewsItem[] }) {
                 />
 
                 <div className="flex items-center gap-2 ml-auto">
+                    {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                        <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleteOpen(true)}>
+                            <IconTrash className="mr-2 h-4 w-4" />
+                            Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                        </Button>
+                    )}
                     <Button variant="default" size="sm" asChild>
                         <Link href="/admin/dashboard/news/create">
                             <IconPlus className="mr-2 h-4 w-4" /> Tambah Berita
@@ -273,7 +318,18 @@ export function NewsTable({ data: initialData }: { data: NewsItem[] }) {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                                    <TableCell><Skeleton className="h-12 w-20 rounded-md" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}

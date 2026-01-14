@@ -1,10 +1,8 @@
 "use client"
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
 
@@ -30,6 +28,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import Link from "next/link"
+import { signOut } from "next-auth/react"
 
 export function NavUser({
   user,
@@ -94,8 +93,11 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
-              <IconLogout className="text-red-600"/>
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            >
+              <IconLogout className="text-red-600" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

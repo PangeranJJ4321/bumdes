@@ -222,7 +222,7 @@ async function main() {
     // 3. Seed Users
     console.log('Seeding Users...')
     const passwordHash = await bcrypt.hash('password123', 10)
-    
+
     const MOCK_USERS = [
         {
             username: "admin",

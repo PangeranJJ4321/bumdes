@@ -17,7 +17,7 @@ import { UsersTable } from "@/components/users-table"
 import { trpc as api } from "@/lib/trpc/client"
 
 export default function Page() {
-    const { data: users } = api.user.getAll.useQuery()
+    const { data: users, isLoading } = api.user.getAll.useQuery()
 
     return (
         <SidebarProvider>
@@ -42,7 +42,7 @@ export default function Page() {
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <UsersTable data={users || []} />
+                        <UsersTable data={users || []} isLoading={isLoading} />
                     </div>
                 </div>
             </SidebarInset>

@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, adminProcedure, protectedProcedure } from "../../trpc";
-import { UserRole } from "@prisma/client";
+import { UserRole, ProductCategory } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const userRoleEnum = z.nativeEnum(UserRole);
+const productCategoryEnum = z.nativeEnum(ProductCategory);
 
 export const userRouter = createTRPCRouter({
     // --- Admin Only Procedures ---
@@ -19,6 +20,7 @@ export const userRouter = createTRPCRouter({
                 phone: true,
                 role: true,
                 isActive: true,
+                unit: true,
                 image: true,
                 createdAt: true,
             },
@@ -43,6 +45,7 @@ export const userRouter = createTRPCRouter({
                 role: userRoleEnum,
                 isActive: z.boolean().default(true),
                 phone: z.string().optional(),
+                unit: productCategoryEnum.optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -57,6 +60,7 @@ export const userRouter = createTRPCRouter({
                     role: input.role,
                     phone: input.phone,
                     isActive: input.isActive,
+                    unit: input.unit,
                 },
             });
         }),
@@ -72,6 +76,7 @@ export const userRouter = createTRPCRouter({
                 isActive: z.boolean().optional(),
                 phone: z.string().optional(),
                 password: z.string().min(6).optional(),
+                unit: productCategoryEnum.optional().nullable(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -131,6 +136,7 @@ export const userRouter = createTRPCRouter({
             username: z.string().min(3).optional(),
             email: z.string().email().optional(),
             phone: z.string().optional(),
+            image: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
             return ctx.prisma.user.update({

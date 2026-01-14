@@ -19,6 +19,7 @@ import {
     IconSearch,
     IconTrash,
     IconFilter,
+    IconArrowsSort,
 } from "@tabler/icons-react"
 import {
     AlertDialog,
@@ -64,6 +65,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { trpc as api } from "@/lib/trpc/client"
 import { ProductCategory } from "@prisma/client"
+import { useSession } from "next-auth/react"
 
 export type Product = {
     id: string
@@ -148,7 +150,18 @@ export const columns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "price",
-        header: "Harga",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="-ml-4 hover:bg-transparent"
+                >
+                    Harga
+                    <IconArrowsSort className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
         cell: ({ row }) => (
             <div>
                 {row.original.isPromo && row.original.promoPrice ? (
@@ -164,7 +177,18 @@ export const columns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "stock",
-        header: "Stok",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="-ml-4 hover:bg-transparent"
+                >
+                    Stok
+                    <IconArrowsSort className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
         cell: ({ row }) => <div>{row.getValue("stock")}</div>,
     },
     {
@@ -224,7 +248,7 @@ export const columns: ColumnDef<Product>[] = [
                         <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
                                 onClick={() => deleteMutation.mutate({ id: product.id })}
                                 disabled={deleteMutation.isPending}
                             >
@@ -238,24 +262,49 @@ export const columns: ColumnDef<Product>[] = [
     },
 ]
 
-export function ProductsTable({ data: initialData }: { data: Product[] }) {
+import { Skeleton } from "@/components/ui/skeleton"
+
+export function ProductsTable({ data: initialData, isLoading }: { data: Product[]; isLoading?: boolean }) {
     const [data, setData] = React.useState<Product[]>(initialData)
+    // ... hooks
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
+    const [stockFilter, setStockFilter] = React.useState<string>("all")
+    const [isBulkDeleteOpen, setIsBulkDeleteOpen] = React.useState(false)
+
+    const { data: session } = useSession()
+    const user = session?.user
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN'
+    const showCategoryFilter = isSuperAdmin // Only Super Admin needs to switch categories
 
     // Update local state when initialData changes
     React.useEffect(() => {
         setData(initialData)
     }, [initialData])
 
-    // Filter data based on category
+    // Filter data based on category and stock
     const filteredData = React.useMemo(() => {
-        if (categoryFilter === "all") return data
-        return data.filter((item) => item.category === categoryFilter)
-    }, [data, categoryFilter])
+        let result = data
+
+        // Category filter
+        if (categoryFilter !== "all") {
+            result = result.filter((item) => item.category === categoryFilter)
+        }
+
+        // Stock filter
+        if (stockFilter === "available") {
+            result = result.filter((item) => item.stock > 0)
+        } else if (stockFilter === "out_of_stock") {
+            result = result.filter((item) => item.stock === 0)
+        } else if (stockFilter === "low_stock") {
+            result = result.filter((item) => item.stock > 0 && item.stock < 10)
+        }
+
+        return result
+    }, [data, categoryFilter, stockFilter])
 
     const table = useReactTable({
         data: filteredData,
@@ -276,8 +325,60 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
         },
     })
 
+    const utils = api.useUtils()
+    const deleteMutation = api.product.delete.useMutation({
+        onSuccess: () => {
+            // Handled in bulk delete
+        },
+        onError: (error) => {
+            toast.error(`Gagal menghapus produk: ${error.message}`)
+        }
+    })
+
+    const executeBulkDelete = async () => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows
+        if (selectedRows.length === 0) return
+
+        setIsBulkDeleteOpen(false)
+
+        const toastId = toast.loading("Menghapus produk...")
+
+        try {
+            await Promise.all(selectedRows.map(row =>
+                deleteMutation.mutateAsync({ id: row.original.id })
+            ))
+
+            toast.success(`${selectedRows.length} produk berhasil dihapus`, { id: toastId })
+            setRowSelection({})
+            utils.product.getDashboardProducts.invalidate()
+            utils.dashboard.getStats.invalidate()
+        } catch (error) {
+            toast.error("Gagal menghapus beberapa produk", { id: toastId })
+        }
+    }
+
     return (
         <div className="w-full space-y-4">
+            <AlertDialog open={isBulkDeleteOpen} onOpenChange={setIsBulkDeleteOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Produk Terpilih?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Anda akan menghapus {table.getFilteredSelectedRowModel().rows.length} produk. Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
+                            onClick={executeBulkDelete}
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            {/* ... header controls */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1">
                     <div className="relative flex-1 md:max-w-sm">
@@ -291,28 +392,58 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
                             className="pl-8 w-full"
                         />
                     </div>
-                    <div className="w-[180px]">
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="w-[150px] mr-2">
                         <Select
-                            value={categoryFilter}
-                            onValueChange={setCategoryFilter}
+                            value={stockFilter}
+                            onValueChange={setStockFilter}
                         >
                             <SelectTrigger className="w-full">
                                 <div className="flex items-center gap-2">
                                     <IconFilter className="h-4 w-4" />
-                                    <SelectValue placeholder="Kategori" />
+                                    <SelectValue placeholder="Stok" />
                                 </div>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">Semua Kategori</SelectItem>
-                                {Object.values(ProductCategory).map((category) => (
-                                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                                ))}
+                                <SelectItem value="all">Semua Stok</SelectItem>
+                                <SelectItem value="available">Tersedia</SelectItem>
+                                <SelectItem value="low_stock">Menipis ({'<'} 10)</SelectItem>
+                                <SelectItem value="out_of_stock">Habis</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
+
+                    {showCategoryFilter && (
+                        <div className="w-[180px] mr-4">
+                            <Select
+                                value={categoryFilter}
+                                onValueChange={setCategoryFilter}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <div className="flex items-center gap-2">
+                                        <IconFilter className="h-4 w-4" />
+                                        <SelectValue placeholder="Kategori" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all" className="text-sm">Semua Kategori</SelectItem>
+                                    {Object.values(ProductCategory).map((category) => (
+                                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="default" asChild>
+                    {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                        <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleteOpen(true)}>
+                            <IconTrash className="mr-2 h-4 w-4" />
+                            Hapus ({table.getFilteredSelectedRowModel().rows.length})
+                        </Button>
+                    )}
+                    <Button variant="default" size="sm" asChild>
                         <Link href="/admin/dashboard/products/create">
                             <IconPlus className="mr-2 h-4 w-4" /> Tambah Produk
                         </Link>
@@ -341,7 +472,19 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                                    <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -370,6 +513,7 @@ export function ProductsTable({ data: initialData }: { data: Product[] }) {
                     </TableBody>
                 </Table>
             </div>
+            {/* ... pagination */}
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}

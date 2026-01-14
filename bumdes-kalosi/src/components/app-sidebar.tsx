@@ -35,111 +35,114 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useSession } from "next-auth/react"
+import Link from "next/link"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession()
+  const user = session?.user
+
+  // Define interface for navigation items
+  interface NavItem {
+    title: string
+    url: string
+    icon: React.ElementType
+    roles: string[]
+    excludeUnits?: string[]
+    onlyUnits?: string[]
+  }
+
+  // Define all navigation items
+  const allNavItems: NavItem[] = [
     {
       title: "Dashboard",
       url: "/admin/dashboard",
       icon: IconDashboard,
+      roles: ["SUPER_ADMIN", "STAFF"],
     },
     {
       title: "News",
       url: "/admin/dashboard/news",
       icon: IconNews,
+      roles: ["SUPER_ADMIN"],
     },
     {
       title: "Products",
       url: "/admin/dashboard/products",
       icon: IconBox,
-    },
-    {
-      title: "Services",
-      url: "/admin/dashboard/services",
-      icon: IconListDetails,
+      roles: ["SUPER_ADMIN", "STAFF"],
     },
     {
       title: "Transactions",
       url: "/admin/dashboard/transactions",
       icon: IconReceipt,
+      roles: ["SUPER_ADMIN", "STAFF"],
     },
     {
       title: "Users",
       url: "/admin/dashboard/users",
       icon: IconUsers,
+      roles: ["SUPER_ADMIN"],
     },
-  ],
-  navClouds: [
+  ]
+
+  const filteredNavMain = React.useMemo(() => {
+    if (!user) return []
+
+    return allNavItems.filter((item) => {
+      // Check Role
+      if (!item.roles.includes(user.role as string)) {
+        return false
+      }
+
+      // Check Unit Exclusions (e.g. Products hidden for WISATA)
+      if (item.excludeUnits && user.unit && item.excludeUnits.includes(user.unit)) {
+        return false
+      }
+
+      // Check Unit Inclusions (e.g. Services only for WISATA)
+      // If item has `onlyUnits`...
+      if (item.onlyUnits) {
+        // If Admin, usually sees all, but let's say Admin sees Services too?
+        if (user.role === 'SUPER_ADMIN') return true
+        // If Staff, must match unit
+        if (user.unit && item.onlyUnits.includes(user.unit)) return true
+        return false
+      }
+
+      return true
+    })
+  }, [user])
+
+  const documents = [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
+      name: "Rekap Bumdes",
+      url: "/admin/dashboard?tab=reports",
+      icon: IconDatabase,
+    }
+  ]
+
+  const navSecondary = [
     {
       title: "Settings",
       url: "/admin/dashboard/settings",
       icon: IconSettings,
-    },
-  ],
-  documents: [
-    {
-      name: "Rekap Bumdes",
-      url: "#",
-      icon: IconDatabase,
-    },
+    }
+  ]
 
-  ],
-}
+  // Filter secondary nav: Staff shouldn't see generic Settings?? 
+  // User asked for "Overview, Product/Services, Transaction". 
+  // So probably hide Settings for Staff.
+  const filteredNavSecondary = user?.role === 'SUPER_ADMIN' ? navSecondary : []
+  const filteredDocuments = (user?.role === 'SUPER_ADMIN' || user?.role === 'STAFF') ? documents : []
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // User object for NavUser
+  const userData = {
+    name: user?.name || "User",
+    email: user?.email || "",
+    avatar: user?.image || "", // Use image from session
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -149,21 +152,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <Link href="#">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">Bumdes Kalosi</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={filteredNavMain} />
+        {filteredDocuments.length > 0 && <NavDocuments items={filteredDocuments} />}
+        {filteredNavSecondary.length > 0 && <NavSecondary items={filteredNavSecondary} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={userData} />}
       </SidebarFooter>
     </Sidebar>
   )

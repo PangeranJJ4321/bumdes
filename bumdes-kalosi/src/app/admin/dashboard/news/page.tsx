@@ -10,7 +10,7 @@ import { trpc as api } from "@/lib/trpc/client"
 
 export default function Page() {
     // Fetch all news, adjust limit as needed or add pagination support later
-    const { data: newsData } = api.news.getAll.useQuery({ limit: 50 })
+    const { data: newsData, isLoading } = api.news.getAll.useQuery({ limit: 50 })
 
     return (
         <SidebarProvider
@@ -32,7 +32,7 @@ export default function Page() {
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <NewsTable data={newsData?.items || []} />
+                        <NewsTable data={newsData?.items || []} isLoading={isLoading} />
                     </div>
                 </div>
             </SidebarInset>

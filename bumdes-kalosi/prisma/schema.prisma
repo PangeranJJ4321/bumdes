@@ -44,6 +44,10 @@ model Product {
   category    ProductCategory
   imageUrl    String?          @map("image_url")
   stock       Int              @default(0)
+  
+  createdById String?          @map("created_by_id")
+  createdBy   User?            @relation(fields: [createdById], references: [id])
+
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
@@ -120,6 +124,8 @@ model User {
   role          UserRole  @default(STAFF) // SUPER_ADMIN, STAFF
   isActive      Boolean   @default(true) @map("is_active")
   phone         String?   // Add phone number field
+  unit          ProductCategory? // For multi-store/staff separation
+  products      Product[] // Products created by this user
   accounts      Account[]
   sessions      Session[]
   

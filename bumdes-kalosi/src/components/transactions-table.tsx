@@ -39,6 +39,10 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+import { trpc as api } from "@/lib/trpc/client"
+import { toast } from "sonner"
+import { OrderStatus } from "@prisma/client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -59,8 +63,13 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
+import { useSession } from "next-auth/react"
 import { TransactionStatusDialog } from "./transaction-status-dialog"
+import { InvoiceDialog } from "./invoice-dialog"
+import { CreateTransactionDialog } from "./create-transaction-dialog"
+import { EditTransactionDialog } from "./edit-transaction-dialog"
 
 export type Transaction = {
     id: string
@@ -71,7 +80,7 @@ export type Transaction = {
         email: string
     }
     amount: number
-    status: string
+    status: OrderStatus
     items: {
         name: string
         quantity: number
@@ -88,11 +97,6 @@ const formatCurrency = (value: number) => {
 }
 
 
-import { trpc as api } from "@/lib/trpc/client"
-import { toast } from "sonner"
-import { OrderStatus } from "@prisma/client"
-
-// ... imports remain same ...
 
 export function TransactionsTable() {
     // 1. Fetch Data
@@ -122,10 +126,19 @@ export function TransactionsTable() {
             // Parse items from JSON
             const items = (order.items as any[]) || []
 
+            // Derive category from itemsDetail if available
+            let displayCategory = "Campuran"
+            if (order.itemsDetail && order.itemsDetail.length > 0) {
+                const categories = new Set(order.itemsDetail.map((d: any) => d.product.category))
+                if (categories.size === 1) {
+                    displayCategory = Array.from(categories)[0] as string
+                }
+            }
+
             return {
                 id: order.id,
                 date: order.created_at.toISOString(),
-                category: "Campuran", // Simplified logic, could be derived from items
+                category: displayCategory,
                 customer: {
                     name: order.customerName,
                     email: order.customerPhone || "-", // Using phone as identifier/contact
@@ -141,6 +154,10 @@ export function TransactionsTable() {
         })
     }, [orders])
 
+    const { data: session } = useSession()
+    const user = session?.user
+    const isAdmin = user?.role === 'ADMIN'
+
     // Table States
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -148,8 +165,13 @@ export function TransactionsTable() {
     const [rowSelection, setRowSelection] = React.useState({})
 
     // Dialog States
+    const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
+    const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+    const [selectedEditTransaction, setSelectedEditTransaction] = React.useState<Transaction | null>(null)
     const [statusDialogOpen, setStatusDialogOpen] = React.useState(false)
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null)
+    const [invoiceDialogOpen, setInvoiceDialogOpen] = React.useState(false)
+    const [selectedInvoiceTransaction, setSelectedInvoiceTransaction] = React.useState<Transaction | null>(null)
     const [deleteWarningOpen, setDeleteWarningOpen] = React.useState(false)
     const [transactionToDelete, setTransactionToDelete] = React.useState<Transaction | null>(null)
     const [bulkDeleteWarningOpen, setBulkDeleteWarningOpen] = React.useState(false)
@@ -277,20 +299,45 @@ export function TransactionsTable() {
             header: "Status",
             cell: ({ row }) => {
                 const status = row.getValue("status") as string
-                let variant: "default" | "secondary" | "destructive" | "outline" = "default"
 
-                switch (status.toLowerCase()) {
-                    case "pending": variant = "secondary"; break;
-                    case "success": variant = "default"; break;
-                    case "failed": variant = "destructive"; break;
-                    case "cancelled": variant = "outline"; break;
-                    default: variant = "outline"; break;
+                const getStatusStyles = (s: string) => {
+                    switch (s) {
+                        case OrderStatus.PENDING:
+                            return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 focus:ring-yellow-500"
+                        case OrderStatus.COMPLETED:
+                            return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 focus:ring-green-500"
+                        case OrderStatus.CANCELLED:
+                            return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 focus:ring-red-500"
+                        default:
+                            return "bg-gray-100 text-gray-800 border-gray-200"
+                    }
                 }
 
                 return (
-                    <Badge variant={variant}>
-                        {status}
-                    </Badge>
+                    <Select
+                        defaultValue={status}
+                        onValueChange={(value) => {
+                            updateStatusMutation.mutate({
+                                id: row.original.id,
+                                status: value as OrderStatus,
+                            })
+                        }}
+                    >
+                        <SelectTrigger className={`w-[130px] h-8 font-medium transition-colors ${getStatusStyles(status)}`}>
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={OrderStatus.PENDING} className="text-yellow-800 focus:bg-yellow-100 focus:text-yellow-900">
+                                Pending
+                            </SelectItem>
+                            <SelectItem value={OrderStatus.COMPLETED} className="text-green-800 focus:bg-green-100 focus:text-green-900">
+                                Completed
+                            </SelectItem>
+                            <SelectItem value={OrderStatus.CANCELLED} className="text-red-800 focus:bg-red-100 focus:text-red-900">
+                                Cancelled
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 )
             },
         },
@@ -309,20 +356,20 @@ export function TransactionsTable() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(transaction.id)}
-                            >
-                                Copy ID Transaksi
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedEditTransaction(transaction)
+                                setEditDialogOpen(true)
+                            }}>
+                                <IconEdit className="mr-2 h-4 w-4" /> Edit Transaksi
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/dashboard/transactions/${transaction.id}`}>
-                                    <IconFileInvoice className="mr-2 h-4 w-4" /> Lihat Invoice
-                                </Link>
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedInvoiceTransaction(transaction)
+                                setInvoiceDialogOpen(true)
+                            }}>
+                                <IconFileInvoice className="mr-2 h-4 w-4" /> Lihat Invoice
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditStatus(transaction)}>
-                                <IconEdit className="mr-2 h-4 w-4" /> Update Status
-                            </DropdownMenuItem>
+
                             <DropdownMenuItem
                                 onClick={() => handleDeleteClick(transaction)}
                                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
@@ -371,30 +418,32 @@ export function TransactionsTable() {
                                 className="pl-8 w-full"
                             />
                         </div>
-                        <div className="w-[150px]">
-                            <Select
-                                value={(table.getColumn("category")?.getFilterValue() as string) ?? "all"}
-                                onValueChange={(value) =>
-                                    table.getColumn("category")?.setFilterValue(value === "all" ? "" : value)
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <div className="flex items-center gap-2">
-                                        <IconFilter className="h-4 w-4" />
-                                        <SelectValue placeholder="Kategori" />
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Kategori</SelectItem>
-                                    <SelectItem value="Kuliner">Kuliner</SelectItem>
-                                    <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
-                                    <SelectItem value="Perikanan">Perikanan</SelectItem>
-                                    <SelectItem value="Agen LPG">Agen LPG</SelectItem>
-                                    <SelectItem value="Wisata">Wisata</SelectItem>
-                                    <SelectItem value="Jasa">Jasa</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {isAdmin && (
+                            <div className="w-[150px]">
+                                <Select
+                                    value={(table.getColumn("category")?.getFilterValue() as string) ?? "all"}
+                                    onValueChange={(value) =>
+                                        table.getColumn("category")?.setFilterValue(value === "all" ? "" : value)
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <div className="flex items-center gap-2">
+                                            <IconFilter className="h-4 w-4" />
+                                            <SelectValue placeholder="Kategori" />
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Semua Kategori</SelectItem>
+                                        <SelectItem value="Kuliner">Kuliner</SelectItem>
+                                        <SelectItem value="Bumdes Mart">Bumdes Mart</SelectItem>
+                                        <SelectItem value="Perikanan">Perikanan</SelectItem>
+                                        <SelectItem value="Agen LPG">Agen LPG</SelectItem>
+                                        <SelectItem value="Wisata">Wisata</SelectItem>
+                                        <SelectItem value="Jasa">Jasa</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         <div className="w-[150px]">
                             <Select
                                 value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
@@ -410,10 +459,9 @@ export function TransactionsTable() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Semua Status</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="success">Success</SelectItem>
-                                    <SelectItem value="failed">Failed</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    <SelectItem value="PENDING">Pending</SelectItem>
+                                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -425,7 +473,7 @@ export function TransactionsTable() {
                                 Hapus ({table.getFilteredSelectedRowModel().rows.length})
                             </Button>
                         )}
-                        <Button>
+                        <Button onClick={() => setCreateDialogOpen(true)}>
                             Tambah Transaksi
                         </Button>
                     </div>
@@ -452,7 +500,21 @@ export function TransactionsTable() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
@@ -507,10 +569,29 @@ export function TransactionsTable() {
                 </div>
             </div>
 
+            <EditTransactionDialog
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+                transaction={selectedEditTransaction}
+                onSuccess={() => refetch()}
+            />
+
+            <CreateTransactionDialog
+                open={createDialogOpen}
+                onOpenChange={setCreateDialogOpen}
+                onSuccess={() => refetch()}
+            />
+
             <TransactionStatusDialog
                 open={statusDialogOpen}
                 onOpenChange={setStatusDialogOpen}
                 transaction={selectedTransaction}
+            />
+
+            <InvoiceDialog
+                open={invoiceDialogOpen}
+                onOpenChange={setInvoiceDialogOpen}
+                transaction={selectedInvoiceTransaction}
             />
 
             <AlertDialog open={deleteWarningOpen} onOpenChange={setDeleteWarningOpen}>

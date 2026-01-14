@@ -22,6 +22,38 @@ export const checkoutSchema = z.object({
     }
 });
 
+export const profileFormSchema = z.object({
+    name: z.string().min(1, {
+        message: "Nama lengkap wajib diisi.",
+    }),
+    username: z.string().min(3, {
+        message: "Username minimal 3 karakter.",
+    }),
+    email: z.string().email("Alamat email tidak valid."),
+    phone: z.string().optional(),
+    image: z.string().optional(),
+})
+
+export const passwordFormSchema = z.object({
+    currentPassword: z.string().min(1, {
+        message: "Kata sandi saat ini wajib diisi.",
+    }),
+    newPassword: z.string().min(6, {
+        message: "Kata sandi baru minimal 6 karakter.",
+    }),
+    confirmPassword: z.string().min(1, {
+        message: "Konfirmasi kata sandi wajib diisi.",
+    }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Kata sandi tidak cocok.",
+    path: ["confirmPassword"],
+})
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>
+
+export type PasswordFormValues = z.infer<typeof passwordFormSchema>
+
+
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>
 

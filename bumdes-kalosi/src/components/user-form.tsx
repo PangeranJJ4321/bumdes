@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
-import { UserRole } from "@prisma/client"
+import { UserRole, ProductCategory } from "@prisma/client"
 
 const userFormSchema = z.object({
     name: z.string().min(2, {
@@ -42,6 +42,7 @@ const userFormSchema = z.object({
     password: z.string().min(6, {
         message: "Password minimal 6 karakter.",
     }).optional().or(z.literal("")),
+    unit: z.nativeEnum(ProductCategory).optional(),
 })
 
 type UserFormValues = z.infer<typeof userFormSchema>
@@ -65,6 +66,7 @@ interface UserFormProps {
         phone: string | null;
         role: UserRole;
         isActive: boolean;
+        unit: ProductCategory | null;
     };
     isEdit?: boolean;
 }
@@ -83,6 +85,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
             role: initialData.role,
             isActive: initialData.isActive,
             password: "",
+            unit: initialData.unit || undefined,
         } : defaultValues,
     })
 
@@ -120,6 +123,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                 phone: data.phone,
                 role: data.role,
                 isActive: data.isActive,
+                unit: data.role === UserRole.STAFF ? data.unit : null,
             }
             // Only send password if it's not empty, otherwise undefined
             if (data.password && data.password.length > 0) {
@@ -141,6 +145,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                 role: data.role,
                 isActive: data.isActive,
                 password: data.password,
+                unit: data.role === UserRole.STAFF ? data.unit : undefined,
             })
         }
     }
@@ -253,6 +258,38 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                                 </FormItem>
                             )}
                         />
+
+                        {form.watch("role") === UserRole.STAFF && (
+                            <FormField
+                                control={form.control}
+                                name="unit"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Unit Bisnis (Toko)</FormLabel>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value || undefined}
+                                            disabled={isPending}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih unit bisnis" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {Object.values(ProductCategory).map((cat) => (
+                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormDescription>
+                                            Pilih unit bisnis yang akan dikelola oleh staff ini.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}

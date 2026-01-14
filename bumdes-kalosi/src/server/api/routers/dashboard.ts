@@ -1,10 +1,82 @@
 
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, ProductCategory } from "@prisma/client";
 
 export const dashboardRouter = createTRPCRouter({
     getStats: protectedProcedure.query(async ({ ctx }) => {
+        const user = ctx.session.user
+        const isStaff = user.role === 'STAFF'
+
+        let orderWhere: any = {}
+        let productWhere: any = {}
+
+        if (isStaff) {
+            // Filter orders containing products owned by this staff (or their unit for legacy)
+            // We use a shared filter for consistency
+            const productFilter = {
+                OR: [
+                    { createdById: user.id },
+                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                ]
+            }
+
+            orderWhere.itemsDetail = {
+                some: {
+                    product: productFilter
+                }
+            }
+
+            // Filter Products by category
+            productWhere = productFilter;
+        }
+
+        let totalRevenue = 0;
+
+        if (isStaff) {
+            // Calculate revenue from Completed Orders filtering only valid items
+            // Consistency Note: We query Orders just like getRecentActivity to ensure if it shows there, it counts here.
+            const orders = await ctx.prisma.order.findMany({
+                where: {
+                    status: OrderStatus.COMPLETED,
+                    ...orderWhere
+                },
+                select: {
+                    itemsDetail: {
+                        where: {
+                            product: {
+                                OR: [
+                                    { createdById: user.id },
+                                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                                ]
+                            }
+                        },
+                        select: {
+                            price: true,
+                            quantity: true
+                        }
+                    }
+                }
+            })
+
+            // Sum up the filtered items from the matched orders
+            orders.forEach(order => {
+                const orderRevenue = order.itemsDetail.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+                totalRevenue += orderRevenue
+            })
+        } else {
+            // Calculate total revenue from all Completed Orders
+            const aggregate = await ctx.prisma.order.aggregate({
+                _sum: {
+                    totalPrice: true
+                },
+                where: {
+                    status: OrderStatus.COMPLETED
+                }
+            })
+            totalRevenue = aggregate._sum.totalPrice || 0
+        }
+
         const [
             pendingOrders,
             totalProducts,
@@ -13,14 +85,22 @@ export const dashboardRouter = createTRPCRouter({
             totalUsers
         ] = await Promise.all([
             ctx.prisma.order.count({
-                where: { status: OrderStatus.PENDING },
+                where: {
+                    status: OrderStatus.PENDING,
+                    ...orderWhere
+                },
             }),
-            ctx.prisma.product.count(),
-            ctx.prisma.news.count(),
+            ctx.prisma.product.count({
+                where: productWhere
+            }),
+            isStaff ? 0 : ctx.prisma.news.count(), // Staff shouldn't generally count news
             ctx.prisma.order.count({
-                where: { status: OrderStatus.COMPLETED },
+                where: {
+                    status: OrderStatus.COMPLETED,
+                    ...orderWhere
+                },
             }),
-            ctx.prisma.user.count(),
+            isStaff ? 0 : ctx.prisma.user.count(), // Staff shouldn't count users
         ]);
 
         return {
@@ -29,33 +109,243 @@ export const dashboardRouter = createTRPCRouter({
             totalNews,
             completedOrders,
             totalUsers,
+            totalRevenue,
         };
     }),
 
-    getRecentActivity: protectedProcedure.query(async ({ ctx }) => {
-        const [recentOrders, recentReviews] = await Promise.all([
-            ctx.prisma.order.findMany({
-                take: 5,
-                orderBy: { created_at: "desc" },
+    getRecentActivity: protectedProcedure
+        .input(z.object({
+            unit: z.nativeEnum(ProductCategory).optional(),
+        }).optional())
+        .query(async ({ ctx, input }) => {
+            const user = ctx.session.user;
+            const isStaff = user.role === 'STAFF';
+
+            let orderWhere: any = {};
+            let reviewWhere: any = {};
+
+            if (isStaff) {
+                const productFilter = {
+                    OR: [
+                        { createdById: user.id },
+                        user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                    ]
+                }
+
+                orderWhere.itemsDetail = {
+                    some: {
+                        product: productFilter
+                    }
+                };
+
+                reviewWhere.product = productFilter;
+            } else if (input?.unit) {
+                // Admin Unit Filter
+                orderWhere.itemsDetail = {
+                    some: {
+                        product: { category: input.unit }
+                    }
+                };
+                reviewWhere.product = {
+                    category: input.unit
+                };
+            }
+
+            const [recentOrders, recentReviews] = await Promise.all([
+                ctx.prisma.order.findMany({
+                    where: orderWhere,
+                    take: 5,
+                    orderBy: { created_at: "desc" },
+                    include: {
+                        itemsDetail: {
+                            include: { product: true }
+                        }
+                    }
+                }),
+                ctx.prisma.review.findMany({
+                    where: reviewWhere,
+                    take: 5,
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        product: true,
+                    },
+                }),
+            ]);
+
+            return {
+                recentOrders,
+                recentReviews,
+            };
+        }),
+
+    getChartData: protectedProcedure.query(async ({ ctx }) => {
+        const user = ctx.session.user
+        const isStaff = user.role === 'STAFF'
+
+        // Fetch last 90 days of completed orders
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        let orderWhere: any = {
+            status: OrderStatus.COMPLETED,
+            created_at: {
+                gte: ninetyDaysAgo
+            }
+        }
+
+        if (isStaff) {
+            const productFilter = {
+                OR: [
+                    { createdById: user.id },
+                    user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                ]
+            }
+            orderWhere.itemsDetail = {
+                some: { product: productFilter }
+            }
+        }
+
+        const orders = await ctx.prisma.order.findMany({
+            where: orderWhere,
+            select: {
+                created_at: true,
+                totalPrice: true,
+                itemsDetail: isStaff ? {
+                    where: {
+                        product: {
+                            OR: [
+                                { createdById: user.id },
+                                user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                            ]
+                        }
+                    },
+                    select: {
+                        price: true,
+                        quantity: true
+                    }
+                } : undefined
+            },
+            orderBy: { created_at: 'asc' }
+        })
+
+        // Group by date
+        const dailyRevenue: Record<string, number> = {}
+
+        orders.forEach(order => {
+            const date = order.created_at.toISOString().split('T')[0]
+            let revenue = 0
+
+            if (isStaff && order.itemsDetail) {
+                // For staff, rely on the checked items only
+                revenue = order.itemsDetail.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            } else {
+                revenue = order.totalPrice
+            }
+
+            dailyRevenue[date] = (dailyRevenue[date] || 0) + revenue
+        })
+
+        // Fill in missing days
+        const chartData = []
+        for (let d = new Date(ninetyDaysAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0]
+            chartData.push({
+                date: dateStr,
+                revenue: dailyRevenue[dateStr] || 0
+            })
+        }
+
+        return chartData
+    }),
+
+    getReport: protectedProcedure
+        .input(z.object({
+            startDate: z.date(),
+            endDate: z.date(),
+            unit: z.nativeEnum(ProductCategory).optional(), // Admin optional filter
+        }))
+        .query(async ({ ctx, input }) => {
+            const user = ctx.session.user
+            const isStaff = user.role === 'STAFF'
+
+            // Base Filters
+            let orderWhere: any = {
+                status: OrderStatus.COMPLETED,
+                created_at: {
+                    gte: input.startDate,
+                    lte: input.endDate,
+                }
+            }
+
+            // Role-based filtering logic
+            if (isStaff) {
+                // Staff only sees their own products/unit
+                const productFilter = {
+                    OR: [
+                        { createdById: user.id },
+                        user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                    ]
+                }
+                orderWhere.itemsDetail = {
+                    some: { product: productFilter }
+                }
+            } else if (input.unit) {
+                // Admin specific unit filter
+                orderWhere.itemsDetail = {
+                    some: { product: { category: input.unit } }
+                }
+            }
+
+            // Fetch Data
+            const orders = await ctx.prisma.order.findMany({
+                where: orderWhere,
+                orderBy: { created_at: 'desc' },
                 include: {
                     itemsDetail: {
-                        include: { product: true }
+                        where: isStaff ? {
+                            product: {
+                                OR: [
+                                    { createdById: user.id },
+                                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                                ]
+                            }
+                        } : (input.unit ? { product: { category: input.unit } } : undefined),
+                        include: {
+                            product: true
+                        }
                     }
                 }
-            }),
-            // Assuming Review model exists and has relation to Product/User
-            ctx.prisma.review.findMany({
-                take: 5,
-                orderBy: { createdAt: "desc" },
-                include: {
-                    product: true,
-                },
-            }),
-        ]);
+            })
 
-        return {
-            recentOrders,
-            recentReviews,
-        };
-    }),
+            // Process Data for Report
+            const reportData = orders.flatMap(order => {
+                // If itemsDetail is empty (filtered out) but order exists, skip
+                if (order.itemsDetail.length === 0) return []
+
+                return order.itemsDetail.map(item => ({
+                    date: order.created_at,
+                    orderId: order.id,
+                    productName: item.product.name,
+                    unit: item.product.category,
+                    quantity: item.quantity,
+                    price: item.price,
+                    total: item.price * item.quantity,
+                    customer: order.customerName,
+                    status: order.status
+                }))
+            })
+
+            // Summary Stats
+            const totalRevenue = reportData.reduce((acc, item) => acc + item.total, 0)
+            const totalTransactions = new Set(reportData.map(r => r.orderId)).size
+
+            return {
+                transactions: reportData,
+                summary: {
+                    totalRevenue,
+                    totalTransactions,
+                    count: reportData.length
+                }
+            }
+        })
 });

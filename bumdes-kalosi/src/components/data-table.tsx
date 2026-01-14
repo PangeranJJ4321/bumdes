@@ -33,7 +33,10 @@ import {
   IconLoader,
   IconPlus,
   IconTrendingUp,
+  IconFilter,
+  IconX,
 } from "@tabler/icons-react"
+import { useSession } from "next-auth/react"
 import {
   flexRender,
   getCoreRowModel,
@@ -78,6 +81,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -256,16 +260,24 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 }
 export function DataTable({
   data: initialData,
+  reviews: initialReviews = [],
+  onUnitChange,
+  selectedUnit,
 }: {
   data: any[]
+  reviews?: any[]
+  onUnitChange?: (unit: string | undefined) => void
+  selectedUnit?: string
 }) {
-  // Mapper to transform real Order data to the table's expected format on the fly if needed
-  // This is a temporary bridge. Ideally we should rewrite the columns definition to match Order type.
-  const mappedData = React.useMemo(() => {
+  const [activeTab, setActiveTab] = React.useState("transactions")
+  const [statusFilter, setStatusFilter] = React.useState("all")
+
+  // Mapper to transform real Order data to the table's expected format
+  const mappedTransactions = React.useMemo(() => {
     return initialData.map((order: any) => ({
       id: order.id,
-      header: `Order #${order.id.slice(0, 8)}`, // content/item name
-      type: "Pesanan", // or product category if available
+      header: `Order #${order.id.slice(0, 8)}`,
+      type: "Pesanan",
       status: order.status,
       target: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(order.totalPrice),
       limit: new Date(order.created_at).toLocaleDateString("id-ID"),
@@ -273,15 +285,44 @@ export function DataTable({
     }))
   }, [initialData])
 
-  const [activeTab, setActiveTab] = React.useState("all")
+  const mappedReviews = React.useMemo(() => {
+    return initialReviews.map((review: any) => ({
+      id: review.id,
+      header: `Review #${review.id.slice(0, 8)}`,
+      type: "Ulasan",
+      status: `${review.rating} ★`,
+      target: review.product?.name || "Unknown Product",
+      limit: new Date(review.createdAt).toLocaleDateString("id-ID"),
+      reviewer: review.comment || "No comment",
+    }))
+  }, [initialReviews])
 
-  // Filter data based on active tab
-  const data = React.useMemo(() => {
-    // Use mappedData here
-    if (activeTab === "all") return mappedData
-    // Simple filter adaptation
-    return mappedData.filter((item) => item.type === activeTab)
-  }, [mappedData, activeTab])
+  const currentData = React.useMemo(() => {
+    if (activeTab === "reviews") return mappedReviews
+
+    // Filter Transactions by Status
+    if (statusFilter === "all") return mappedTransactions
+    if (statusFilter === "pending") return mappedTransactions.filter(t => t.status === "PENDING")
+    if (statusFilter === "completed") return mappedTransactions.filter(t => t.status === "COMPLETED" || t.status === "Done" || t.status === "Lunas")
+
+    return mappedTransactions
+  }, [activeTab, mappedTransactions, mappedReviews, statusFilter])
+
+  // Dynamic Column Headers based on activeTab
+  const dynamicColumns = React.useMemo(() => {
+    return columns.map(col => {
+      if (col.accessorKey === 'status') {
+        return { ...col, header: activeTab === 'transactions' ? 'Status' : 'Rating' }
+      }
+      if (col.accessorKey === 'target') {
+        return { ...col, header: () => <div className="w-full text-right">{activeTab === 'transactions' ? 'Total (Rp)' : 'Produk'}</div> }
+      }
+      if (col.accessorKey === 'reviewer') {
+        return { ...col, header: activeTab === 'transactions' ? 'Pelanggan' : 'Komentar' }
+      }
+      return col
+    })
+  }, [activeTab])
 
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -302,13 +343,13 @@ export function DataTable({
   )
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map(({ id }) => id) || [],
-    [data]
+    () => currentData?.map(({ id }) => id) || [],
+    [currentData]
   )
 
   const table = useReactTable({
-    data,
-    columns,
+    data: currentData,
+    columns: dynamicColumns as any,
     state: {
       sorting,
       columnVisibility,
@@ -335,25 +376,107 @@ export function DataTable({
     // No-op for derived data
   }
 
+  const { data: session } = useSession()
+  const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
+
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full flex-col justify-start gap-6"
-    >
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-          <TabsTrigger value="all">Semua</TabsTrigger>
-          <TabsTrigger value="Kuliner">Kuliner</TabsTrigger>
-          <TabsTrigger value="Wisata">Wisata</TabsTrigger>
-          <TabsTrigger value="BUMDes Mart">BUMDes Mart</TabsTrigger>
-          <TabsTrigger value="Agen BNI46">Agen BNI46</TabsTrigger>
-          <TabsTrigger value="Perikanan">Perikanan</TabsTrigger>
-          <TabsTrigger value="Unit Lain">Unit Lain</TabsTrigger>
-        </TabsList>
+    <div className="w-full flex-col justify-start gap-6">
+      <div className="flex flex-col gap-4 px-4 lg:px-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-medium">Aktivitas Terbaru</h3>
+              {isSuperAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1 ml-2">
+                      <IconFilter className="h-3.5 w-3.5" />
+                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        {selectedUnit ? selectedUnit : "Semua Unit"}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuLabel>Filter Unit</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === undefined}
+                      onCheckedChange={() => onUnitChange && onUnitChange(undefined)}
+                    >
+                      Semua Unit
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "MART"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("MART")}
+                    >
+                      Mart
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "WISATA"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("WISATA")}
+                    >
+                      Wisata
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "PERIKANAN"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("PERIKANAN")}
+                    >
+                      Perikanan
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "LPG"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("LPG")}
+                    >
+                      LPG
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "AGEN"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("AGEN")}
+                    >
+                      Agen
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedUnit === "KETAPANG"}
+                      onCheckedChange={() => onUnitChange && onUnitChange("KETAPANG")}
+                    >
+                      Ketapang
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {isSuperAdmin && selectedUnit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={() => onUnitChange && onUnitChange(undefined)}
+                  title="Clear Filter"
+                >
+                  <IconX className="h-4 w-4" />
+                  <span className="sr-only">Clear filter</span>
+                </Button>
+              )}
+            </div>
+            <TabsList>
+              <TabsTrigger value="transactions">Transaksi</TabsTrigger>
+              <TabsTrigger value="reviews">Ulasan</TabsTrigger>
+            </TabsList>
+          </div>
+        </Tabs>
+
+        {activeTab === "transactions" && (
+          <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
+            <TabsList className="bg-transparent p-0">
+              <TabsTrigger value="all" className="data-[state=active]:bg-muted data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 pb-2 pt-2">Semua</TabsTrigger>
+              <TabsTrigger value="pending" className="data-[state=active]:bg-muted data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 pb-2 pt-2">Perlu Diproses</TabsTrigger>
+              <TabsTrigger value="completed" className="data-[state=active]:bg-muted data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 pb-2 pt-2">Selesai</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
       </div>
 
-      {/* Content Area - Always Visible (filtered by activeTab state) */}
+      {/* Content Area - Always Visible */}
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
         <div className="overflow-hidden rounded-lg border">
           <DndContext
@@ -480,7 +603,7 @@ export function DataTable({
           </div>
         </div>
       </div>
-    </Tabs>
+    </div>
   )
 }
 

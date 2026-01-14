@@ -9,7 +9,7 @@ import {
 import { trpc as api } from "@/lib/trpc/client"
 
 export default function Page() {
-    const { data: products } = api.product.getAll.useQuery()
+    const { data: products, isLoading } = api.product.getDashboardProducts.useQuery()
 
     return (
         <SidebarProvider
@@ -25,13 +25,13 @@ export default function Page() {
                 <SiteHeader />
                 <div className="flex flex-1 flex-col p-4 pt-0">
                     <div className="flex items-center justify-between space-y-2 py-4">
-                        <h2 className="text-3xl font-bold tracking-tight">Daftar Produk & Layanan</h2>
+                        <h2 className="text-3xl font-bold tracking-tight">Daftar Produk</h2>
                         <div className="flex items-center space-x-2">
                             {/* Optional header actions */}
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
-                        <ProductsTable data={products || []} />
+                        <ProductsTable data={products || []} isLoading={isLoading} />
                     </div>
                 </div>
             </SidebarInset>
