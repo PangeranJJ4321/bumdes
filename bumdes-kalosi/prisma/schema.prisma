@@ -146,7 +146,34 @@ model News {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  comments    Comment[]
+
   @@map("news")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  name      String
+  email     String
+  newsId    String   @map("news_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+  @@map("comments")
+}
+
+model Gallery {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String   @map("image_url")
+  category    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("gallery")
 }
 
 model Account {

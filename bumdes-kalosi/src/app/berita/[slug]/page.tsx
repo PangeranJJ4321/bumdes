@@ -9,6 +9,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Metadata } from "next"
+import { CommentsSection } from "@/components/custom/CommentsSection"
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const params = await props.params;
@@ -132,6 +133,9 @@ export default async function NewsDetailPage(props: { params: Promise<{ slug: st
                                     </Button>
                                 </div>
                             </div>
+
+                            {/* Comments Section */}
+                            <CommentsSection newsId={news.id} />
                         </div>
 
                         {/* Sidebar */}
