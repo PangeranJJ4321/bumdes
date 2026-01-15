@@ -21,6 +21,15 @@ import {
   IconBox,
   IconReceipt,
 } from "@tabler/icons-react"
+import {
+  LayoutDashboard,
+  Newspaper,
+  Package,
+  Settings,
+  ShoppingBag,
+  Users,
+  Image,
+} from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -65,6 +74,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/admin/dashboard/news",
       icon: IconNews,
       roles: ["SUPER_ADMIN"],
+    },
+    {
+      title: "Gallery",
+      url: "/admin/dashboard/gallery",
+      icon: IconCamera,
+      roles: ["SUPER_ADMIN", "STAFF"],
     },
     {
       title: "Products",
@@ -145,16 +160,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-sidebar-border bg-sidebar px-4 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-0 hover:bg-transparent"
             >
-              <Link href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Bumdes Kalosi</span>
+              <Link href="#" className="flex flex-col items-start gap-1">
+                <span className="font-serif text-xl font-bold tracking-tight text-sidebar-foreground">BUMDes Kalosi</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/60">Management System</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
