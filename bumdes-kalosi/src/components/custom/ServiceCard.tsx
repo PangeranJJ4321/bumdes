@@ -34,7 +34,7 @@ export function ServiceCard({ title, description, icon: Icon, href, imageUrls, c
         <div
             onClick={onClick}
             className={cn(
-                "relative h-[400px] md:h-[500px] transition-all duration-500 ease-in-out cursor-pointer overflow-hidden rounded-3xl group",
+                "relative h-[400px] md:h-[500px] transition-all duration-500 ease-in-out cursor-pointer overflow-hidden rounded-[5px] group",
                 isActive ? "flex-[3]" : "flex-[1] hover:flex-[1.2]"
             )}
         >

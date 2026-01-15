@@ -37,27 +37,33 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                 className={cn(
                     "fixed top-0 z-50 w-full transition-all duration-300",
                     showOpaque
-                        ? "bg-background/80 backdrop-blur-md border-b shadow-sm"
-                        : "bg-transparent"
+                        ? "bg-background/80 backdrop-blur-md border-b shadow-sm h-20"
+                        : "bg-transparent h-24"
                 )}
             >
-                <div className="container mx-auto px-4 h-16">
-                    <div className="flex items-center justify-between h-full md:grid md:grid-cols-3">
+                <div className="container mx-auto px-4 h-full">
+                    <div className="flex items-center justify-between h-full">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
+                        <Link href="/" className="flex items-center space-x-3 shrink-0">
+                            <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center text-white font-serif font-bold text-xl">
                                 K
                             </div>
                             <span className={cn(
-                                "font-bold text-lg tracking-tight",
-                                showOpaque ? "text-foreground" : "text-white"
+                                "font-serif text-2xl font-bold tracking-tight hidden lg:block",
+                                showOpaque ? "text-black" : "text-white"
                             )}>
                                 BUMDes Kalosi
+                            </span>
+                            <span className={cn(
+                                "font-serif text-2xl font-bold tracking-tight lg:hidden",
+                                showOpaque ? "text-black" : "text-white"
+                            )}>
+                                Kalosi
                             </span>
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center justify-center gap-8">
+                        <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-8 absolute left-1/2 -translate-x-1/2">
                             {[
                                 { name: "Beranda", href: "/" },
                                 { name: "Tentang Kami", href: "/tentang-kami" },
@@ -68,8 +74,8 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                     key={item.name}
                                     href={item.href}
                                     className={cn(
-                                        "text-sm font-medium transition-colors hover:text-primary",
-                                        showOpaque ? "text-foreground/80" : "text-white/90 hover:text-white"
+                                        "text-xs font-bold uppercase tracking-widest transition-colors hover:text-black whitespace-nowrap",
+                                        showOpaque ? "text-black/70" : "text-white/90 hover:text-white"
                                     )}
                                 >
                                     {item.name}
@@ -83,14 +89,14 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                 variant="ghost"
                                 size="icon"
                                 className={cn(
-                                    "relative",
-                                    showOpaque ? "text-foreground" : "text-white hover:bg-white/20 hover:text-white"
+                                    "relative rounded-none h-10 w-10",
+                                    showOpaque ? "text-black" : "text-white hover:bg-white/10 hover:text-white"
                                 )}
                                 onClick={() => setIsCartOpen(true)}
                             >
-                                <ShoppingCart className="h-5 w-5" />
+                                <ShoppingCart className="h-6 w-6" />
                                 {mounted && (totalItems ?? 0) > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-secondary-foreground animate-in zoom-in">
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-none bg-black text-[10px] font-bold text-white animate-in zoom-in">
                                         {totalItems}
                                     </span>
                                 )}
@@ -100,25 +106,25 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button variant="ghost" size="icon" className={cn(
-                                        "md:hidden",
-                                        showOpaque ? "text-foreground" : "text-white hover:bg-white/20 hover:text-white"
+                                        "md:hidden h-10 w-10",
+                                        showOpaque ? "text-black" : "text-white hover:bg-white/20 hover:text-white"
                                     )}>
-                                        <Menu className="h-5 w-5" />
+                                        <Menu className="h-6 w-6" />
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                                     <SheetHeader className="text-left mb-8">
-                                        <div className="flex items-center space-x-2 mb-2">
-                                            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
+                                        <div className="flex items-center space-x-3 mb-2">
+                                            <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center text-white font-serif font-bold text-xl">
                                                 K
                                             </div>
-                                            <SheetTitle className="text-xl">BUMDes Kalosi</SheetTitle>
+                                            <SheetTitle className="font-serif text-2xl font-bold">BUMDes Kalosi</SheetTitle>
                                         </div>
                                         <SheetDescription>
                                             Jelajahi layanan dan informasi kami
                                         </SheetDescription>
                                     </SheetHeader>
-                                    <nav className="flex flex-col gap-1">
+                                    <nav className="flex flex-col gap-2">
                                         {[
                                             { name: "Beranda", href: "/" },
                                             { name: "Tentang Kami", href: "/tentang-kami" },
@@ -128,7 +134,7 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                             <Link
                                                 key={item.name}
                                                 href={item.href}
-                                                className="px-4 py-3 rounded-lg font-medium text-base hover:bg-accent transition-colors"
+                                                className="px-4 py-3 rounded-none font-serif text-lg hover:bg-slate-100 transition-colors border-b border-slate-100 last:border-0"
                                             >
                                                 {item.name}
                                             </Link>

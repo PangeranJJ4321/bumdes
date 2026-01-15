@@ -25,7 +25,7 @@ export async function FeaturedProducts() {
     if (products.length === 0) return null;
 
     return (
-        <section className="py-20 bg-slate-50">
+        <section className="py-20 bg-white">
             <div className="container mx-auto px-4">
                 <SectionHeader
                     title="Produk Unggulan Desa"
@@ -46,6 +46,7 @@ export async function FeaturedProducts() {
                                 // Map DB 'name' to 'title' prop of ProductCard
                                 title={product.name}
                                 description={product.description || ""}
+                                imageUrl={product.imageUrl || "https://placehold.co/600x400/png?text=No+Image"}
                                 category={product.category as string}
                                 rating={avgRating}
                                 reviewCount={product.reviews.length}
@@ -56,7 +57,7 @@ export async function FeaturedProducts() {
 
                 <div className="text-center">
                     <Link href="/layanan">
-                        <Button size="lg" variant="outline" className="rounded-full px-8 font-bold border-2">
+                        <Button size="lg" variant="outline" className="rounded-none px-8 font-bold border-2 border-black text-black hover:bg-black hover:text-white transition-colors">
                             Lihat Semua Produk <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
                     </Link>

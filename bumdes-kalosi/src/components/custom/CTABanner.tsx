@@ -7,15 +7,16 @@ export function CTABanner() {
     return (
         <section className="py-24 relative overflow-hidden">
             {/* Background with Gradient and Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-sky-500 z-0">
-                <div className="absolute inset-0 opacity-10"
+            <div className="absolute inset-0 bg-slate-900 z-0">
+                <div className="absolute inset-0 opacity-5"
                     style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}>
                 </div>
             </div>
 
             {/* Floating Decorative Elements */}
-            <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse delay-700" />
-            <div className="absolute bottom-10 right-10 w-48 h-48 bg-yellow-400/10 rounded-full blur-3xl animate-pulse" />
+            {/* Floating Decorative Elements */}
+            <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-none blur-2xl animate-pulse delay-700" />
+            <div className="absolute bottom-10 right-10 w-48 h-48 bg-white/5 rounded-none blur-3xl animate-pulse" />
 
             <div className="container mx-auto px-4 relative z-10 text-center text-white space-y-8">
                 <div
@@ -37,7 +38,7 @@ export function CTABanner() {
                     data-aos-delay="200"
                     data-aos-duration="800"
                 >
-                    <Button size="lg" className="h-14 px-8 rounded-full text-lg font-bold bg-white text-blue-700 hover:bg-blue-50 shadow-blue-900/20 shadow-xl transition-all hover:scale-105 active:scale-95">
+                    <Button size="lg" className="h-14 px-8 rounded-none text-lg font-bold bg-white text-black hover:bg-slate-100 shadow-none transition-all hover:translate-y-[-2px]">
                         Mulai Pesan Sekarang
                         <ArrowUpRight className="ml-2 w-5 h-5" />
                     </Button>

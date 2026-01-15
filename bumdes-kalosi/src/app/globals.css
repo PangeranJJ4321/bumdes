@@ -47,116 +47,86 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0rem;
 
-  /* Base Colors - Cool Blue White */
-  --background: oklch(0.99 0.01 260);
-  /* Cool White */
-  --foreground: oklch(0.20 0.04 260);
-  /* Deep Blue Black */
+  /* Base Colors - Pure Black & White */
+  --background: #ffffff;
+  --foreground: #000000;
 
   /* Cards & Surfaces */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.04 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.04 260);
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
 
-  /* Primary - Blue (Trust/Professional) */
-  /* oklch(0.48 0.16 260) is a vibrant blue */
-  --primary: oklch(0.48 0.16 260);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Primary - Black (Dominant) */
+  --primary: #000000;
+  --primary-foreground: #ffffff;
 
-  /* Secondary - Keep Warm Orange for contrast or switch to Light Blue? 
-     User said "Biru Putih", but pure blue/white might be boring. 
-     Let's keep Secondary as distinct CTA color but maybe cooler?
-     Actually, let's make secondary a lighter blue/slate for "White/Blue" feel.
-     OR keep it Orange/Amber as "Action" color is common. 
-     Let's stick to Blue Primary first. 
-  */
-  /* Retaining slight Warmth for secondary or making it neutral? 
-     Let's make Secondary a very soft blue/slate. 
-  */
-  --secondary: oklch(0.97 0.02 260);
-  --secondary-foreground: oklch(0.205 0 0);
+  /* Secondary - Soft Gray */
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
 
   /* Accent - Used for highlights/CTA */
-  --accent: oklch(0.96 0.02 260);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
 
-  --muted: oklch(0.96 0.01 260);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted: #fafafa;
+  --muted-foreground: #71717a;
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #000000;
 
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.48 0.16 260);
-  /* Matches Primary */
+  --chart-1: #000000;
+  --chart-2: #333333;
+  --chart-3: #666666;
+  --chart-4: #999999;
+  --chart-5: #cccccc;
 
-  --chart-1: oklch(0.48 0.16 260);
-  /* Blue */
-  --chart-2: oklch(0.60 0.18 250);
-  /* Lighter Blue */
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #000000;
 }
 
 .dark {
-  --background: oklch(0.10 0.02 260);
-  /* Very dark blue-tinted black */
-  --foreground: oklch(0.985 0 0);
-
-  --card: oklch(0.15 0.03 260);
-  --card-foreground: oklch(0.985 0 0);
-
-  --popover: oklch(0.15 0.03 260);
-  --popover-foreground: oklch(0.985 0 0);
-
-  --primary: oklch(0.55 0.16 260);
-  /* Slightly lighter blue for dark mode */
-  --primary-foreground: oklch(0.985 0 0);
-
-  --secondary: oklch(0.20 0.05 260);
-  --secondary-foreground: oklch(0.985 0 0);
-
-  --muted: oklch(0.20 0.02 260);
-  --muted-foreground: oklch(0.708 0 0);
-
-  --accent: oklch(0.20 0.05 260);
-  --accent-foreground: oklch(0.985 0 0);
-
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-
-  --border: oklch(0.25 0.02 260);
-  --input: oklch(0.25 0.02 260);
-  --ring: oklch(0.55 0.16 260);
-
-  --chart-1: oklch(0.55 0.16 260);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+  --chart-1: #22005d;
+  --chart-2: #194185;
+  --chart-3: #ca8a04;
+  --chart-4: #ca8a04;
+  --chart-5: #e6007a;
+  --sidebar: #09090b;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #d4d4d8;
 }
 
 @layer base {

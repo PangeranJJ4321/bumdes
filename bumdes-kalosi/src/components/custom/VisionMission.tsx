@@ -9,20 +9,20 @@ export function VisionMission() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* Vision */}
                     <div
-                        className="bg-blue-50 rounded-3xl p-8 border border-blue-100 relative overflow-hidden group"
+                        className="bg-white rounded-none p-8 border border-black relative overflow-hidden group"
                         data-aos="fade-right"
                     >
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Lightbulb className="w-32 h-32 text-blue-600" />
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Lightbulb className="w-32 h-32 text-black" />
                         </div>
                         <div className="relative z-10">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white rounded-none text-xs uppercase tracking-widest font-bold mb-6">
                                 <Target className="w-4 h-4" /> Visi Kami
                             </div>
-                            <h3 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
+                            <h3 className="text-3xl font-serif font-bold text-black mb-6 leading-tight italic">
                                 "Menjadi Pilar Ekonomi Desa yang Mandiri, Inovatif, dan Berkelanjutan Berbasis Digital"
                             </h3>
-                            <p className="text-slate-600 leading-relaxed">
+                            <p className="text-black/80 leading-relaxed font-light">
                                 Kami bercita-cita mewujudkan Desa Kalosi sebagai pusat pertumbuhan ekonomi baru yang memanfaatkan teknologi untuk kesejahteraan seluruh warga.
                             </p>
                         </div>
@@ -41,31 +41,31 @@ export function VisionMission() {
                                 {
                                     title: "Digitalisasi Ekonomi",
                                     desc: "Membangun ekosistem perdagangan digital yang inklusif bagi seluruh pelaku UMKM desa.",
-                                    icon: <Lightbulb className="w-5 h-5 text-amber-500" />
+                                    icon: <Lightbulb className="w-5 h-5 text-black" />
                                 },
                                 {
                                     title: "Pemberdayaan Masyarakat",
                                     desc: "Meningkatkan kapasitas SDM desa melalui pelatihan dan pendampingan usaha.",
-                                    icon: <Users className="w-5 h-5 text-blue-500" />
+                                    icon: <Users className="w-5 h-5 text-black" />
                                 },
                                 {
                                     title: "Optimasi Potensi Lokal",
                                     desc: "Mengelola dan memasarkan produk unggulan serta pariwisata desa ke pasar yang lebih luas.",
-                                    icon: <Target className="w-5 h-5 text-blue-500" />
+                                    icon: <Target className="w-5 h-5 text-black" />
                                 }
                             ].map((item, idx) => (
                                 <div
                                     key={idx}
-                                    className="flex gap-4 p-4 rounded-xl bg-slate-50 hover:bg-white border border-slate-100 hover:shadow-md transition-all group"
+                                    className="flex gap-4 p-4 rounded-none bg-white border border-slate-200 hover:border-black transition-all group"
                                     data-aos="fade-up"
                                     data-aos-delay={idx * 100}
                                 >
-                                    <div className="shrink-0 w-12 h-12 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                    <div className="shrink-0 w-12 h-12 rounded-none bg-white border border-slate-200 flex items-center justify-center shadow-none group-hover:border-black transition-colors">
                                         {item.icon}
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-900 mb-1">{item.title}</h4>
-                                        <p className="text-slate-600 text-sm">{item.desc}</p>
+                                        <h4 className="font-serif font-bold text-black mb-1 text-lg">{item.title}</h4>
+                                        <p className="text-slate-600 text-sm font-light">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}

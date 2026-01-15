@@ -33,15 +33,15 @@ export function PageHero({
             {/* Content */}
             <div className={berita ? "relative z-20 container px-4 text-center max-w-4xl mx-auto space-y-6 pt-32 md:pt-5" : "relative z-20 container px-4 text-center max-w-4xl mx-auto space-y-6 pt-16"}>
                 <div
-                    className="space-y-2"
+                    className="space-y-4"
                     data-aos="fade-up"
                     data-aos-duration="1000"
                 >
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight text-white drop-shadow-lg italic">
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md font-medium">
+                        <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md font-light">
                             {subtitle}
                         </p>
                     )}

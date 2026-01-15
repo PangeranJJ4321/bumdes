@@ -34,7 +34,7 @@ export function ProductCard({
 }: ProductCardProps) {
     return (
         <Link href={`/layanan/${id}`} className="block h-full">
-            <div className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-300 flex flex-col h-full">
+            <div className="group bg-white rounded-none shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-300 flex flex-col h-full">
                 <div className="relative h-48 w-full overflow-hidden">
                     <div className="absolute inset-0 bg-slate-100 animate-pulse" /> {/* Placeholder loading */}
                     <img
@@ -43,11 +43,11 @@ export function ProductCard({
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                        <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-xs font-semibold shadow-sm">
+                        <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-xs font-semibold shadow-none border border-black/10 rounded-none text-black">
                             {category}
                         </Badge>
                         {isPromo && (
-                            <Badge className="bg-red-500 text-white border-red-600 animate-pulse shadow-sm">
+                            <Badge className="bg-black text-white border-black animate-pulse shadow-none rounded-none">
                                 Promo!
                             </Badge>
                         )}
@@ -77,10 +77,10 @@ export function ProductCard({
                                 <div className="flex flex-col">
                                     {isPromo && promoPrice ? (
                                         <>
-                                            <span className="text-xs text-muted-foreground line-through decoration-red-400">
+                                            <span className="text-xs text-muted-foreground line-through decoration-black/50">
                                                 Rp {price.toLocaleString('id-ID')}
                                             </span>
-                                            <span className="text-lg font-bold text-primary">
+                                            <span className="text-lg font-bold text-black">
                                                 Rp {promoPrice.toLocaleString('id-ID')}
                                             </span>
                                         </>
@@ -97,7 +97,12 @@ export function ProductCard({
                             )}
                         </div>
 
-                        <Button size="icon" className="h-9 w-9 rounded-full shadow-sm hover:scale-105 transition-transform">
+                        <Button
+                            size="icon"
+                            className="h-9 w-9 rounded-none shadow-sm hover:scale-105 transition-transform"
+                            disabled={["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(category)}
+                            title={["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(category) ? "Pembelian hanya tersedia di lokasi" : "Tambah ke Keranjang"}
+                        >
                             <ShoppingCart className="h-4 w-4" />
                         </Button>
                     </div>

@@ -80,7 +80,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column: Image Gallery */}
             <div className="space-y-4">
-                <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group">
+                <div className="relative aspect-square rounded-none overflow-hidden bg-slate-100 border border-slate-200 group">
                     <img
                         src={galleryImages[currentImageIndex]}
                         alt={product.title}
@@ -89,7 +89,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
                     {isOutOfStock && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <span className="bg-slate-900 text-white px-6 py-2 rounded-full font-bold text-lg">STOK HABIS</span>
+                            <span className="bg-black text-white px-6 py-2 rounded-none font-bold text-lg">STOK HABIS</span>
                         </div>
                     )}
 
@@ -99,7 +99,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-none opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
                                 onClick={prevImage}
                             >
                                 <ChevronLeft className="h-6 w-6 text-slate-900" />
@@ -107,7 +107,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-none opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shadow-sm z-10"
                                 onClick={nextImage}
                             >
                                 <ChevronRight className="h-6 w-6 text-slate-900" />
@@ -116,7 +116,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     )}
 
                     {product.isPromo && !isOutOfStock && (
-                        <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold shadow-lg animate-pulse">
+                        <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded-none font-bold shadow-none animate-pulse">
                             Promo!
                         </div>
                     )}
@@ -127,7 +127,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <button
                                 key={idx}
                                 onClick={() => setCurrentImageIndex(idx)}
-                                className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${currentImageIndex === idx ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-slate-300"
+                                className={`relative w-20 h-20 rounded-none overflow-hidden border-2 flex-shrink-0 transition-all ${currentImageIndex === idx ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-slate-300"
                                     }`}
                             >
                                 <img src={img} alt={`View ${idx}`} className="w-full h-full object-cover" />
@@ -141,9 +141,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <div className="space-y-8">
                 <div>
                     <div className="flex items-center gap-2 mb-4">
-                        <Badge variant="secondary" className="text-sm px-3 py-1">{product.category}</Badge>
+                        <Badge variant="secondary" className="text-sm px-3 py-1 rounded-none">{product.category}</Badge>
                         {stock > 0 && stock <= 5 && (
-                            <Badge variant="destructive" className="text-sm px-3 py-1 animate-pulse">Sisa {stock} Unit</Badge>
+                            <Badge variant="destructive" className="text-sm px-3 py-1 animate-pulse rounded-none">Sisa {stock} Unit</Badge>
                         )}
                     </div>
                     <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">{product.title}</h1>
@@ -152,7 +152,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             Rp {currentPrice.toLocaleString("id-ID")}
                         </div>
                         {product.isPromo && (
-                            <div className="text-xl text-muted-foreground line-through decoration-red-400 mb-1">
+                            <div className="text-xl text-muted-foreground line-through decoration-black/50 mb-1">
                                 Rp {product.price.toLocaleString("id-ID")}
                             </div>
                         )}
@@ -165,11 +165,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <div className="border-t border-b border-slate-100 py-6 space-y-6">
                     <div className="flex items-center justify-between">
                         <span className="font-medium text-slate-900">Jumlah</span>
-                        <div className="flex items-center border border-slate-200 rounded-full">
+                        <div className="flex items-center border border-slate-200 rounded-none">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-l-full hover:bg-slate-100"
+                                className="rounded-none hover:bg-slate-100"
                                 onClick={() => handleQuantityChange("dec")}
                                 disabled={quantity <= 1 || isOutOfStock}
                             >
@@ -179,7 +179,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-r-full hover:bg-slate-100"
+                                className="rounded-none hover:bg-slate-100"
                                 onClick={() => handleQuantityChange("inc")}
                                 disabled={quantity >= stock || isOutOfStock}
                             >
@@ -195,17 +195,17 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <div className="hidden lg:flex gap-4">
                     <Button
                         size="lg"
-                        className="flex-1 h-12 text-lg rounded-xl font-bold shadow-lg shadow-blue-900/10"
+                        className="flex-1 h-12 text-lg rounded-none font-bold shadow-lg shadow-blue-900/10"
                         onClick={handleAddToCart}
-                        disabled={isOutOfStock}
+                        disabled={isOutOfStock || ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category)}
                     >
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        {isOutOfStock ? "Stok Habis" : "Tambah ke Keranjang"}
+                        {isOutOfStock ? "Stok Habis" : ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category) ? "Datang Langsung" : "Tambah ke Keranjang"}
                     </Button>
                     <Button
                         size="lg"
                         variant="outline"
-                        className="h-12 border-primary text-primary hover:bg-blue-50 rounded-xl px-6 font-bold"
+                        className="h-12 border-primary text-primary hover:bg-blue-50 rounded-none px-6 font-bold"
                         onClick={handleChatSeller}
                     >
                         <Share2 className="mr-2 h-5 w-5" /> Tanya Penjual
@@ -218,19 +218,19 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <Button
                     size="lg"
                     variant="outline"
-                    className="h-12 w-12 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl p-0 flex-shrink-0"
+                    className="h-12 w-12 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-none p-0 flex-shrink-0"
                     onClick={handleChatSeller}
                 >
                     <Share2 className="h-5 w-5" />
                 </Button>
                 <Button
                     size="lg"
-                    className="flex-1 h-12 text-base rounded-xl font-bold shadow-sm"
+                    className="flex-1 h-12 text-base rounded-none font-bold shadow-sm"
                     onClick={handleAddToCart}
-                    disabled={isOutOfStock}
+                    disabled={isOutOfStock || ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category)}
                 >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    {isOutOfStock ? "Stok Habis" : "Beli Sekarang"}
+                    {isOutOfStock ? "Stok Habis" : ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category) ? "Datang Langsung" : "Beli Sekarang"}
                 </Button>
             </div>
         </div>

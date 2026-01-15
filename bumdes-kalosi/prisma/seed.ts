@@ -1,17 +1,10 @@
-
 import { PrismaClient, UserRole, ProductCategory } from '@prisma/client'
-import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
 import dotenv from "dotenv"
 import bcrypt from "bcryptjs"
 
 dotenv.config()
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-})
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient()
 
 const MOCK_PRODUCTS = [
     {
@@ -158,6 +151,22 @@ const MOCK_NEWS = [
         thumbnail: "https://placehold.co/800x400/9333ea/ffffff?text=Pelatihan+UMKM",
         author: "Admin",
         publishedAt: new Date(Date.now() - 345600000), // 4 days ago
+    },
+    {
+        title: "Festival Kopi Kalosi 2026",
+        slug: "festival-kopi-kalosi-2026",
+        content: "<p>Desa Kalosi akan menggelar Festival Kopi tahunan yang menghadirkan barista terbaik...</p>",
+        thumbnail: "https://placehold.co/800x400/78350f/ffffff?text=Festival+Kopi",
+        author: "Admin",
+        publishedAt: new Date(Date.now() - 5000000), // Recent
+    },
+    {
+        title: "Lomba Fotografi: Pesona Desa Kalosi",
+        slug: "lomba-fotografi-pesona-desa-kalosi",
+        content: "<p>Ikuti lomba fotografi dengan tema keindahan alam dan budaya Desa Kalosi...</p>",
+        thumbnail: "https://placehold.co/800x400/0f172a/ffffff?text=Lomba+Foto",
+        author: "Admin",
+        publishedAt: new Date(Date.now() - 1000000), // Very recent
     }
 ]
 

@@ -25,11 +25,11 @@ export function FooterClient({
     youtubeUrl
 }: FooterClientProps) {
     return (
-        <footer className="bg-muted/50 border-t pt-12 pb-6">
+        <footer className="bg-white border-t pt-20 pb-12">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     <div className="space-y-4">
-                        <h3 className="font-bold text-lg text-primary">{contactName}</h3>
+                        <h3 className="font-serif text-xl font-bold text-black">{contactName}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Menggerakkan ekonomi desa melalui inovasi digital.
                             Nikmati kuliner lezat dan wisata seru di satu tempat.
@@ -54,17 +54,17 @@ export function FooterClient({
                     </div>
 
                     <div>
-                        <h4 className="font-semibold mb-4">Unit Usaha</h4>
+                        <h4 className="font-serif font-bold text-lg mb-4">Unit Usaha</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/layanan#kuliner" className="hover:text-primary transition-colors">Food Court</Link></li>
-                            <li><Link href="/layanan#wisata" className="hover:text-primary transition-colors">Wisata Malam</Link></li>
-                            <li><Link href="/layanan#mart" className="hover:text-primary transition-colors">BUMDes Mart</Link></li>
-                            <li><Link href="/layanan#perikanan" className="hover:text-primary transition-colors">Perikanan</Link></li>
+                            <li><Link href="/layanan#kuliner" className="hover:text-black transition-colors">Food Court</Link></li>
+                            <li><Link href="/layanan#wisata" className="hover:text-black transition-colors">Wisata Malam</Link></li>
+                            <li><Link href="/layanan#mart" className="hover:text-black transition-colors">BUMDes Mart</Link></li>
+                            <li><Link href="/layanan#perikanan" className="hover:text-black transition-colors">Perikanan</Link></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h4 className="font-semibold mb-4">Kontak</h4>
+                        <h4 className="font-serif font-bold text-lg mb-4">Kontak</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>{address}</li>
                             <li>WhatsApp: {contactPhone}</li>
@@ -73,7 +73,7 @@ export function FooterClient({
                     </div>
 
                     <div>
-                        <h4 className="font-semibold mb-4">Jam Operasional</h4>
+                        <h4 className="font-serif font-bold text-lg mb-4">Jam Operasional</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>{operatingHours}</li>
                         </ul>

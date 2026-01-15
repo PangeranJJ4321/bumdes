@@ -23,7 +23,7 @@ export function NewsCard({ title, excerpt, date, author, imageUrl, slug, categor
     return (
         <Link href={`/berita/${slug}`} className="block h-full">
             <div
-                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-2 h-full flex flex-col"
+                className="group bg-white rounded-none border border-slate-200 hover:border-black transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col"
                 data-aos="fade-up"
             >
                 <div className="relative overflow-hidden h-56 shrink-0">
@@ -34,7 +34,7 @@ export function NewsCard({ title, excerpt, date, author, imageUrl, slug, categor
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     <div className="absolute top-4 left-4">
-                        <span className={`${CATEGORY_COLORS[category] || 'bg-primary'} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg`}>
+                        <span className="bg-white text-black text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-none border border-black/10">
                             {category}
                         </span>
                     </div>

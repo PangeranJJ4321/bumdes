@@ -16,7 +16,7 @@ const SERVICES = [
             "https://placehold.co/600x800/c2410c/ffffff?text=Suasana+Makan",
             "https://placehold.co/600x800/ea580c/ffffff?text=Menu+Lokal",
         ],
-        colorClass: "bg-orange-600",
+        colorClass: "bg-neutral-900",
     },
     {
         id: "wisata",
@@ -29,7 +29,7 @@ const SERVICES = [
             "https://placehold.co/600x800/3730a3/ffffff?text=Wahana+Main",
             "https://placehold.co/600x800/312e81/ffffff?text=Lampu+Hias",
         ],
-        colorClass: "bg-indigo-600",
+        colorClass: "bg-neutral-800",
     },
     {
         id: "mart",
@@ -42,7 +42,7 @@ const SERVICES = [
             "https://placehold.co/600x800/059669/ffffff?text=Rak+Sembako",
             "https://placehold.co/600x800/047857/ffffff?text=Pelayanan",
         ],
-        colorClass: "bg-blue-600",
+        colorClass: "bg-neutral-900",
     },
     {
         id: "agen",
@@ -55,7 +55,7 @@ const SERVICES = [
             "https://placehold.co/600x800/0284c7/ffffff?text=Bayar+Listrik",
             "https://placehold.co/600x800/0369a1/ffffff?text=Transfer",
         ],
-        colorClass: "bg-sky-600",
+        colorClass: "bg-neutral-800",
     },
     {
         id: "perikanan",
@@ -68,7 +68,7 @@ const SERVICES = [
             "https://placehold.co/600x800/7c3aed/ffffff?text=Ikan+Segar",
             "https://placehold.co/600x800/6d28d9/ffffff?text=Budidaya",
         ],
-        colorClass: "bg-violet-600",
+        colorClass: "bg-black",
     },
 ]
 

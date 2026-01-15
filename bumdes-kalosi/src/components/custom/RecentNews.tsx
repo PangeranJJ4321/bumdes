@@ -30,7 +30,7 @@ export async function RecentNews() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                     {newsList.map((news) => (
-                        <div key={news.id} className="group border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full bg-white">
+                        <div key={news.id} className="group border-b border-black/10 hover:border-black transition-all duration-500 flex flex-col h-full bg-white pb-6">
                             <div className="relative h-48 w-full overflow-hidden">
                                 {news.thumbnail ? (
                                     <Image
@@ -72,7 +72,7 @@ export async function RecentNews() {
 
                 <div className="text-center">
                     <Link href="/berita">
-                        <Button variant="outline" className="rounded-full px-8">
+                        <Button variant="outline" className="rounded-none px-8 border-black text-black hover:bg-black hover:text-white transition-colors h-12">
                             Lihat Semua Berita <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
                     </Link>
