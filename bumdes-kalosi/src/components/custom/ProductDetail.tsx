@@ -19,6 +19,10 @@ interface ProductDetailProps {
         promoPrice?: number;
         images?: string[];
         stock?: number | null;
+        sellerPhone?: string;
+        rating?: number;
+        reviewCount?: number;
+        isOnlineOrder?: boolean;
     };
 }
 
@@ -63,6 +67,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             img: product.imageUrl, // react-use-cart might use 'img' or custom field, I'll put both
             imageUrl: product.imageUrl,
             category: product.category,
+            sellerPhone: product.sellerPhone, // Persist seller phone in cart
         } as any, quantity);
 
         toast.success("Berhasil ditambahkan ke keranjang", {
@@ -71,7 +76,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
     };
 
     const handleChatSeller = () => {
-        const adminPhone = "6282393318287";
+        const adminPhone = product.sellerPhone || "6282393318287";
         const message = `Halo Admin, saya mau tanya tentang produk *${product.title}*...`;
         window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
     };
@@ -197,10 +202,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
                         size="lg"
                         className="flex-1 h-12 text-lg rounded-none font-bold shadow-lg shadow-blue-900/10"
                         onClick={handleAddToCart}
-                        disabled={isOutOfStock || ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category)}
+                        disabled={isOutOfStock || product.isOnlineOrder === false}
                     >
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        {isOutOfStock ? "Stok Habis" : ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category) ? "Datang Langsung" : "Tambah ke Keranjang"}
+                        {isOutOfStock ? "Stok Habis" : (product.isOnlineOrder === false ? "Datang Langsung" : "Tambah ke Keranjang")}
                     </Button>
                     <Button
                         size="lg"
@@ -227,10 +232,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     size="lg"
                     className="flex-1 h-12 text-base rounded-none font-bold shadow-sm"
                     onClick={handleAddToCart}
-                    disabled={isOutOfStock || ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category)}
+                    disabled={isOutOfStock || product.isOnlineOrder === false}
                 >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    {isOutOfStock ? "Stok Habis" : ["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(product.category) ? "Datang Langsung" : "Beli Sekarang"}
+                    {isOutOfStock ? "Stok Habis" : (product.isOnlineOrder === false ? "Datang Langsung" : "Beli Sekarang")}
                 </Button>
             </div>
         </div>

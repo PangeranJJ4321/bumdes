@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface WhatsAppButtonProps {
   phoneNumber: string;
@@ -9,6 +11,13 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton({ phoneNumber, message = "" }: WhatsAppButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  // Hide if on admin dashboard AND user is SUPER_ADMIN
+  if (pathname?.startsWith("/admin") && session?.user?.role === "SUPER_ADMIN") {
+    return null;
+  }
 
   // Default strings in Bahasa Indonesia
   const t = {

@@ -62,6 +62,7 @@ export function LoginForm({
             {...register("username")}
             type="text"
             placeholder="masukan username"
+            aria-invalid={!!errors.username}
           />
           <FieldError>{errors.username?.message}</FieldError>
         </Field>
@@ -82,6 +83,7 @@ export function LoginForm({
               type={showPassword ? "text" : "password"}
               className="pr-10"
               placeholder="masukan password"
+              aria-invalid={!!errors.password}
             />
             <Button
               type="button"

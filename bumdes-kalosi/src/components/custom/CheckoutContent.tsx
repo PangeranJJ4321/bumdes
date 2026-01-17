@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Field,
@@ -22,7 +21,7 @@ import {
 import { checkoutSchema, CheckoutFormValues } from "@/lib/schemas";
 
 export function CheckoutContent() {
-    const { items, cartTotal, isEmpty, emptyCart } = useCart();
+    const { items, cartTotal, isEmpty, emptyCart, removeItem } = useCart();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,18 +47,18 @@ export function CheckoutContent() {
 
     if (isEmpty) {
         return (
-            <main className="flex-grow flex flex-col items-center justify-center p-6">
-                <div className="max-w-md w-full text-center space-y-6 bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/60">
-                    <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <ShoppingBag className="h-10 w-10 text-blue-600" />
+            <main className="flex-grow flex flex-col items-center justify-center p-6 bg-slate-50">
+                <div className="max-w-md w-full text-center space-y-6 bg-white p-10 border border-black shadow-none">
+                    <div className="bg-black text-white w-24 h-24 flex items-center justify-center mx-auto mb-4 rounded-none">
+                        <ShoppingBag className="h-10 w-10 text-white" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="text-2xl font-bold text-slate-900">Keranjang Masih Kosong</h2>
-                        <p className="text-slate-500">Sepertinya Anda belum memilih produk atau layanan dari BUMDes Kalosi.</p>
+                        <h2 className="text-2xl font-serif font-bold text-black uppercase tracking-wider">Keranjang Kosong</h2>
+                        <p className="text-slate-500 font-mono text-sm tracking-wide">Belum ada item yang dipilih.</p>
                     </div>
                     <Button
                         onClick={() => router.push("/layanan")}
-                        className="w-full bg-blue-600 hover:bg-blue-700 h-12 rounded-xl transition-all"
+                        className="w-full bg-black hover:bg-slate-800 text-white h-12 rounded-none transition-all uppercase tracking-widest font-bold"
                     >
                         Mulai Belanja
                     </Button>
@@ -68,11 +67,35 @@ export function CheckoutContent() {
         );
     }
 
-    const onSubmit = async (data: CheckoutFormValues) => {
+    // Group items by sellerPhone
+    const groupedItems: Record<string, typeof items> = {};
+    items.forEach(item => {
+        const sellerPhone = (item as any).sellerPhone || "6282393318287"; // Fallback to default admin
+        if (!groupedItems[sellerPhone]) {
+            groupedItems[sellerPhone] = [];
+        }
+        groupedItems[sellerPhone].push(item);
+    });
+
+    const onSubmit = async (data: CheckoutFormValues, targetSellerPhone?: string) => {
         setIsSubmitting(true);
 
+        // Filter items for this specific seller if targetSellerPhone is provided
+        // If not provided (should not happen with new logic), it takes all items.
+        // Actually, let's make targetSellerPhone required for the button interaction.
+        if (!targetSellerPhone) return;
+
+        const sellerItems = groupedItems[targetSellerPhone];
+        const sellerTotal = sellerItems.reduce((acc, item) => acc + (item.price * (item.quantity ?? 1)), 0);
+
+
         try {
-            // 1. Save to Database
+            // 1. Save to Database (We still save ONE order entry technically, or should we split?
+            // For now, let's save a single order record but with ONLY these items to allow tracking per seller order?
+            // OR save one big order and just message the seller with partial items.
+            // Let's go with: Save the specific items being ordered as a "Order" record.
+            // This means we might have multiple Order IDs if the user clicks both buttons.
+            // This is actually better for tracking. Each click = One DB Order.
             const response = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -81,93 +104,86 @@ export function CheckoutContent() {
                     customerPhone: data.noHp,
                     customerAddress: data.alamatLengkap,
                     deliveryMethod: data.metodePengiriman,
-                    items: items,
-                    totalPrice: cartTotal,
-                    notes: `Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`
+                    items: sellerItems, // ONLY send items for this seller
+                    totalPrice: sellerTotal,
+                    notes: `Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`,
+                    sellerPhone: targetSellerPhone // Passing sellerPhone for Fonnte API
                 })
             });
 
-            const resData = await response.json();
+            const result = await response.json();
 
-            if (!resData.success) {
-                toast.error("Gagal memproses pesanan: " + resData.message);
-                setIsSubmitting(false);
-                return;
+            if (!response.ok) {
+                throw new Error(result.message || "Gagal membuat pesanan");
             }
 
-            // 2. Redirect to WhatsApp
-            const adminPhone = "6282393318287";
-            const orderIdShort = resData.orderId.substring(0, 8).toUpperCase();
+            // Remove items from cart
+            sellerItems.forEach(item => removeItem(item.id));
 
-            let message = `*PESANAN BARU - BUMDES KALOSI*\n`;
-            message += `#ORDER ID: ${orderIdShort}\n`;
-            message += `------------------------------------------\n\n`;
-            message += `👤 *Data Pemesan:*\n`;
-            message += `Nama: ${data.nama}\n`;
-            message += `No HP: ${data.noHp}\n`;
-            message += `Alamat: ${data.alamatLengkap || "-"}\n`;
-            message += `Metode: ${data.metodePengiriman === 'COURIER' ? '🚚 Diantar Kurir' : '🏪 Ambil Sendiri'}\n\n`;
+            // Success notification - NO REDIRECT
+            toast.success("Pesanan berhasil dibuat! Notifikasi WhatsApp telah dikirim.");
 
-            message += `🛒 *Detail Pesanan:*\n`;
-            items.forEach((item, index) => {
-                message += `${index + 1}. ${item.title} (${item.quantity}x) - Rp ${(item.price * item.quantity!).toLocaleString('id-ID')}\n`;
-            });
+            // Optional: Redirect to home or order history
+            router.push('/');
 
-            message += `\n💰 *Total Tagihan: Rp ${cartTotal.toLocaleString('id-ID')}*\n\n`;
-            message += `------------------------------------------\n`;
-            message += `_Mohon segera dikonfirmasi ya Admin, Terima kasih!_`;
-
-            const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
-
-            // Clear cart and redirect
-            emptyCart();
-            window.open(waUrl, '_blank');
-            router.push("/"); // Back to home or success page
-            toast.success("Pesanan berhasil dibuat!");
-
-        } catch (error) {
-            console.error(error);
-            toast.error("Terjadi kesalahan sistem.");
+        } catch (error: any) {
+            console.error("Checkout Error:", error);
+            toast.error(error.message);
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false); // Using boolean or specific seller state
         }
     };
 
+
+    // Wrapper to handle specific seller submission
+    const handleSellerSubmit = (sellerPhone: string) => {
+        handleSubmit((data) => {
+            onSubmit(data, sellerPhone).then(() => {
+                // After success, remove items for this seller
+                if (groupedItems[sellerPhone]) {
+                    groupedItems[sellerPhone].forEach(item => removeItem(item.id));
+                }
+                // If cart becomes empty, component will re-render and show empty state
+            });
+        })();
+    };
+
     return (
-        <main className="flex-grow pt-28 pb-16">
+        <main className="flex-grow pt-28 pb-16 bg-white">
             <div className="container mx-auto px-4">
                 <div className="max-w-5xl mx-auto">
                     {/* Header & Breadcrumb */}
                     <div className="mb-10 lg:text-left">
-                        <Link href="/layanan" className="inline-flex items-center text-sm text-primary font-medium mb-4 hover:gap-2 transition-all gap-1">
+                        <Link href="/layanan" className="inline-flex items-center text-sm text-slate-500 font-mono font-medium mb-4 hover:gap-2 hover:text-black transition-all gap-1 uppercase tracking-widest">
                             <ArrowLeft className="w-4 h-4" /> Kembali ke Layanan
                         </Link>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Checkout</h1>
-                        <p className="text-slate-500 mt-2">Selesaikan pesanan Anda dengan mengisi data di bawah ini.</p>
+                        <h1 className="text-4xl font-serif font-bold text-black uppercase tracking-wider">Checkout</h1>
+                        <p className="text-slate-500 mt-2 font-mono tracking-wide">Selesaikan pesanan Anda dengan mengisi data di bawah ini.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                         {/* Form Pengiriman */}
                         <div className="lg:col-span-7 space-y-6">
-                            <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40">
+                            <div className="bg-white p-8 border border-black rounded-none shadow-none">
                                 <div className="flex items-center gap-3 mb-8">
-                                    <div className="bg-blue-50 p-2 rounded-lg">
-                                        <MapPin className="h-5 w-5 text-primary" />
+                                    <div className="bg-black text-white p-2 rounded-none">
+                                        <MapPin className="h-5 w-5 text-white" />
                                     </div>
-                                    <h2 className="text-xl font-bold text-slate-800">Informasi Pengiriman</h2>
+                                    <h2 className="text-xl font-serif font-bold text-black uppercase tracking-wide">Informasi Pengiriman</h2>
                                 </div>
 
-                                <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                <form id="checkout-form" className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <Field>
-                                            <FieldLabel htmlFor="nama" className="text-slate-700 font-medium">Nama Lengkap</FieldLabel>
+                                            <FieldLabel htmlFor="nama" className="text-black font-bold uppercase tracking-widest text-xs font-mono">Nama Lengkap</FieldLabel>
                                             <div className="relative">
                                                 <User className="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
                                                 <FieldContent>
                                                     <Input
                                                         id="nama"
                                                         placeholder="Masukan nama anda"
-                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        className="pl-10 bg-white border-black text-black transition-all h-12 rounded-none placeholder:text-slate-400 font-mono"
+                                                        aria-invalid={!!errors.nama}
                                                         {...register("nama")}
                                                     />
                                                 </FieldContent>
@@ -176,7 +192,7 @@ export function CheckoutContent() {
                                         </Field>
 
                                         <Field>
-                                            <FieldLabel htmlFor="noHp" className="text-slate-700 font-medium">Nomor WhatsApp</FieldLabel>
+                                            <FieldLabel htmlFor="noHp" className="text-black font-bold uppercase tracking-widest text-xs font-mono">Nomor WhatsApp</FieldLabel>
                                             <div className="relative">
                                                 <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400 z-10" />
                                                 <FieldContent>
@@ -184,7 +200,8 @@ export function CheckoutContent() {
                                                         id="noHp"
                                                         type="tel"
                                                         placeholder="081234..."
-                                                        className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all h-11 rounded-xl"
+                                                        className="pl-10 bg-white border-black text-black transition-all h-12 rounded-none placeholder:text-slate-400 font-mono"
+                                                        aria-invalid={!!errors.noHp}
                                                         {...register("noHp")}
                                                     />
                                                 </FieldContent>
@@ -194,36 +211,36 @@ export function CheckoutContent() {
                                     </div>
 
                                     <Field>
-                                        <FieldLabel className="text-slate-700 font-medium">Metode Pengiriman</FieldLabel>
+                                        <FieldLabel className="text-black font-bold uppercase tracking-widest text-xs font-mono">Metode Pengiriman</FieldLabel>
                                         <div className="grid grid-cols-2 gap-4 mt-2">
                                             <div
-                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'PICKUP' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                                                className={`cursor-pointer border-2 rounded-none p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'PICKUP' ? 'border-black bg-black text-white' : 'border-slate-200 text-slate-500 hover:border-black hover:text-black'}`}
                                                 onClick={() => setValue('metodePengiriman', 'PICKUP')}
                                             >
-                                                <ShoppingBag className={`h-6 w-6 ${metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-400'}`} />
-                                                <span className={`font-semibold ${metodePengiriman === 'PICKUP' ? 'text-primary' : 'text-slate-600'}`}>Ambil Sendiri</span>
+                                                <ShoppingBag className={`h-6 w-6 ${metodePengiriman === 'PICKUP' ? 'text-white' : 'text-current'}`} />
+                                                <span className={`font-bold uppercase tracking-wider text-xs ${metodePengiriman === 'PICKUP' ? 'text-white' : 'text-current'}`}>Ambil Sendiri</span>
                                             </div>
                                             <div
-                                                className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'COURIER' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                                                className={`cursor-pointer border-2 rounded-none p-4 flex flex-col items-center justify-center gap-2 transition-all ${metodePengiriman === 'COURIER' ? 'border-black bg-black text-white' : 'border-slate-200 text-slate-500 hover:border-black hover:text-black'}`}
                                                 onClick={() => setValue('metodePengiriman', 'COURIER')}
                                             >
                                                 <div className="relative">
-                                                    <MapPin className={`h-6 w-6 ${metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-400'}`} />
-                                                    {metodePengiriman === 'COURIER' && <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-green-500" />}
+                                                    <MapPin className={`h-6 w-6 ${metodePengiriman === 'COURIER' ? 'text-white' : 'text-current'}`} />
                                                 </div>
-                                                <span className={`font-semibold ${metodePengiriman === 'COURIER' ? 'text-primary' : 'text-slate-600'}`}>Diantar Kurir</span>
+                                                <span className={`font-bold uppercase tracking-wider text-xs ${metodePengiriman === 'COURIER' ? 'text-white' : 'text-current'}`}>Diantar Kurir</span>
                                             </div>
                                         </div>
                                     </Field>
 
                                     {metodePengiriman === 'COURIER' && (
                                         <Field>
-                                            <FieldLabel htmlFor="alamatLengkap" className="text-slate-700 font-medium">Detail Alamat / Patokan</FieldLabel>
+                                            <FieldLabel htmlFor="alamatLengkap" className="text-black font-bold uppercase tracking-widest text-xs font-mono">Detail Alamat / Patokan</FieldLabel>
                                             <FieldContent>
                                                 <Textarea
                                                     id="alamatLengkap"
                                                     placeholder="Contoh: Rumah warna hijau depan masjid, Jl. Poros Kalosi..."
-                                                    className="resize-none h-24 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl p-4"
+                                                    className="resize-none h-24 bg-white border-black text-black  transition-all rounded-none p-4 placeholder:text-slate-400 font-mono"
+                                                    aria-invalid={!!errors.alamatLengkap}
                                                     {...register("alamatLengkap")}
                                                 />
                                             </FieldContent>
@@ -234,83 +251,91 @@ export function CheckoutContent() {
                             </div>
 
                             {/* Payment Note */}
-                            <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex gap-4">
-                                <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
-                                <p className="text-sm text-blue-900 leading-relaxed">
-                                    <strong>Metode Pembayaran:</strong> Pembayaran dilakukan via
-                                    <strong> Cash on Delivery (COD)</strong> atau Transfer saat barang diterima.
+                            <div className="bg-slate-50 border border-slate-200 p-5 rounded-none flex gap-4">
+                                <CheckCircle2 className="h-6 w-6 text-black shrink-0" />
+                                <p className="text-sm text-slate-600 leading-relaxed font-mono">
+                                    <strong className="text-black">Metode Pembayaran:</strong> Pembayaran dilakukan via
+                                    <strong className="text-black"> Cash on Delivery (COD)</strong> atau Transfer saat barang diterima.
                                     Admin akan mengonfirmasi total biaya (+ ongkir jika kurir) via WhatsApp.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Ringkasan Pesanan */}
-                        <div className="lg:col-span-5">
-                            <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/40 sticky top-28">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                        <ShoppingBag className="h-5 w-5 text-primary" />
-                                        Ringkasan
-                                    </h2>
-                                    <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">{items.length} Item</span>
-                                </div>
+                        {/* Ringkasan Pesanan (Iterate per Seller) */}
+                        <div className="lg:col-span-5 space-y-8">
+                            {Object.entries(groupedItems).map(([sellerPhone, sellerItems], idx) => {
+                                const sellerTotal = sellerItems.reduce((acc, item) => acc + (item.price * (item.quantity ?? 1)), 0);
+                                const isMultiSeller = Object.keys(groupedItems).length > 1;
 
-                                <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 mb-8 custom-scrollbar">
-                                    {items.map((item) => (
-                                        <div key={item.id} className="flex justify-between items-center group">
-                                            <div className="flex flex-col">
-                                                <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{item.title}</span>
-                                                <span className="text-slate-400 text-xs font-medium">{item.quantity} Unit x Rp {item.price.toLocaleString('id-ID')}</span>
-                                            </div>
-                                            <span className="font-bold text-slate-900">
-                                                Rp {(item.price * item.quantity!).toLocaleString('id-ID')}
-                                            </span>
+                                return (
+                                    <div key={sellerPhone} className="bg-white p-8 border border-black rounded-none shadow-none">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h2 className="text-xl font-serif font-bold text-black uppercase tracking-wide flex items-center gap-2">
+                                                <ShoppingBag className="h-5 w-5 text-black" />
+                                                {isMultiSeller ? `Pesanan #${idx + 1}` : 'Ringkasan'}
+                                            </h2>
+                                            <span className="bg-black text-white px-3 py-1 rounded-none text-xs font-mono font-bold">{sellerItems.length} Item</span>
                                         </div>
-                                    ))}
-                                </div>
 
-                                <div className="space-y-4 pt-6 border-t border-slate-100">
-                                    <div className="flex justify-between items-center text-slate-500">
-                                        <span className="text-sm">Subtotal</span>
-                                        <span className="font-medium">Rp {cartTotal.toLocaleString('id-ID')}</span>
+                                        {/* Items List */}
+                                        <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 mb-8 custom-scrollbar">
+                                            {sellerItems.map((item) => (
+                                                <div key={item.id} className="flex justify-between items-center group py-2 border-b border-dashed border-slate-200 last:border-0">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-black font-serif uppercase tracking-tight">{item.title}</span>
+                                                        <span className="text-slate-500 text-xs font-mono">{item.quantity} Unit x Rp {item.price.toLocaleString('id-ID')}</span>
+                                                    </div>
+                                                    <span className="font-bold text-black font-mono">
+                                                        Rp {(item.price * item.quantity!).toLocaleString('id-ID')}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="space-y-4 pt-6 border-t border-black">
+                                            <div className="flex justify-between items-center text-slate-600 font-mono text-sm">
+                                                <span className="uppercase tracking-wide">Subtotal</span>
+                                                <span className="font-bold text-black">Rp {sellerTotal.toLocaleString('id-ID')}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-slate-600 font-mono text-sm">
+                                                <span className="uppercase tracking-wide">Biaya Pengiriman</span>
+                                                {metodePengiriman === 'COURIER' ? (
+                                                    <span className="text-xs font-bold text-black bg-slate-100 px-2 py-1 rounded-none uppercase">Info via WA</span>
+                                                ) : (
+                                                    <span className="text-xs font-bold text-white bg-black px-2 py-1 rounded-none uppercase">Gratis</span>
+                                                )}
+                                            </div>
+
+                                            <div className="flex justify-between items-center pt-4 border-t border-dashed border-black">
+                                                <span className="text-lg font-serif font-bold text-black uppercase tracking-wider">Total</span>
+                                                <span className="text-2xl font-black text-black">
+                                                    Rp {sellerTotal.toLocaleString('id-ID')}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            type="button"
+                                            onClick={() => handleSellerSubmit(sellerPhone)}
+                                            disabled={isSubmitting}
+                                            className="w-full mt-8 bg-black hover:bg-slate-800 text-white font-bold h-14 rounded-none text-lg shadow-none transition-all uppercase tracking-widest disabled:opacity-70 disabled:cursor-not-allowed border border-black hover:border-slate-800"
+                                        >
+                                            {isSubmitting ? (
+                                                "Memproses..."
+                                            ) : (
+                                                <>
+                                                    <Send className="w-5 h-5 mr-3" />
+                                                    Pesan ke Penjual {isMultiSeller ? `#${idx + 1}` : ''}
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <p className="text-[10px] text-center text-slate-400 mt-5 leading-relaxed uppercase tracking-wider font-bold font-mono">
+                                            Terjamin Aman • Layanan Desa Kalosi
+                                        </p>
                                     </div>
-                                    <div className="flex justify-between items-center text-slate-500">
-                                        <span className="text-sm">Biaya Pengiriman</span>
-                                        {metodePengiriman === 'COURIER' ? (
-                                            <span className="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded-full">Info via WA</span>
-                                        ) : (
-                                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase">Gratis</span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex justify-between items-center pt-4 border-t border-dashed border-slate-200">
-                                        <span className="text-lg font-bold text-slate-900">Total</span>
-                                        <span className="text-2xl font-black text-primary">
-                                            Rp {cartTotal.toLocaleString('id-ID')}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    form="checkout-form"
-                                    disabled={isSubmitting}
-                                    className="w-full mt-8 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-extrabold h-14 rounded-2xl text-lg shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                                >
-                                    {isSubmitting ? (
-                                        "Memproses..."
-                                    ) : (
-                                        <>
-                                            <Send className="w-5 h-5 mr-3" />
-                                            Pesan via WhatsApp
-                                        </>
-                                    )}
-                                </Button>
-
-                                <p className="text-[10px] text-center text-slate-400 mt-5 leading-relaxed uppercase tracking-wider font-semibold">
-                                    Terjamin Aman • Layanan Desa Kalosi
-                                </p>
-                            </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
 import { ProductCategory } from "@prisma/client"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { Switch } from "@/components/ui/switch"
 
 const productFormSchema = z.object({
     name: z.string().min(2, { message: "Nama produk harus minimal 2 karakter." }),
@@ -38,6 +39,7 @@ const productFormSchema = z.object({
     stock: z.coerce.number().min(0, { message: "Stok tidak boleh negatif." }),
     category: z.nativeEnum(ProductCategory),
     imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
+    isOnlineOrder: z.boolean().default(true),
 })
 
 type ProductFormValues = z.infer<typeof productFormSchema>
@@ -48,6 +50,7 @@ const defaultValues: Partial<ProductFormValues> = {
     price: 0,
     stock: 0,
     imageUrl: "",
+    isOnlineOrder: true,
 }
 
 interface ProductFormProps {
@@ -167,6 +170,32 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                     </FormControl>
                                     <FormDescription>Gunakan angka besar jika stok tidak terbatas (misal: jasa)</FormDescription>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <FormField
+                            control={form.control}
+                            name="isOnlineOrder"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 col-span-2">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">Bisa Dipesan Online?</FormLabel>
+                                        <FormDescription>
+                                            Jika dimatikan, tombol "Tambah ke Keranjang" akan diganti "Datang Langsung".
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
                                 </FormItem>
                             )}
                         />

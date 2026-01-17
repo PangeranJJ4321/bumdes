@@ -74,6 +74,9 @@
   --muted: #fafafa;
   --muted-foreground: #71717a;
 
+  --destructive: #f81616;
+  --destructive-foreground: #fafafa;
+
   --border: #e4e4e7;
   --input: #e4e4e7;
   --ring: #000000;

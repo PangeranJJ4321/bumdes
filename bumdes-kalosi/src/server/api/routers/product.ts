@@ -110,6 +110,7 @@ export const productRouter = createTRPCRouter({
                 category: productCategoryEnum,
                 imageUrl: z.string().url().optional(),
                 stock: z.number().int().optional(),
+                isOnlineOrder: z.boolean().default(true),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -141,6 +142,7 @@ export const productRouter = createTRPCRouter({
                 category: productCategoryEnum.optional(),
                 imageUrl: z.string().url().optional(),
                 stock: z.number().int().optional(),
+                isOnlineOrder: z.boolean().optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {

@@ -44,6 +44,7 @@ model Product {
   category    ProductCategory
   imageUrl    String?          @map("image_url")
   stock       Int              @default(0)
+  isOnlineOrder Boolean        @default(true) @map("is_online_order")
   
   createdById String?          @map("created_by_id")
   createdBy   User?            @relation(fields: [createdById], references: [id])

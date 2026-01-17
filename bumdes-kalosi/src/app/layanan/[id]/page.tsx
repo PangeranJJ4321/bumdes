@@ -19,6 +19,7 @@ export default async function ProductDetailPage({
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
+            createdBy: true,
             reviews: {
                 where: { status: "APPROVED" }, // Only show approved reviews or filtered
                 orderBy: { createdAt: "desc" }
@@ -43,9 +44,13 @@ export default async function ProductDetailPage({
         // If we want multiple images, we need to add them to DB or use array. 
         // fallback to single image array
         images: product.imageUrl ? [product.imageUrl] : [],
+        imageUrl: product.imageUrl || "",  // Ensure string
+        promoPrice: product.promoPrice || undefined, // Handle null -> undefined
         category: product.category as string,
         rating: averageRating,
-        reviewCount: product.reviews.length
+        reviewCount: product.reviews.length,
+        sellerPhone: product.createdBy?.phone || "6282393318287",
+        isOnlineOrder: product.isOnlineOrder,
     };
 
     return (

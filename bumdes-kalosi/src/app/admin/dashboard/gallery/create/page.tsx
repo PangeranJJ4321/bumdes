@@ -132,6 +132,7 @@ export default function CreateGalleryPage() {
                                         value={formData.title}
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         required
+                                        aria-invalid={isSubmitting && !formData.title}
                                     />
                                 </div>
 

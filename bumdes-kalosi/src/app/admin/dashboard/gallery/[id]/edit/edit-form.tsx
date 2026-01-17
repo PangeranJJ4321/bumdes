@@ -78,6 +78,7 @@ export function EditGalleryForm({ item }: EditGalleryFormProps) {
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
+                        aria-invalid={isSubmitting && !formData.title}
                     />
                 </div>
 

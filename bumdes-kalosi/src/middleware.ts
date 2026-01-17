@@ -6,16 +6,26 @@ const { auth } = NextAuth(authConfig)
 export default auth((req) => {
     const isLoggedIn = !!req.auth
     const isAdminRoute = req.nextUrl.pathname.startsWith("/admin")
-    const isAuthRoute = req.nextUrl.pathname.startsWith("/admin/login")
+
+    // Define public admin routes that don't require authentication
+    const publicAdminRoutes = [
+        "/admin/login",
+        "/admin/forgot-password",
+        "/admin/reset-password"
+    ]
+
+    const isPublicAdminRoute = publicAdminRoutes.some(route =>
+        req.nextUrl.pathname.startsWith(route)
+    )
 
     // Protect all /admin routes
-    if (isAdminRoute && !isAuthRoute) {
+    if (isAdminRoute && !isPublicAdminRoute) {
         if (isLoggedIn) return
         return Response.redirect(new URL("/admin/login", req.nextUrl))
     }
 
-    // Redirect to dashboard if logged in and trying to access login page
-    if (isAuthRoute && isLoggedIn) {
+    // Redirect to dashboard if logged in and trying to access public auth pages (login, forgot password, etc)
+    if (isPublicAdminRoute && isLoggedIn) {
         return Response.redirect(new URL("/admin/dashboard", req.nextUrl))
     }
 })

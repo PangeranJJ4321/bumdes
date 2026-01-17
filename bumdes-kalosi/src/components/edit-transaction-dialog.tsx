@@ -207,6 +207,7 @@ export function EditTransactionDialog({
                                     id="customerName"
                                     {...form.register("customerName")}
                                     placeholder="Cth. John Doe"
+                                    aria-invalid={!!form.formState.errors.customerName}
                                 />
                                 {form.formState.errors.customerName && (
                                     <p className="text-xs text-red-500">{form.formState.errors.customerName.message}</p>
@@ -218,6 +219,7 @@ export function EditTransactionDialog({
                                     id="customerPhone"
                                     {...form.register("customerPhone")}
                                     placeholder="0821..."
+                                    aria-invalid={!!form.formState.errors.customerPhone}
                                 />
                             </div>
                         </div>
@@ -276,9 +278,9 @@ export function EditTransactionDialog({
                                     <div className="pt-8">
                                         <Button
                                             type="button"
-                                            variant="ghost"
+                                            variant="destructive"
                                             size="icon"
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            className="bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => remove(index)}
                                             disabled={fields.length === 1}
                                         >
