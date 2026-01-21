@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db";
 
-import { sendWhatsapp } from "@/lib/fonnte";
+import { sendTemplateMessage } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
     try {
@@ -58,51 +58,62 @@ export async function POST(req: Request) {
 
             console.log("[Checkout API] Order created successfully:", order.id);
 
-            // --- FONNTE NOTIFICATION START ---
+            const orderIdShort = order.id.substring(0, 8).toUpperCase();
+
+            // --- WHATSAPP CLOUD API START ---
 
             // 1. Send Message to SELLER (Staff)
             if (sellerPhone) {
-                const orderIdShort = order.id.substring(0, 8).toUpperCase();
-                let sellerMsg = `*PESANAN BARU - BUMDES KALOSI*\n`;
-                sellerMsg += `#ORDER ID: ${orderIdShort}\n`;
-                sellerMsg += `------------------------------------------\n\n`;
-                sellerMsg += `👤 *Data Pemesan:*\n`;
-                sellerMsg += `Nama: ${customerName}\n`;
-                sellerMsg += `No HP: ${customerPhone}\n`;
-                sellerMsg += `Alamat: ${customerAddress || "-"}\n`;
-                sellerMsg += `Metode: ${deliveryMethod === 'COURIER' ? '🚚 Diantar Kurir' : '🏪 Ambil Sendiri'}\n\n`;
+                // Template: new_order_detail
+                // Body Params: {{1}}=OrderId, {{2}}=Name, {{3}}=Phone, {{4}}=Method, {{5}}=Total, {{6}}=CleanPhone (for link)
 
-                sellerMsg += `🛒 *Detail Pesanan:*\n`;
-                items.forEach((item: any, index: number) => {
-                    sellerMsg += `${index + 1}. ${item.title} (${item.quantity}x) - Rp ${(item.price * item.quantity).toLocaleString('id-ID')}\n`;
-                });
+                // Sanitize phone for URL (remove + or 0 in front, ensure 62)
+                let cleanPhone = customerPhone.replace(/\D/g, '');
+                if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
 
-                sellerMsg += `\n💰 *Total Tagihan: Rp ${Number(totalPrice).toLocaleString('id-ID')}*\n\n`;
-                sellerMsg += `------------------------------------------\n`;
-                sellerMsg += `Mohon segera diproses ya!`;
+                const sellerComponents = [
+                    {
+                        type: "body",
+                        parameters: [
+                            { type: "text", text: orderIdShort },                                      // {{1}}
+                            { type: "text", text: customerName },                                      // {{2}}
+                            { type: "text", text: customerPhone },                                     // {{3}}
+                            { type: "text", text: deliveryMethod === 'COURIER' ? 'Kurir' : 'Pickup' }, // {{4}}
+                            { type: "text", text: `Rp ${Number(totalPrice).toLocaleString('id-ID')}` }, // {{5}}
+                            { type: "text", text: cleanPhone }                                         // {{6}}
+                        ]
+                    }
+                ];
 
-                await sendWhatsapp(sellerPhone, sellerMsg);
+                await sendTemplateMessage(sellerPhone, "new_order_detail3", sellerComponents);
             }
 
             // 2. Send Message to BUYER (Customer)
             if (customerPhone) {
-                let buyerMsg = `Halo Kak ${customerName}, terima kasih sudah berbelanja di BUMDes Kalosi! 🎉\n\n`;
-                buyerMsg += `Berikut detail pesanan kakak:\n`;
+                // Construct Item List String
+                // Example: "- Nasi Goreng (2x) @ Rp 15.000\n- Es Teh (1x) @ Rp 5.000"
+                const itemsListString = items.map((item: any) =>
+                    `- ${item.title} (${item.quantity}x) @ Rp ${Number(item.price).toLocaleString('id-ID')}`
+                ).join("\n");
 
-                items.forEach((item: any, index: number) => {
-                    buyerMsg += `${index + 1}. ${item.title} (${item.quantity}x) - Rp ${(item.price * item.quantity).toLocaleString('id-ID')}\n`;
-                });
+                // Template: order_confirmation
+                // Params: {{1}}=Name, {{2}}=OrderId, {{3}}=ItemsString, {{4}}=Total
+                const buyerComponents = [
+                    {
+                        type: "body",
+                        parameters: [
+                            { type: "text", text: customerName },                                      // {{1}}
+                            { type: "text", text: orderIdShort },                                      // {{2}}
+                            { type: "text", text: itemsListString },                                   // {{3}}
+                            { type: "text", text: `Rp ${Number(totalPrice).toLocaleString('id-ID')}` } // {{4}}
+                        ]
+                    }
+                ];
 
-                buyerMsg += `\n💰 *Total Tagihan: Rp ${Number(totalPrice).toLocaleString('id-ID')}*\n\n`;
-
-                buyerMsg += `Pesanan kakak sedang kami proses.\n`;
-                buyerMsg += `Admin kami akan segera menghubungi kakak untuk konfirmasi pembayaran dan ${deliveryMethod === 'COURIER' ? 'pengiriman' : 'pengambilan barang'}.\n\n`;
-                buyerMsg += `Mohon ditunggu ya! 😊`;
-
-                await sendWhatsapp(customerPhone, buyerMsg);
+                await sendTemplateMessage(customerPhone, "order_confirmation3", buyerComponents);
             }
 
-            // --- FONNTE NOTIFICATION END ---
+            // --- WHATSAPP CLOUD API END ---
 
             return NextResponse.json({
                 success: true,

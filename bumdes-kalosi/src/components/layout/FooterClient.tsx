@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { IconBrandFacebook, IconBrandInstagram, IconBrandYoutube } from "@tabler/icons-react";
+import Image from "next/image";
+import { IconBrandFacebook, IconBrandInstagram, IconBrandYoutube, IconBrandTiktok } from "@tabler/icons-react";
 
 interface FooterClientProps {
     contactName: string;
@@ -11,6 +12,7 @@ interface FooterClientProps {
     operatingHours: string;
     facebookUrl?: string | null;
     instagramUrl?: string | null;
+    tiktokUrl?: string | null;
     youtubeUrl?: string | null;
 }
 
@@ -22,6 +24,7 @@ export function FooterClient({
     operatingHours,
     facebookUrl,
     instagramUrl,
+    tiktokUrl,
     youtubeUrl
 }: FooterClientProps) {
     return (
@@ -36,20 +39,49 @@ export function FooterClient({
                         </p>
                         <div className="flex gap-4">
                             {facebookUrl && (
-                                <Link href={facebookUrl} target="_blank" className="text-muted-foreground hover:text-primary">
-                                    <IconBrandFacebook size={20} />
+                                <Link href={facebookUrl} target="_blank" className="text-muted-foreground hover:text-black transition-colors">
+                                    <IconBrandFacebook size={24} />
                                 </Link>
                             )}
                             {instagramUrl && (
-                                <Link href={instagramUrl} target="_blank" className="text-muted-foreground hover:text-primary">
-                                    <IconBrandInstagram size={20} />
+                                <Link href={instagramUrl} target="_blank" className="text-muted-foreground hover:text-black transition-colors">
+                                    <IconBrandInstagram size={24} />
+                                </Link>
+                            )}
+                            {tiktokUrl && (
+                                <Link href={tiktokUrl} target="_blank" className="text-muted-foreground hover:text-black transition-colors">
+                                    <IconBrandTiktok size={24} />
                                 </Link>
                             )}
                             {youtubeUrl && (
-                                <Link href={youtubeUrl} target="_blank" className="text-muted-foreground hover:text-primary">
-                                    <IconBrandYoutube size={20} />
+                                <Link href={youtubeUrl} target="_blank" className="text-muted-foreground hover:text-black transition-colors">
+                                    <IconBrandYoutube size={24} />
                                 </Link>
                             )}
+                        </div>
+
+                        <div className="pt-6 border-t border-dashed border-slate-200">
+                            <p className="text-xs font-serif italic text-muted-foreground mb-3">Didukung oleh:</p>
+                            <div className="flex items-center gap-6">
+                                <div className="relative w-24 h-24 grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100">
+                                    <Image
+                                        src="/logo-desa.png"
+                                        alt="Logo Desa Kalosi"
+                                        fill
+                                        className="object-contain"
+                                        sizes="96px"
+                                    />
+                                </div>
+                                <div className="relative w-24 h-24 grayscale hover:grayscale-0 transition-all duration-300 opacity-80 hover:opacity-100">
+                                    <Image
+                                        src="/logo-kkn.png"
+                                        alt="Logo KKN Unhas"
+                                        fill
+                                        className="object-contain"
+                                        sizes="96px"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 

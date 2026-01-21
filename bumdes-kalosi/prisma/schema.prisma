@@ -232,6 +232,7 @@ model SiteSettings {
     // Social Media
     facebookUrl     String?  @map("facebook_url")
     instagramUrl    String?  @map("instagram_url")
+    tiktokUrl       String?  @map("tiktok_url")
     youtubeUrl      String?  @map("youtube_url")
 
     updatedAt       DateTime @updatedAt @map("updated_at")

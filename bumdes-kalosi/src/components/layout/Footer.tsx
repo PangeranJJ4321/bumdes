@@ -21,6 +21,7 @@ export async function Footer() {
             operatingHours={hours}
             facebookUrl={settings?.facebookUrl}
             instagramUrl={settings?.instagramUrl}
+            tiktokUrl={settings?.tiktokUrl}
             youtubeUrl={settings?.youtubeUrl}
         />
     )
