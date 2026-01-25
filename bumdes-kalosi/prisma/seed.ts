@@ -1,10 +1,18 @@
 import { PrismaClient, UserRole, ProductCategory } from '@prisma/client'
-import dotenv from "dotenv"
 import bcrypt from "bcryptjs"
+import fs from 'fs'
+import path from 'path'
+import 'dotenv/config'
+import { PrismaPg } from '@prisma/adapter-pg'
 
-dotenv.config()
+const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+})
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+    adapter,
+})
+
 
 const MOCK_PRODUCTS = [
     {
@@ -170,65 +178,84 @@ const MOCK_NEWS = [
     }
 ]
 
+async function seedMenuFromCSV(staffId: string | undefined) {
+    console.log('Seeding Menu from CSV...')
+    const csvPath = path.join(process.cwd(), 'menu_bumdes.csv')
+
+    if (!fs.existsSync(csvPath)) {
+        console.warn('menu_bumdes.csv not found, skipping menu seeding.')
+        return
+    }
+
+    const csvContent = fs.readFileSync(csvPath, 'utf-8')
+    const lines = csvContent.split('\n')
+    // Skip header
+    const dataLines = lines.slice(1).filter(line => line.trim() !== '')
+
+    for (const [index, line] of dataLines.entries()) {
+        try {
+            const trimmedLine = line.trim()
+            if (!trimmedLine) continue
+
+            const parts = trimmedLine.split(',')
+            if (parts.length < 3) continue
+
+            const categoryRaw = parts[0]
+            const name = parts[1]
+            const priceRaw = parts[2]
+            const description = parts.slice(3).join(',')
+
+            const price = parseInt(priceRaw)
+            if (isNaN(price)) continue
+
+            // All imported items are KULINER
+            const category = ProductCategory.KULINER
+
+            const existing = await prisma.product.findFirst({
+                where: {
+                    name: {
+                        equals: name,
+                        mode: 'insensitive'
+                    }
+                }
+            })
+
+            if (existing) {
+                console.log(`Upserting menu item (update): ${name}`)
+                await prisma.product.update({
+                    where: { id: existing.id },
+                    data: {
+                        price,
+                        description,
+                        category,
+                        createdById: staffId // Assign to Kuliner staff
+                    }
+                })
+            } else {
+                console.log(`Upserting menu item (create): ${name}`)
+                await prisma.product.create({
+                    data: {
+                        name,
+                        price,
+                        description,
+                        category,
+                        stock: 100,
+                        isOnlineOrder: true,
+                        imageUrl: "https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes",
+                        createdById: staffId // Assign to Kuliner staff
+                    }
+                })
+            }
+        } catch (err) {
+            console.error(`Error processing CSV line ${index}:`, err)
+        }
+    }
+}
+
 async function main() {
     console.log('Start seeding ...')
 
-    // 1. Seed Products
-    console.log('Seeding Products...')
-    for (const product of MOCK_PRODUCTS) {
-        const p = await prisma.product.upsert({
-            where: { id: product.id },
-            update: {
-                stock: product.stock,
-                category: product.category,
-                price: product.price,
-                promoPrice: product.promoPrice,
-                isPromo: product.isPromo,
-                imageUrl: product.imageUrl,
-                name: product.name,
-                description: product.description,
-            },
-            create: {
-                id: product.id,
-                name: product.name,
-                description: product.description,
-                price: product.price,
-                category: product.category,
-                imageUrl: product.imageUrl,
-                isPromo: product.isPromo,
-                promoPrice: product.promoPrice,
-                stock: product.stock,
-            },
-        })
-        console.log(`Upserted product: ${p.name}`)
-    }
-
-    // 2. Seed News
-    console.log('Seeding News...')
-    for (const news of MOCK_NEWS) {
-        // Upsert by slug
-        const n = await prisma.news.upsert({
-            where: { slug: news.slug },
-            update: {
-                title: news.title,
-                content: news.content,
-                thumbnail: news.thumbnail,
-                author: news.author,
-                publishedAt: news.publishedAt,
-            },
-            create: {
-                title: news.title,
-                slug: news.slug,
-                content: news.content,
-                thumbnail: news.thumbnail,
-                author: news.author,
-                publishedAt: news.publishedAt,
-            },
-        })
-        console.log(`Upserted news: ${n.title}`)
-    }
-
-    // 3. Seed Users
+    // 1. Seed Users FIRST so we have IDs for products
     console.log('Seeding Users...')
     const passwordHash = await bcrypt.hash('password123', 10)
 
@@ -250,8 +277,16 @@ async function main() {
             email: "staff.mart@bumdes.com",
             name: "Staff Mart",
             role: UserRole.STAFF,
+        },
+        {
+            username: "staff_kuliner",
+            email: "staff.kuliner@bumdes.com",
+            name: "Staff Kuliner",
+            role: UserRole.STAFF,
         }
     ]
+
+    const userMap = new Map<string, string>() // email -> id
 
     for (const user of MOCK_USERS) {
         const u = await prisma.user.upsert({
@@ -261,7 +296,6 @@ async function main() {
                 username: user.username,
                 role: user.role,
                 isActive: true,
-                // Do not update password if user exists to avoid overwriting changed passwords
             },
             create: {
                 name: user.name,
@@ -272,7 +306,88 @@ async function main() {
                 isActive: true,
             },
         })
+        userMap.set(user.email, u.id)
         console.log(`Upserted user: ${u.username} (${u.role})`)
+    }
+
+    // 2. Seed Products with Staff Assignment
+    console.log('Seeding Products...')
+
+    // Helper to get staff ID by category
+    const getStaffIdForCategory = (cat: ProductCategory) => {
+        switch (cat) {
+            case ProductCategory.WISATA: return userMap.get("staff.wisata@bumdes.com")
+            case ProductCategory.MART: return userMap.get("staff.mart@bumdes.com")
+            case ProductCategory.KULINER: return userMap.get("staff.kuliner@bumdes.com")
+            default: return userMap.get("admin@bumdes.com") // Fallback
+        }
+    }
+
+    for (const product of MOCK_PRODUCTS) {
+        const staffId = getStaffIdForCategory(product.category)
+
+        const p = await prisma.product.upsert({
+            where: { id: product.id },
+            update: {
+                stock: product.stock,
+                category: product.category,
+                price: product.price,
+                promoPrice: product.promoPrice,
+                isPromo: product.isPromo,
+                imageUrl: product.imageUrl,
+                name: product.name,
+                description: product.description,
+                createdById: staffId
+            },
+            create: {
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                category: product.category,
+                imageUrl: product.imageUrl,
+                isPromo: product.isPromo,
+                promoPrice: product.promoPrice,
+                stock: product.stock,
+                createdById: staffId
+            },
+        })
+        console.log(`Upserted product: ${p.name} (Assigned to: ${staffId})`)
+    }
+
+    // 3. Seed News
+    // console.log('Seeding News...')
+    // for (const news of MOCK_NEWS) {
+    //     // Upsert by slug
+    //     const n = await prisma.news.upsert({
+    //         where: { slug: news.slug },
+    //         update: {
+    //             title: news.title,
+    //             content: news.content,
+    //             thumbnail: news.thumbnail,
+    //             author: news.author,
+    //             publishedAt: news.publishedAt,
+    //         },
+    //         create: {
+    //             title: news.title,
+    //             slug: news.slug,
+    //             content: news.content,
+    //             thumbnail: news.thumbnail,
+    //             author: news.author,
+    //             publishedAt: news.publishedAt,
+    //         },
+    //     })
+    //     console.log(`Upserted news: ${n.title}`)
+    // }
+
+    // 4. Seed CSV Menu (Kuliner)
+    const kulinerStaffId = userMap.get("staff.kuliner@bumdes.com")
+    if (kulinerStaffId) {
+        await seedMenuFromCSV(kulinerStaffId)
+    } else {
+        console.warn('Staff Kuliner not found via map, trying DB lookup or skipping...')
+        const dbUser = await prisma.user.findUnique({ where: { email: "staff.kuliner@bumdes.com" } })
+        await seedMenuFromCSV(dbUser?.id)
     }
 
     console.log('Seeding finished.')

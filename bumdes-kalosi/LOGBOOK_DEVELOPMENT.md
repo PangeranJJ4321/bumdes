@@ -38,3 +38,17 @@ Mengganti engine notifikasi dari Fonnte (unofficial) ke WhatsApp Cloud API resmi
 
 ## Update Identitas Footer
 Memperbarui footer website dengan menambahkan logo identitas (Desa Kalosi & KKN Unhas) serta merapikan tata letak ikon media sosial untuk memberikan kesan yang lebih resmi dan profesional.
+
+## Digitasi Menu & Seeding Database
+Berhasil mengekstrak dan memasukkan data menu dari gambar fisik ke dalam database:
+- **Digitasi:** Mengekstrak 60+ item menu (Nasi, Mie, Minuman, dll) ke format CSV.
+- **Seeding:** Mengimplementasikan script seeding (`prisma/seed.ts`) yang otomatis membaca CSV.
+- **Assignment Staff:** Produk otomatis dipetakan ke penanggung jawab yang sesuai (Staff Kuliner, Wisata, Mart).
+- **Perbaikan Koneksi:** Mengatasi masalah kompatibilitas Prisma v7 dengan menggunakan `PrismaPg` adapter untuk koneksi database yang stabil saat seeding.
+
+## Optimasi Performa & UX
+- **Lazy Loading (Infinite Scroll):** Mengimplementasikan infinite scroll pada halaman `/layanan` menggunakan `useInfiniteQuery` dan `IntersectionObserver`. Memuat produk secara bertahap (per 12 item) untuk mengurangi beban awal halaman.
+- **Optimasi Gambar:** Mengganti tag `<img>` standar dengan `next/image` pada `ProductCard` untuk performa loading yang lebih baik.
+- **Anti-Flicker:** Menambahkan state `opacity` transition pada gambar produk untuk menghilangkan efek flickering/layout shift saat gambar dimuat.
+- **Filter Ketegori Dinamis:** Meningkatkan interaktifitas filter kategori dengan animasi `framer-motion` (sliding pill), ikon representatif, dan badge jumlah produk yang diambil real-time dari database.
+

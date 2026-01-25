@@ -1,0 +1,73 @@
+Category,Name,Price,Description
+Aneka Menu Nasi,Nasi Goreng Biasa,15000,Nasi goreng klasik dengan bumbu khas
+Aneka Menu Nasi,Nasi Goreng Telur,15000,Nasi goreng dengan telur ceplok
+Aneka Menu Nasi,Nasi Goreng Udang,20000,Nasi goreng dengan udang segar
+Aneka Menu Nasi,Nasi Goreng Level Full,20000,Nasi goreng pedas dengan level spesial
+Aneka Menu Nasi,Nasi Goreng Ayam Geprek,25000,Nasi goreng disajikan dengan ayam geprek
+Aneka Menu Nasi,Nasi Goreng Sate Taichan,25000,Nasi goreng dengan sate ayam taichan
+Aneka Menu Nasi,Nasi Ayam Geprek,20000,Nasi putih dengan ayam crispy geprek
+Aneka Menu Nasi,Nasi Ayam Lalapan,20000,Nasi putih ayam goreng lalapan segar
+Aneka Menu Nasi,Nasi Ayam Goreng,20000,Nasi putih dengan ayam goreng dada
+Aneka Menu Nasi,Nasi Sate Taichan Crispy,20000,Nasi putih dengan sate ayam crispy
+Aneka Menu Mie,Mie Goreng Biasa,15000,Mie goreng gurih dan nikmat
+Aneka Menu Mie,Mie Siram + Telur,15000,Mie siram hangat dan lezat
+Aneka Menu Mie,Mie Goreng Udang,20000,Mie goreng dengan udang pilihan
+Aneka Menu Mie,Mie Goreng Ayam Geprek,20000,Mie goreng disajikan dengan ayam geprek
+Aneka Menu Mie,Mie Titti,25000,Mie khas Makassar dengan kuah kental
+Aneka Menu Mie,Mie Goreng Sate Taichan,25000,Mie goreng dengan sate ayam taichan
+Aneka Menu Mie,Mie Kuah,20000,Mie kuah hangat dengan bumbu gurih
+Aneka Menu Mie,Bakso Kuah,20000,Bakso daging sapi kuah kaldu gurih
+Aneka Menu Mie,Pop Mie Goreng,10000,Pop Mie goreng praktis
+Aneka Menu Mie,Pop Mie Soto,10000,Pop Mie kuah soto segar
+Minuman Lainnya,Extra Joss Susu,10000,Energy drink dengan susu
+Minuman Lainnya,Kukubima Susu,10000,Energy drink dengan susu
+Minuman Lainnya,Coca-Cola,10000,Minuman bersoda
+Minuman Lainnya,Sprite,10000,Minuman bersoda lemon-lime
+Minuman Lainnya,Fanta,10000,Minuman bersoda strawberry
+Minuman Lainnya,Beng-Beng Drink,10000,Minuman coklat beng-beng
+Minuman Lainnya,Milo,10000,Minuman coklat malt
+Aneka Jus dan Es,Jus Alpukat,15000,Jus alpukat kental dan creamy
+Aneka Jus dan Es,Jus Buah Naga,15000,Jus buah naga segar
+Aneka Jus dan Es,Jus Jeruk,10000,Jus jeruk segar
+Aneka Jus dan Es,Jus Apel,15000,Jus apel segar
+Aneka Jus dan Es,Melon Mojito,15000,Minuman melon segar
+Aneka Jus dan Es,Strawberry,10000,Jus strawberry segar
+Aneka Jus dan Es,Mangga,10000,Jus mangga kental
+Aneka Jus dan Es,Taro,10000,Minuman taro creamy
+Aneka Jus dan Es,Es Cincau,10000,Minuman cincau segar
+Aneka Jus dan Es,Coklat,10000,Minuman coklat manis
+Aneka Jus dan Es,Es Buah Ice Cream,20000,Es buah segar dengan es krim
+Aneka Jus dan Es,Es Pelangi,15000,Minuman manis warna-warni
+Aneka Jus dan Es,Es Pisang Ijo,15000,Pisang ijo khas Makassar
+Aneka Jus dan Es,Es Pisang Ijo + Ice Cream,20000,Pisang ijo dengan tambahan es krim
+Aneka Teh dan Kopi,Lemon Tea,10000,Teh lemon segar
+Aneka Teh dan Kopi,Green Tea,10000,Teh hijau segar
+Aneka Teh dan Kopi,Thai Tea,10000,Teh susu khas Thailand
+Aneka Teh dan Kopi,Es Teh Manis,10000,Teh manis dingin
+Aneka Teh dan Kopi,Teh Panas,10000,Teh panas hangat
+Aneka Teh dan Kopi,Kopi Hitam,10000,Kopi hitam pekat
+Aneka Teh dan Kopi,Kopi Susu,10000,Kopi dengan susu creamy
+Aneka Teh dan Kopi,Kopi Mix,10000,Perpaduan kopi dan susu
+Aneka Teh dan Kopi,Cappucino,10000,Kopi dengan foam lembut
+Aneka Teh dan Kopi,Mocaccino,10000,Perpaduan kopi dan coklat
+Aneka Teh dan Kopi,Vanila Latte,10000,Kopi latte aroma vanila
+Aneka Teh dan Kopi,Sarabba Panas,10000,Minuman jahe khas Sulawesi
+Aneka Makanan Kekinian,Bakso Goreng,10000,Bakso goreng renyah
+Aneka Makanan Kekinian,Bakso Bakar,10000,Bakso bakar bumbu pedas
+Aneka Makanan Kekinian,Sosis Goreng,10000,Sosis goreng garing
+Aneka Makanan Kekinian,Sosis Bakar,10000,Sosis bakar saus spesial
+Aneka Makanan Kekinian,Bakso Palekko,15000,Bakso bumbu palekko khas
+Aneka Makanan Kekinian,Roti Bakar Coklat,10000,Roti bakar isian coklat
+Aneka Makanan Kekinian,Burger Crispy,20000,Burger ayam crispy
+Aneka Makanan Kekinian,Burger Daging,15000,Burger daging sapi saus keju
+Aneka Makanan Kekinian,Pempek,20000,Pempek khas Palembang
+Aneka Olahan Pisang,Pisang Goreng,15000,Pisang goreng renyah
+Aneka Olahan Pisang,Pisang Nugget,15000,Pisang nugget crispy
+Aneka Olahan Pisang,Pisang Coklat Keju,15000,Pisang goreng topping coklat keju
+Aneka Olahan Pisang,Pisang Palm Sugar,15000,Pisang goreng gula aren
+Aneka Olahan Pisang,Banana Roll,10000,Pisang roll kulit lumpia
+Aneka Olahan Pisang,Cokodok Pisang,10000,Pisang goreng lembut
+Aneka Olahan Pisang,Pisang Epe Original,10000,Pisang epe bakar khas Makassar
+Aneka Olahan Pisang,Pisang Epe Topping,15000,Pisang epe dengan topping
+Aneka Olahan Pisang,Banana Pizza,10000,Pisang panggang manis ala pizza
+Aneka Olahan Pisang,Sanggara Peppe,10000,Pisang goreng khas Sulawesi dengan sambal

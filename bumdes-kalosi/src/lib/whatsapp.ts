@@ -8,6 +8,14 @@ const WHATSAPP_API_URL = "https://graph.facebook.com/v17.0";
  * @param languageCode Language code (default: "id")
  * @param components Template parameters (header, body, etc.)
  */
+const formatToWhatsAppNumber = (phone: string): string => {
+    let clean = phone.replace(/\D/g, '');
+    if (clean.startsWith('0')) {
+        clean = '62' + clean.substring(1);
+    }
+    return clean;
+};
+
 export const sendTemplateMessage = async (
     to: string,
     templateName: string,
@@ -22,10 +30,12 @@ export const sendTemplateMessage = async (
         return { success: false, error: "Missing configuration" };
     }
 
+    const formattedTo = formatToWhatsAppNumber(to);
+
     try {
         const payload = {
             messaging_product: "whatsapp",
-            to: to,
+            to: formattedTo,
             type: "template",
             template: {
                 name: templateName,
@@ -52,7 +62,7 @@ export const sendTemplateMessage = async (
             return { success: false, error: data.error?.message || "Unknown error" };
         }
 
-        console.log("[WhatsApp] Message sent successfully:", data);
+        console.log(`[WhatsApp] Message sent successfully to ${formattedTo}:`, data);
         return { success: true, data };
     } catch (error) {
         console.error("[WhatsApp] Exception sending message:", error);

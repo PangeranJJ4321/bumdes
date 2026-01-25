@@ -22,7 +22,8 @@ export async function POST(req: Request) {
             items,
             totalPrice,
             notes,
-            sellerPhone // Receive sellerPhone explicitly
+            sellerPhone, // Receive sellerPhone explicitly
+            waOptIn // Receive opt-in status
         } = body;
 
         // Basic validation
@@ -46,6 +47,8 @@ export async function POST(req: Request) {
                     totalPrice: Number(totalPrice),
                     status: "PENDING",
                     notes: notes,
+                    waOptIn: waOptIn || false,
+                    waOptInAt: waOptIn ? new Date() : null,
                     itemsDetail: {
                         create: items.map((item: any) => ({
                             productId: item.id,
@@ -64,12 +67,19 @@ export async function POST(req: Request) {
 
             // 1. Send Message to SELLER (Staff)
             if (sellerPhone) {
-                // Template: new_order_detail
-                // Body Params: {{1}}=OrderId, {{2}}=Name, {{3}}=Phone, {{4}}=Method, {{5}}=Total, {{6}}=CleanPhone (for link)
+                // Template: new_order_detail3 (Updated with {{7}} for items)
+                // Body Params: 
+                // {{1}}=OrderId, {{2}}=Name, {{3}}=Phone, {{4}}=Method, {{5}}=Total, 
+                // {{6}}=CleanPhone (for link), {{7}}=ItemsList
 
                 // Sanitize phone for URL (remove + or 0 in front, ensure 62)
                 let cleanPhone = customerPhone.replace(/\D/g, '');
                 if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
+
+                // Construct Item List String (Same as buyer)
+                const itemsListString = items.map((item: any) =>
+                    `- ${item.title} (${item.quantity}x) @ Rp ${Number(item.price).toLocaleString('id-ID')}`
+                ).join("\n");
 
                 const sellerComponents = [
                     {
@@ -80,7 +90,8 @@ export async function POST(req: Request) {
                             { type: "text", text: customerPhone },                                     // {{3}}
                             { type: "text", text: deliveryMethod === 'COURIER' ? 'Kurir' : 'Pickup' }, // {{4}}
                             { type: "text", text: `Rp ${Number(totalPrice).toLocaleString('id-ID')}` }, // {{5}}
-                            { type: "text", text: cleanPhone }                                         // {{6}}
+                            { type: "text", text: cleanPhone },                                        // {{6}}
+                            { type: "text", text: itemsListString }                                    // {{7}} Detail Pesanan
                         ]
                     }
                 ];
@@ -88,8 +99,8 @@ export async function POST(req: Request) {
                 await sendTemplateMessage(sellerPhone, "new_order_detail3", sellerComponents);
             }
 
-            // 2. Send Message to BUYER (Customer)
-            if (customerPhone) {
+            // 2. Send Message to BUYER (Customer) - ONLY IF OPTED IN
+            if (customerPhone && waOptIn) {
                 // Construct Item List String
                 // Example: "- Nasi Goreng (2x) @ Rp 15.000\n- Es Teh (1x) @ Rp 5.000"
                 const itemsListString = items.map((item: any) =>

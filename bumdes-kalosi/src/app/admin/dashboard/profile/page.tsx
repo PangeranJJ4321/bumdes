@@ -39,7 +39,8 @@ import { IconEye, IconEyeOff } from "@tabler/icons-react"
 import { profileFormSchema, passwordFormSchema, ProfileFormValues, PasswordFormValues } from "@/lib/schemas"
 
 export default function ProfilePage() {
-    const { data: user, refetch } = api.user.getProfile.useQuery()
+    const { data: user, isLoading, error, refetch } = api.user.getProfile.useQuery()
+    const utils = api.useUtils() // Correct hook usage at top level
 
     return (
         <SidebarProvider
@@ -66,13 +67,28 @@ export default function ProfilePage() {
 
                     {/* Cards Grid */}
                     <div className="grid gap-6 lg:grid-cols-2 max-w-5xl">
-                        {user ? (
+                        {isLoading ? (
+                            <div className="col-span-2 text-center py-10">
+                                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                                <p>Memuat profil...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="col-span-2 text-center py-10 text-red-500 bg-red-50 rounded-lg border border-red-200">
+                                <p className="font-bold">Gagal memuat profil</p>
+                                <p className="text-sm">{error.message}</p>
+                                <Button variant="outline" className="mt-4" onClick={() => refetch()}>Coba Lagi</Button>
+                            </div>
+                        ) : user ? (
                             <>
                                 <PersonalInfoCard user={user} onSuccess={refetch} />
                                 <SecurityCard />
                             </>
                         ) : (
-                            <div className="col-span-2 text-center py-10">Memuat profil...</div>
+                            <div className="col-span-2 text-center py-10 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+                                <p className="font-semibold">Data pengguna tidak ditemukan</p>
+                                <p className="text-sm">ID Pengguna: {JSON.stringify(utils.user.getProfile.getData() || "Unknown")}</p>
+                                <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>Muat Ulang</Button>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
     id: string;
@@ -18,8 +21,6 @@ interface ProductCardProps {
     reviewCount?: number;
 }
 
-import Link from "next/link";
-
 export function ProductCard({
     id,
     title,
@@ -32,17 +33,25 @@ export function ProductCard({
     rating = 0,
     reviewCount = 0
 }: ProductCardProps) {
+    const [isLoading, setIsLoading] = useState(true);
+
     return (
         <Link href={`/layanan/${id}`} className="block h-full">
             <div className="group bg-white rounded-none shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-300 flex flex-col h-full">
-                <div className="relative h-48 w-full overflow-hidden">
-                    <div className="absolute inset-0 bg-slate-100 animate-pulse" /> {/* Placeholder loading */}
-                    <img
+                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                    <Image
                         src={imageUrl}
                         alt={title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        className={cn(
+                            "object-cover group-hover:scale-110 transition-all duration-700 ease-in-out",
+                            isLoading ? "scale-110 blur-xl grayscale" : "scale-100 blur-0 grayscale-0"
+                        )}
+                        onLoad={() => setIsLoading(false)}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+
+                    <div className="absolute top-3 right-3 flex flex-col gap-2 items-end z-10">
                         <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-xs font-semibold shadow-none border border-black/10 rounded-none text-black">
                             {category}
                         </Badge>

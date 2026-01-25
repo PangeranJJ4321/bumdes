@@ -114,7 +114,12 @@ export function FooterClient({
 
                 <div className="border-t pt-6 text-center text-xs text-muted-foreground">
                     <p>&copy; {new Date().getFullYear()} BUMDes Sumber Kalosi. All rights reserved.</p>
-                    <p className="mt-1">Built with ❤️ for KKN T Gelombang 115 Desa Kalosi</p>
+                    <div className="mt-2 space-x-4">
+                        <Link href="/privacy-terms" className="hover:text-black transition-colors underline decoration-dotted">
+                            Privacy Policy & Terms of Service
+                        </Link>
+                    </div>
+                    <p className="mt-2">Built with ❤️ for KKN T Gelombang 115 Desa Kalosi</p>
                 </div>
             </div>
         </footer>

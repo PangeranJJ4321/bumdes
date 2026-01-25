@@ -70,6 +70,8 @@ model Order {
   deliveryMethod  String        @default("PICKUP") @map("delivery_method") // PICKUP or COURIER
   notes           String?
   whatsappUrl     String?       @map("whatsapp_url")
+  waOptIn         Boolean       @default(false) @map("wa_opt_in")
+  waOptInAt       DateTime?     @map("wa_opt_in_at")
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
 

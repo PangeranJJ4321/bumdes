@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCart } from "react-use-cart";
 import { useState, useEffect } from "react";
 import { Phone, MapPin, User, ShoppingBag, Send, ArrowLeft, CheckCircle2 } from "lucide-react";
@@ -33,6 +34,7 @@ export function CheckoutContent() {
             noHp: "",
             alamatLengkap: "",
             metodePengiriman: "PICKUP",
+            waOptIn: false,
         },
     });
 
@@ -107,7 +109,8 @@ export function CheckoutContent() {
                     items: sellerItems, // ONLY send items for this seller
                     totalPrice: sellerTotal,
                     notes: `Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`,
-                    sellerPhone: targetSellerPhone // Passing sellerPhone for Fonnte API
+                    sellerPhone: targetSellerPhone, // Passing sellerPhone for Fonnte API
+                    waOptIn: data.waOptIn
                 })
             });
 
@@ -208,6 +211,28 @@ export function CheckoutContent() {
                                             </div>
                                             <FieldError errors={[{ message: errors.noHp?.message }]} />
                                         </Field>
+                                    </div>
+                                    <div className="flex items-start space-x-3 pt-4 pb-2">
+                                        <Checkbox
+                                            id="waOptIn"
+                                            checked={watch("waOptIn")}
+                                            onCheckedChange={(checked) => setValue("waOptIn", checked as boolean)}
+                                            className="mt-1"
+                                        />
+                                        <div className="grid gap-1.5 leading-none">
+                                            <label
+                                                htmlFor="waOptIn"
+                                                className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-black"
+                                            >
+                                                Kirim notifikasi status pesanan via WhatsApp
+                                                <span className="ml-2 inline-block bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                                    Disarankan
+                                                </span>
+                                            </label>
+                                            <p className="text-xs text-slate-500 leading-normal">
+                                                Centang agar kami bisa mengirim <strong className="text-black">Detail Pesanan</strong> & <strong className="text-black">Update Pengiriman</strong> Anda secara otomatis tanpa perlu chat manual.
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <Field>

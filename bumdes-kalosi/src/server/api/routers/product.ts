@@ -7,6 +7,72 @@ const productCategoryEnum = z.nativeEnum(ProductCategory)
 const reviewStatusEnum = z.nativeEnum(ReviewStatus)
 
 export const productRouter = createTRPCRouter({
+    getInfinite: publicProcedure
+        .input(
+            z.object({
+                limit: z.number().min(1).max(50).default(12),
+                cursor: z.string().nullish(), // itemId (not index)
+                category: z.string().optional(),
+                search: z.string().optional(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { limit, cursor, category, search } = input
+            const where: any = {}
+
+            // Category Filter
+            if (category && category !== "ALL") {
+                where.category = category as ProductCategory
+            }
+
+            // Search Filter
+            if (search) {
+                where.name = {
+                    contains: search,
+                    mode: 'insensitive' // Requires Prisma Preview Feature "fullTextSearch" or generic simple filtering
+                }
+            }
+
+            const items = await ctx.prisma.product.findMany({
+                take: limit + 1, // Get 1 extra to know if there's next page
+                cursor: cursor ? { id: cursor } : undefined,
+                where,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    reviews: {
+                        select: {
+                            rating: true
+                        }
+                    }
+                }
+            })
+
+            let nextCursor: typeof cursor | undefined = undefined
+            if (items.length > limit) {
+                const nextItem = items.pop() // Remove extra item
+                nextCursor = nextItem?.id
+            }
+
+            return {
+                items,
+                nextCursor,
+            }
+        }),
+
+    getCategories: publicProcedure.query(async ({ ctx }) => {
+        const groups = await ctx.prisma.product.groupBy({
+            by: ['category'],
+            _count: {
+                id: true
+            }
+        })
+
+        return groups.map(g => ({
+            category: g.category,
+            count: g._count.id
+        }))
+    }),
+
     getAll: publicProcedure.query(async ({ ctx }) => {
         return ctx.prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
