@@ -9,16 +9,17 @@ Berikut adalah daftar pekerjaan yang perlu diselesaikan agar sistem siap **LIVE*
 - [x] **PR USER:** Update Template Meta `new_order_detail3` agar menerima variabel detail pesanan (`{{7}}`).
 - [x] Test Akhir (Checkout dan pastikan detail pesanan masuk ke WA Admin).
 
-## 2. Konten Real (Isi Produk & Foto) 📝
-- [x] **Reset Database**: Menghapus data dummy (Pizza/Jus Emas). *(Tadi gagal saat seed, perlu dicek)*.
-- [ ] **Input Data Asli**: Mengisi Nasi Goreng, Tiket Wisata, dll.
-- [ ] **Update Informasi Desa**: Mengisi teks Sejarah, Visi Misi, Alamat Kontak di halaman About/Contact.
+## 2. Konten Real (Sisa Foto Produk & Galeri) �️
+- [x] **Reset Database**: Data dummy sudah dibersihkan.
+- [x] **Input Data Asli**: Produk & Teks-teks dasar sudah diisi.
+- [x] **Update Informasi Desa**: Sejarah & Kontak sudah direvisi (Enrekang -> Sidrap).
+- [ ] **GANTI FOTO**: Banyak foto masih placeholder (Hero Banner, Foto Produk, Galeri). Perlu diganti dengan foto asli dari lokasi.
 
 ## 3. Manajemen SDM (Akun Staff) 👥
-- [ ] Membuat akun Login untuk Kepala Unit Wisata.
-- [ ] Membuat akun Login untuk Kepala Unit Mart.
-- [ ] Membuat akun Login untuk Kepala Unit Kuliner.
-*Tujuannya agar notifikasi pesanan masuk ke HP penanggung jawab masing-masing, bukan ke Ketua BUMDes semua.*
+- [x] Membuat akun Login untuk Kepala Unit Wisata.
+- [x] Membuat akun Login untuk Kepala Unit Mart.
+- [x] Membuat akun Login untuk Kepala Unit Kuliner.
+*Akun staff sudah siap digunakan untuk menerima notifikasi masing-masing.*
 
 ## 4. Deploy (Online-kan Website) 🌐
 - [ ] Beli Domain (contoh: `bumdeskalosi.com`) atau pakai subdomain gratis.

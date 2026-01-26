@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, ShoppingCart } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -45,14 +46,20 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                     <div className="flex items-center justify-between h-full">
                         {/* Logo */}
                         <Link href="/" className="flex items-center space-x-3 shrink-0">
-                            <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center text-white font-serif font-bold text-xl">
-                                K
+                            <div className="relative w-10 h-10">
+                                <Image
+                                    src="/logo-sidrap.png"
+                                    alt="Logo Desa Kalosi"
+                                    fill
+                                    sizes="100px"
+                                    className="object-contain"
+                                />
                             </div>
                             <span className={cn(
                                 "font-serif text-2xl font-bold tracking-tight hidden lg:block",
                                 showOpaque ? "text-black" : "text-white"
                             )}>
-                                BUMDes Kalosi
+                                BUMDes Sumber Kalosi
                             </span>
                             <span className={cn(
                                 "font-serif text-2xl font-bold tracking-tight lg:hidden",
@@ -115,10 +122,16 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                                     <SheetHeader className="text-left mb-8">
                                         <div className="flex items-center space-x-3 mb-2">
-                                            <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center text-white font-serif font-bold text-xl">
-                                                K
+                                            <div className="relative w-10 h-10">
+                                                <Image
+                                                    src="/logo-sidrap.png"
+                                                    alt="Logo Desa Kalosi"
+                                                    fill
+                                                    sizes="100px"
+                                                    className="object-contain"
+                                                />
                                             </div>
-                                            <SheetTitle className="font-serif text-2xl font-bold">BUMDes Kalosi</SheetTitle>
+                                            <SheetTitle className="font-serif text-2xl font-bold">BUMDes Sumber Kalosi</SheetTitle>
                                         </div>
                                         <SheetDescription>
                                             Jelajahi layanan dan informasi kami

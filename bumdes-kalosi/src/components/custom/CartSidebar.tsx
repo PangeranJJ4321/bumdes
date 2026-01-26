@@ -65,9 +65,11 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                             </div>
                             <Button
                                 className="bg-black text-white rounded-none hover:bg-slate-800 px-8"
-                                onClick={() => onOpenChange(false)}
+                                asChild
                             >
-                                Mulai Belanja
+                                <Link href="/layanan" onClick={() => onOpenChange(false)}>
+                                    Mulai Belanja
+                                </Link>
                             </Button>
                         </div>
                     ) : (
@@ -103,7 +105,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                                         <div className="flex items-end justify-between mt-3">
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="text-xs font-mono text-slate-500">
-                                                    @{item.price.toLocaleString('id-ID')}
+                                                    {item.price.toLocaleString('id-ID')}
                                                 </span>
                                                 <span className="font-bold text-base text-black">
                                                     Rp {(item.price * item.quantity!).toLocaleString('id-ID')}
@@ -154,7 +156,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
 
                         <div className="flex flex-col gap-3">
                             <Button
-                                className="w-full bg-black text-white hover:bg-slate-800 rounded-none h-12 uppercase tracking-widest font-bold flex items-center justify-between px-6 group"
+                                className="w-full bg-black text-white hover:bg-slate-800 rounded-none h-12 uppercase tracking-widest font-bold flex items-center justify-center gap-2 px-6 group"
                                 asChild
                             >
                                 <Link href="/checkout" onClick={() => onOpenChange(false)}>

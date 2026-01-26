@@ -85,7 +85,7 @@ export default function CreateGalleryPage() {
             <SidebarInset>
                 <SiteHeader />
                 <div className="flex flex-1 flex-col p-4 pt-0">
-                    <div className="space-y-6 max-w-2xl">
+                    <div className="space-y-6 w-full">
                         <div className="flex items-center justify-between space-y-2 py-4">
                             <div className="flex flex-col gap-2">
                                 <Breadcrumb>
@@ -108,12 +108,12 @@ export default function CreateGalleryPage() {
                             </div>
                         </div>
 
-                        <form onSubmit={onSubmit} className="space-y-8 bg-white p-8 rounded-lg border shadow-sm">
+                        <form onSubmit={onSubmit} className="space-y-8 w-full bg-white p-8 rounded-lg border shadow-sm">
 
                             {/* Image Upload */}
                             <div className="space-y-2">
                                 <Label>Foto Galeri</Label>
-                                <div className="max-w-xl">
+                                <div className="w-full">
                                     <ImageUpload
                                         value={imageUrl}
                                         onChange={(url) => setImageUrl(url)}

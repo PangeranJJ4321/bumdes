@@ -82,9 +82,9 @@ export default function Page({ params }: { params: { id: string } }) {
                                         <p className="text-muted-foreground font-mono">{transaction.id}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-semibold text-lg">BUMDes Kalosi</p>
+                                        <p className="font-semibold text-lg">BUMDes Sumber Kalosi</p>
                                         <p className="text-sm text-muted-foreground">Jl. Poros Kalosi No. 123</p>
-                                        <p className="text-sm text-muted-foreground">Enrekang, Sulawesi Selatan</p>
+                                        <p className="text-sm text-muted-foreground">Sidenreng Rappang, Sulawesi Selatan</p>
                                     </div>
                                 </div>
 

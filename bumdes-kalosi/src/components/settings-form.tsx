@@ -103,7 +103,7 @@ export function SettingsForm() {
                                     <FormItem>
                                         <FormLabel>Nama Organisasi</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="BUMDes Kalosi" {...field} />
+                                            <Input placeholder="BUMDes Sumber Kalosi" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

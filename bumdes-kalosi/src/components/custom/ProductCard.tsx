@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useCart } from "react-use-cart";
+import { toast } from "sonner";
 
 interface ProductCardProps {
     id: string;
@@ -34,11 +36,28 @@ export function ProductCard({
     reviewCount = 0
 }: ProductCardProps) {
     const [isLoading, setIsLoading] = useState(true);
+    const { addItem } = useCart();
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation if button is clicked
+        e.stopPropagation();
+
+        if (price) {
+            addItem({
+                id,
+                title, // react-use-cart expects 'title' or 'name' depending on config, usually 'name' but interface might vary. Let's check CartSidebar which uses 'title'.
+                price: isPromo && promoPrice ? promoPrice : price,
+                imageUrl, // preserving extra fields
+                sellerPhone: "6282393318287", // Default for now, ideally passed prop
+            });
+            toast.success("Produk berhasil ditambahkan ke keranjang");
+        }
+    };
 
     return (
-        <Link href={`/layanan/${id}`} className="block h-full">
+        <div className="block h-full">
             <div className="group bg-white rounded-none shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-300 flex flex-col h-full">
-                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                <Link href={`/layanan/${id}`} className="relative h-48 w-full overflow-hidden bg-slate-100 block">
                     <Image
                         src={imageUrl}
                         alt={title}
@@ -61,12 +80,14 @@ export function ProductCard({
                             </Badge>
                         )}
                     </div>
-                </div>
+                </Link>
 
                 <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">
-                        {title}
-                    </h3>
+                    <Link href={`/layanan/${id}`}>
+                        <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                            {title}
+                        </h3>
+                    </Link>
 
                     {reviewCount > 0 && (
                         <div className="flex items-center gap-1 mb-2">
@@ -111,12 +132,13 @@ export function ProductCard({
                             className="h-9 w-9 rounded-none shadow-sm hover:scale-105 transition-transform"
                             disabled={["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(category)}
                             title={["Wisata", "Perikanan", "WISATA", "KETAPANG"].includes(category) ? "Pembelian hanya tersedia di lokasi" : "Tambah ke Keranjang"}
+                            onClick={handleAddToCart}
                         >
                             <ShoppingCart className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

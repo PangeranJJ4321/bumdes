@@ -8,7 +8,7 @@ export async function Footer() {
 
     const contactPhone = settings?.contactPhone || "+62 812-3456-7890";
     const contactEmail = settings?.contactEmail || "bumdes@kalosi.desa.id";
-    const address = settings?.address || "Desa Kalosi, Enrekang";
+    const address = settings?.address || "Desa Kalosi, Sidenreng Rappang";
     const hours = settings?.operatingHours || "Senin - Minggu: 08:00 - 22:00";
     const contactName = settings?.contactName || "BUMDes Sumber Kalosi";
 

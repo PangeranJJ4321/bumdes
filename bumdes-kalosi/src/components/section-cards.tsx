@@ -110,7 +110,7 @@ export function SectionCards({ stats }: { stats?: Stats }) {
           <div className="text-muted-foreground">
             {isGenericStaff
               ? (user.unit ? `Unit: ${user.unit}` : "Produk Unit Anda")
-              : "BUMDes Kalosi"
+              : "BUMDes Sumber Kalosi"
             }
           </div>
         </CardFooter>

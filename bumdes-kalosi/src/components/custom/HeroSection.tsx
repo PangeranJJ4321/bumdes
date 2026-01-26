@@ -66,11 +66,15 @@ export function HeroSection() {
                     data-aos-delay="200"
                     data-aos-duration="1000"
                 >
-                    <Button size="lg" className="bg-white hover:bg-white/90 text-black min-w-[160px] h-12 rounded-none text-base font-semibold shadow-none">
-                        Pesan Makan
+                    <Button asChild size="lg" className="bg-white hover:bg-white/90 text-black min-w-[160px] h-12 rounded-none text-base font-semibold shadow-none cursor-pointer">
+                        <Link href="/layanan">
+                            Pesan Makan
+                        </Link>
                     </Button>
-                    <Button size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white/10 min-w-[160px] h-12 rounded-none text-base backdrop-blur-sm">
-                        Lihat Wahana
+                    <Button asChild size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white/10 min-w-[160px] h-12 rounded-none text-base backdrop-blur-sm cursor-pointer">
+                        <Link href="/layanan#wisata">
+                            Lihat Wahana
+                        </Link>
                     </Button>
                 </div>
             </div>

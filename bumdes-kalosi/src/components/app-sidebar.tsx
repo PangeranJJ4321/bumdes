@@ -168,7 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-0 hover:bg-transparent"
             >
               <Link href="#" className="flex flex-col items-start gap-1">
-                <span className="font-serif text-xl font-bold tracking-tight text-sidebar-foreground">BUMDes Kalosi</span>
+                <span className="font-serif text-xl font-bold tracking-tight text-sidebar-foreground">BUMDes Sumber Kalosi</span>
                 <span className="text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/60">Management System</span>
               </Link>
             </SidebarMenuButton>

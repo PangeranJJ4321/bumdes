@@ -21,7 +21,7 @@ export default function Home() {
         <section className="py-20 container mx-auto px-4 relative z-30">
           <SectionHeader
             title="Layanan Kami"
-            subtitle="Jelajahi berbagai layanan unggulan dari BUMDes Kalosi"
+            subtitle="Jelajahi berbagai layanan unggulan dari BUMDes Sumber Kalosi"
             align="center"
             className="mb-12"
           />

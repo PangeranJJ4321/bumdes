@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useSearchParams, useRouter } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 
 const resetPasswordSchema = z.object({
     password: z.string().min(8, { message: "Password minimal 8 karakter." }),
@@ -35,6 +36,8 @@ export function ResetPasswordForm({
     const router = useRouter()
     const token = searchParams.get("token")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const {
         register,
@@ -94,24 +97,50 @@ export function ResetPasswordForm({
                 </div>
                 <Field>
                     <FieldLabel htmlFor="password">Password Baru</FieldLabel>
-                    <Input
-                        id="password"
-                        type="password"
-                        placeholder="********"
-                        aria-invalid={!!errors.password}
-                        {...register("password")}
-                    />
+                    <div className="relative">
+                        <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="********"
+                            aria-invalid={!!errors.password}
+                            {...register("password")}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                            ) : (
+                                <Eye className="h-4 w-4" />
+                            )}
+                        </button>
+                    </div>
                     <FieldError errors={[{ message: errors.password?.message }]} />
                 </Field>
                 <Field>
                     <FieldLabel htmlFor="confirmPassword">Konfirmasi Password</FieldLabel>
-                    <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="********"
-                        aria-invalid={!!errors.confirmPassword}
-                        {...register("confirmPassword")}
-                    />
+                    <div className="relative">
+                        <Input
+                            id="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="********"
+                            aria-invalid={!!errors.confirmPassword}
+                            {...register("confirmPassword")}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                            {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                            ) : (
+                                <Eye className="h-4 w-4" />
+                            )}
+                        </button>
+                    </div>
                     <FieldError errors={[{ message: errors.confirmPassword?.message }]} />
                 </Field>
                 <Field>

@@ -30,22 +30,25 @@ export default function AboutPage() {
 
                             <div className="prose prose-lg mx-auto text-muted-foreground leading-relaxed" data-aos="fade-up">
                                 <p>
-                                    BUMDes Sumber Kalosi didirikan pada tahun 2018 sebagai respon atas kebutuhan masyarakat Desa Kalosi akan sebuah lembaga ekonomi yang mampu mengelola potensi lokal secara profesional.
-                                    Berawal dari unit usaha simpan pinjam sederhana, kami terus berkembang mengikuti dinamika kebutuhan warga.
+                                    BUMDes Sumber Kalosi didirikan pada tahun 2017 sebagai langkah awal membangun kemandirian ekonomi desa.
+                                    Dimulai dari unit usaha simpan pinjam, kami hadir untuk memberikan solusi keuangan yang mudah dan terjangkau bagi masyarakat Desa Kalosi.
                                 </p>
                                 <p className="mt-4">
-                                    Pada tahun 2024, di bawah kepemimpinan baru dan semangat digitalisasi, BUMDes Kalosi bertransformasi.
-                                    Kami meluncurkan inisiatif "Desa Digital" yang mengintegrasikan layanan perdagangan, pembayaran, dan informasi desa dalam satu platform terpadu.
-                                    Langkah ini diambil untuk memastikan Desa Kalosi tidak hanya menjadi penonton, tetapi pemain utama dalam era ekonomi digital.
+                                    Dalam kurun waktu 2020 hingga 2025, kami fokus mengembangkan unit usaha riil seperti Penyewaan Lapak Makan, Unit Usaha Ketapang, dan perintisan Wisata Desa.
+                                    Langkah ini diambil untuk memberdayakan potensi kuliner lokal dan memaksimalkan sumber daya alam yang ada di desa.
+                                </p>
+                                <p className="mt-4">
+                                    Kini di tahun 2026, BUMDes Sumber Kalosi melangkah lebih jauh. Dengan semangat transformasi digital, kami mengintegrasikan seluruh layanan dalam satu platform
+                                    untuk memperluas jangkauan pasar dan memudahkan akses layanan bagi seluruh warga Sidenreng Rappang.
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-12">
                                 {[
-                                    { year: "2018", event: "Pendirian BUMDes" },
-                                    { year: "2020", event: "Unit Usaha Dagang" },
-                                    { year: "2023", event: "Unit Wisata Rintisan" },
-                                    { year: "2024", event: "Transformasi Digital" }
+                                    { year: "2017", event: "Pendirian & Unit Simpan Pinjam" },
+                                    { year: "2020", event: "Ekspansi Unit Usaha Riil" },
+                                    { year: "2023", event: "Pengembangan Wisata Desa" },
+                                    { year: "2026", event: "Transformasi Digital" }
                                 ].map((item, idx) => (
                                     <div
                                         key={idx}

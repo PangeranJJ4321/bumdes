@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import { LucideIcon, ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -82,13 +83,13 @@ export function ServiceCard({ title, description, icon: Icon, href, imageUrls, c
                             {description}
                         </p>
 
-                        <div className={cn(
-                            "flex items-center text-sm font-bold pt-2",
-                            isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                        <Link href={href} className={cn(
+                            "inline-flex items-center text-sm font-bold pt-2 hover:text-white/80 transition-colors z-20",
+                            isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
                         )}>
                             <span>Jelajahi Sekarang</span>
                             <ArrowRight className="w-4 h-4 ml-2" />
-                        </div>
+                        </Link>
                     </div>
                 </CardContent>
             </Card>

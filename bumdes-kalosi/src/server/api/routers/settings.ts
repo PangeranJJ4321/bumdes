@@ -12,7 +12,7 @@ export const settingsRouter = createTRPCRouter({
             settings = await ctx.prisma.siteSettings.create({
                 data: {
                     key: "general",
-                    contactName: "BUMDes Kalosi",
+                    contactName: "BUMDes Sumber Kalosi",
                     contactEmail: "admin@bumdeskalosi.com",
                     contactPhone: "6281234567890",
                     address: "Jl. Poros Kalosi No. 1",

@@ -23,7 +23,7 @@ export async function RecentNews() {
             <div className="container mx-auto px-4">
                 <SectionHeader
                     title="Berita Terkini"
-                    subtitle="Informasi terbaru seputar kegiatan dan perkembangan BUMDes Kalosi"
+                    subtitle="Informasi terbaru seputar kegiatan dan perkembangan BUMDes Sumber Kalosi"
                     align="center"
                     className="mb-12"
                 />

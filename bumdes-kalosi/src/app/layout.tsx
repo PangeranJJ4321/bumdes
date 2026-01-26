@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BUMDes Kalosi - Landing Page",
+  title: "BUMDes Sumber Kalosi - Landing Page",
   description: "Website resmi BUMDes Sumber Kalosi",
 };
 

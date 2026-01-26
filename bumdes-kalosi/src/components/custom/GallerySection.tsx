@@ -25,7 +25,7 @@ export function GallerySection() {
                     <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
                         <div className="space-y-4">
                             <span className="text-xs font-bold tracking-[0.2em] text-muted-foreground uppercase">
-                                Kabupaten Enrekang
+                                Kabupaten Sidenreng Rappang
                             </span>
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
                                 Galeri Desa Kalosi
@@ -42,11 +42,6 @@ export function GallerySection() {
                             <Link href="/tentang-kami/galeri">
                                 <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white rounded-none px-8 h-12 text-base">
                                     Lihat Galeri
-                                </Button>
-                            </Link>
-                            <Link href="/kontak">
-                                <Button size="lg" variant="outline" className="border-slate-900 text-slate-900 hover:bg-slate-50 rounded-none px-8 h-12 text-base">
-                                    Hubungi Kami
                                 </Button>
                             </Link>
                         </div>

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 export function CTABanner() {
     return (
@@ -38,9 +39,11 @@ export function CTABanner() {
                     data-aos-delay="200"
                     data-aos-duration="800"
                 >
-                    <Button size="lg" className="h-14 px-8 rounded-none text-lg font-bold bg-white text-black hover:bg-slate-100 shadow-none transition-all hover:translate-y-[-2px]">
-                        Mulai Pesan Sekarang
-                        <ArrowUpRight className="ml-2 w-5 h-5" />
+                    <Button asChild size="lg" className="h-14 px-8 rounded-none text-lg font-bold bg-white text-black hover:bg-slate-100 shadow-none transition-all hover:translate-y-[-2px] cursor-pointer">
+                        <Link href="/layanan">
+                            Mulai Pesan Sekarang
+                            <ArrowUpRight className="ml-2 w-5 h-5" />
+                        </Link>
                     </Button>
                 </div>
 

@@ -1,71 +1,66 @@
 
-const WHATSAPP_API_URL = "https://graph.facebook.com/v17.0";
-
 /**
- * Sends a WhatsApp Template Message via Cloud API
- * @param to Recipient phone number (e.g., "628123456789")
- * @param templateName Name of the template (e.g., "hello_world")
- * @param languageCode Language code (default: "id")
- * @param components Template parameters (header, body, etc.)
+ * WhatsApp Helper for Fonnte API
+ * Documentation: https://docs.fonnte.com/
  */
-const formatToWhatsAppNumber = (phone: string): string => {
+
+export const formatToFonnteNumber = (phone: string): string => {
+    // Fonnte accepts 08xx or 628xx. Let's ensure strict digits.
+    // If it starts with +, remove it.
     let clean = phone.replace(/\D/g, '');
+
+    // Fonnte works best with 08xx or 628xx.
+    // If it's already 62, keep it. If it's 08, keep it.
+    // Let's normalize to 62 for consistency if we want, or just leave it.
+    // Actually, Fonnte documentation often shows '08123...' or '628123...'. 
+    // Let's ensure 62 prefix for international standard consistency.
     if (clean.startsWith('0')) {
         clean = '62' + clean.substring(1);
     }
     return clean;
 };
 
-export const sendTemplateMessage = async (
-    to: string,
-    templateName: string,
-    components: any[] = [],
-    languageCode: string = "id"
+export const sendFonnteMessage = async (
+    target: string,
+    message: string
 ) => {
-    const token = process.env.WHATSAPP_ACCESS_TOKEN;
-    const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-
-    if (!token || !phoneId) {
-        console.error("[WhatsApp] Missing configuration. Check .env");
+    const token = process.env.FONNTE_TOKEN;
+    if (!token) {
+        console.error("[Fonnte] Missing FONNTE_TOKEN in .env");
         return { success: false, error: "Missing configuration" };
     }
 
-    const formattedTo = formatToWhatsAppNumber(to);
+    const formattedTarget = formatToFonnteNumber(target);
 
     try {
-        const payload = {
-            messaging_product: "whatsapp",
-            to: formattedTo,
-            type: "template",
-            template: {
-                name: templateName,
-                language: {
-                    code: languageCode
-                },
-                components: components
-            }
-        };
+        const formData = new FormData();
+        formData.append('target', formattedTarget);
+        formData.append('message', message);
 
-        const response = await fetch(`${WHATSAPP_API_URL}/${phoneId}/messages`, {
+        // Optional: url, filename, schedule, etc. can be added here if needed.
+
+        const response = await fetch("https://api.fonnte.com/send", {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
+                "Authorization": token
             },
-            body: JSON.stringify(payload)
+            body: formData
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            console.error("[WhatsApp] Error response:", JSON.stringify(data, null, 2));
-            return { success: false, error: data.error?.message || "Unknown error" };
+        // Fonnte response example: { "status": true, "target": [ "6282..." ], "message": "..." }
+        // or { "status": false, "reason": "..." }
+
+        if (!data.status) {
+            console.error("[Fonnte] Error response:", data);
+            return { success: false, error: data.reason || "Unknown Fonnte error" };
         }
 
-        console.log(`[WhatsApp] Message sent successfully to ${formattedTo}:`, data);
+        console.log(`[Fonnte] Message sent to ${formattedTarget}:`, data);
         return { success: true, data };
     } catch (error) {
-        console.error("[WhatsApp] Exception sending message:", error);
+        console.error("[Fonnte] Exception:", error);
         return { success: false, error: error };
     }
 };

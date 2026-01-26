@@ -20,21 +20,19 @@ export default function TermsAndPrivacyPage() {
                     <div className="flex">
                         <button
                             onClick={() => setActiveTab('terms')}
-                            className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 ${
-                                activeTab === 'terms'
+                            className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 ${activeTab === 'terms'
                                     ? 'bg-amber-500 text-white border-b-4 border-amber-600'
                                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                            }`}
+                                }`}
                         >
                             📋 Syarat & Ketentuan
                         </button>
                         <button
                             onClick={() => setActiveTab('privacy')}
-                            className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 ${
-                                activeTab === 'privacy'
+                            className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 ${activeTab === 'privacy'
                                     ? 'bg-amber-500 text-white border-b-4 border-amber-600'
                                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                            }`}
+                                }`}
                         >
                             🔒 Kebijakan Privasi
                         </button>
@@ -200,7 +198,7 @@ export default function TermsAndPrivacyPage() {
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                                                 <span className="text-blue-600 font-bold">•</span>
-                                                <p className="text-gray-700 leading-relaxed mb-0">Peningkatan kualitas layanan BUMDes Kalosi.</p>
+                                                <p className="text-gray-700 leading-relaxed mb-0">Peningkatan kualitas layanan BUMDes Sumber Kalosi.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -242,7 +240,7 @@ export default function TermsAndPrivacyPage() {
                                     <div className="flex-1">
                                         <h3 className="text-xl font-bold text-gray-900 mt-0 mb-3">Kontak Kami</h3>
                                         <p className="text-gray-700 leading-relaxed">
-                                            Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami melalui halaman Kontak atau kantor BUMDes Kalosi.
+                                            Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami melalui halaman Kontak atau kantor BUMDes Sumber Kalosi.
                                         </p>
                                     </div>
                                 </div>

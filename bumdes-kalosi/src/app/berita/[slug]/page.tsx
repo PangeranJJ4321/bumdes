@@ -25,7 +25,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     }
 
     return {
-        title: `${news.title} - BUMDes Kalosi`,
+        title: `${news.title} - BUMDes Sumber Kalosi`,
         description: news.content.substring(0, 160).replace(/<[^>]*>?/gm, ""),
     }
 }

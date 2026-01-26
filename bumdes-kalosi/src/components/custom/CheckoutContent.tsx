@@ -109,7 +109,7 @@ export function CheckoutContent() {
                     items: sellerItems, // ONLY send items for this seller
                     totalPrice: sellerTotal,
                     notes: `Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}`,
-                    sellerPhone: targetSellerPhone, // Passing sellerPhone for Fonnte API
+                    sellerPhone: targetSellerPhone,
                     waOptIn: data.waOptIn
                 })
             });
@@ -224,9 +224,9 @@ export function CheckoutContent() {
                                                 htmlFor="waOptIn"
                                                 className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-black"
                                             >
-                                                Kirim notifikasi status pesanan via WhatsApp
+                                                Kirim notifikasi status pesanan via WhatsApp <span className="text-red-500">*</span>
                                                 <span className="ml-2 inline-block bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                                                    Disarankan
+                                                    Wajib
                                                 </span>
                                             </label>
                                             <p className="text-xs text-slate-500 leading-normal">
@@ -234,6 +234,7 @@ export function CheckoutContent() {
                                             </p>
                                         </div>
                                     </div>
+                                    {errors.waOptIn && <p className="text-xs font-medium text-destructive mt-1">{errors.waOptIn.message}</p>}
 
                                     <Field>
                                         <FieldLabel className="text-black font-bold uppercase tracking-widest text-xs font-mono">Metode Pengiriman</FieldLabel>
