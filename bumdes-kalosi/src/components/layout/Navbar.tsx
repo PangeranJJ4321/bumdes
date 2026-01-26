@@ -65,7 +65,7 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                 "font-serif text-2xl font-bold tracking-tight lg:hidden",
                                 showOpaque ? "text-black" : "text-white"
                             )}>
-                                Kalosi
+                                BUMDes Kalosi
                             </span>
                         </Link>
 
