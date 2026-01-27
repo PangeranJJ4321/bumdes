@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { TiptapEditor } from "@/components/ui/tiptap-editor"
 
 // Schema matching backend requirements more closely
 const newsFormSchema = z.object({
@@ -127,11 +128,10 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                             <FormItem>
                                 <FormLabel>Konten Berita</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <TiptapEditor
                                         placeholder="Tulis isi berita di sini..."
-                                        className="min-h-[400px]"
-                                        {...field}
-                                        disabled={isPending}
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />

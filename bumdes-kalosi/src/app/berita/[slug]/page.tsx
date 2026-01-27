@@ -146,26 +146,38 @@ export default async function NewsDetailPage(props: { params: Promise<{ slug: st
                                     Berita Lainnya
                                 </h3>
 
-                                {/* Static Recent Items (Can be made dynamic) */}
+
+                                {/* Dynamic Recent Items */}
                                 <div className="space-y-6">
-                                    {[1, 2, 3].map((i) => (
-                                        <div key={i} className="group cursor-pointer">
-                                            <div className="aspect-video w-full rounded-lg bg-muted mb-3 overflow-hidden">
+                                    {(await prisma.news.findMany({
+                                        where: { NOT: { id: news.id } },
+                                        take: 3,
+                                        orderBy: { publishedAt: 'desc' },
+                                        select: { title: true, slug: true, publishedAt: true, thumbnail: true }
+                                    })).map((item) => (
+                                        <Link key={item.slug} href={`/berita/${item.slug}`} className="group cursor-pointer block">
+                                            <div className="aspect-video w-full rounded-lg bg-muted mb-3 overflow-hidden relative">
                                                 <Image
-                                                    src={`https://placehold.co/400x250/1e293b/ffffff?text=Berita+${i}`}
-                                                    alt="Thumbnail"
-                                                    width={400}
-                                                    height={250}
+                                                    src={item.thumbnail || `https://placehold.co/400x250/1e293b/ffffff?text=${encodeURIComponent(item.title)}`}
+                                                    alt={item.title}
+                                                    fill
                                                     className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                                 />
                                             </div>
-                                            <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                                                Judul berita menarik lainnya yang bisa dibaca pengunjung.
+                                            <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors text-sm">
+                                                {item.title}
                                             </h4>
-                                            <span className="text-xs text-muted-foreground mt-2 block">2 Januari 2026</span>
-                                        </div>
+                                            <span className="text-xs text-muted-foreground mt-2 block">
+                                                {format(new Date(item.publishedAt), "d MMMM yyyy", { locale: id })}
+                                            </span>
+                                        </Link>
                                     ))}
+
+                                    {(await prisma.news.count({ where: { NOT: { id: news.id } } })) === 0 && (
+                                        <p className="text-sm text-muted-foreground">Belum ada berita lainnya.</p>
+                                    )}
                                 </div>
+
 
                                 <div className="mt-8 pt-6 border-t">
                                     <Button asChild variant="outline" className="w-full rounded-full">

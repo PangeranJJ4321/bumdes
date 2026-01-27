@@ -6,7 +6,7 @@ const gallerySchema = z.object({
     title: z.string().min(1),
     category: z.string().optional(),
     description: z.string().optional(),
-    imageUrl: z.string().url(),
+    imageUrl: z.string(), // Allow relative paths
 });
 
 export async function POST(req: NextRequest) {
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(item, { status: 201 });
     } catch (error) {
+        console.error("Gallery create error:", error);
         return NextResponse.json({ error: "Failed to create gallery item" }, { status: 500 });
     }
 }
