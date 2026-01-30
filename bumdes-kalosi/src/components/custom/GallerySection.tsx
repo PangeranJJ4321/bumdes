@@ -11,7 +11,7 @@ export function GallerySection() {
                     <div className="w-full lg:w-1/2 relative">
                         <div className="relative aspect-[4/3] w-full overflow-hidden shadow-xl">
                             <Image
-                                src="https://placehold.co/1200x900/1e293b/ffffff?text=Galeri+Desa+Kalosi"
+                                src="/gallery.png"
                                 alt="Galeri Feature"
                                 fill
                                 className="object-cover"

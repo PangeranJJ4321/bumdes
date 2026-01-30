@@ -5,31 +5,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const ABOUT_IMAGES = [
-    "https://placehold.co/800x600/1e293b/ffffff?text=Suasana+Desa+Kalosi",
-    "https://placehold.co/800x600/064e3b/ffffff?text=Kegiatan+Masyarakat",
-    "https://placehold.co/800x600/3f3f46/ffffff?text=Layanan+BUMDes",
-];
+
 
 const FOCUS_AREAS = [
     "Kuliner Nusantara",
-    "BUMDes Mart",
     "Perikanan",
     "Agen LPG",
     "Wisata Malam"
 ];
 
 export function AboutSection() {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % ABOUT_IMAGES.length);
-        }, 4000);
-
-        return () => clearInterval(interval);
-    }, []);
-
     return (
         <section className="py-24 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
             <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -104,33 +89,20 @@ export function AboutSection() {
                     </div>
                 </div>
 
-                {/* Image Side */}
+                {/* Map Side */}
                 <div
-                    className="relative lg:h-[600px] h-[400px] rounded-3xl overflow-hidden shadow-2xl group"
+                    className="relative w-full min-h-[300px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-2xl group border border-slate-100 bg-slate-100"
                     data-aos="fade-left"
                     data-aos-duration="1000"
                 >
-                    <div className="absolute inset-0 bg-slate-900/10 z-10 group-hover:bg-slate-900/0 transition-colors duration-500" />
-
-                    {ABOUT_IMAGES.map((image, index) => (
-                        <div
-                            key={image}
-                            className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform ${index === currentImageIndex
-                                ? "opacity-100 scale-100"
-                                : "opacity-0 scale-110"
-                                }`}
-                            style={{ backgroundImage: `url('${image}')` }}
-                        />
-                    ))}
-
-                    {/* Floating Badge */}
-                    <div className="absolute bottom-6 left-6 right-6 z-20">
-                        <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/20">
-                            <p className="text-slate-800 font-medium text-center">
-                                "Mengabdi untuk Desa, Melayani dengan Hati"
-                            </p>
-                        </div>
-                    </div>
+                    <iframe
+                        src="https://maps.google.com/maps?q=BUMDes+Sumber+Kalosi,+Dua+Pitue,+Sidenreng+Rappang&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                        className="absolute inset-0 w-full h-full border-0"
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Link Google Maps BUMDes Sumber Kalosi"
+                    />
                 </div>
             </div>
         </section>
