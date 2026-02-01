@@ -35,3 +35,29 @@ export async function POST(req: Request) {
         );
     }
 }
+export async function DELETE(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+        return NextResponse.json(
+            { success: false, message: "Review ID required" },
+            { status: 400 }
+        );
+    }
+
+    try {
+        await prisma.review.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ success: true, message: "Review deleted" });
+
+    } catch (error) {
+        console.error("Review Deletion Error:", error);
+        return NextResponse.json(
+            { success: false, message: "Internal Server Error" },
+            { status: 500 }
+        );
+    }
+}

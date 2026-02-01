@@ -7,7 +7,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import { id } from "date-fns/locale"
-import { Loader2, Send, User } from "lucide-react"
+import { Loader2, Send, User, Trash2 } from "lucide-react"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Comment {
     id: string;
@@ -29,6 +39,7 @@ export function CommentsSection({ newsId }: CommentsSectionProps) {
         email: "",
         content: ""
     })
+    const [deleteId, setDeleteId] = useState<string | null>(null)
 
     const fetchComments = async () => {
         try {
@@ -124,19 +135,29 @@ export function CommentsSection({ newsId }: CommentsSectionProps) {
                     </div>
                 ) : (
                     comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-4 p-6 bg-slate-50 border border-slate-100 animate-in fade-in slide-in-from-bottom-2">
+                        <div key={comment.id} className="flex gap-4 p-6 bg-slate-50 border border-slate-100 animate-in fade-in slide-in-from-bottom-2 group relative">
                             <div className="shrink-0 w-10 h-10 bg-white border border-black/10 flex items-center justify-center">
                                 <User className="w-5 h-5 text-black/40" />
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-bold text-black">{comment.name}</span>
-                                    <span className="text-xs text-slate-400">•</span>
-                                    <span className="text-xs text-slate-500">
-                                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: id })}
-                                    </span>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-black">{comment.name}</span>
+                                        <span className="text-xs text-slate-400">•</span>
+                                        <span className="text-xs text-slate-500">
+                                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: id })}
+                                        </span>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                        onClick={() => setDeleteId(comment.id)}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
                                 </div>
-                                <p className="text-slate-700 leading-relaxed text-sm">
+                                <p className="text-slate-700 leading-relaxed text-sm pr-8">
                                     {comment.content}
                                 </p>
                             </div>
@@ -144,6 +165,41 @@ export function CommentsSection({ newsId }: CommentsSectionProps) {
                     ))
                 )}
             </div>
+
+            <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Komentar?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak dapat dibatalkan. Komentar ini akan dihapus secara permanen.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={async () => {
+                                if (!deleteId) return
+                                try {
+                                    const res = await fetch(`/api/comments?id=${deleteId}`, { method: "DELETE" })
+                                    if (res.ok) {
+                                        toast.success("Komentar dihapus")
+                                        fetchComments()
+                                    } else {
+                                        throw new Error("Gagal menghapus")
+                                    }
+                                } catch (err) {
+                                    toast.error("Gagal menghapus komentar")
+                                } finally {
+                                    setDeleteId(null)
+                                }
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

@@ -8,6 +8,8 @@ interface PageHeroProps {
     backgroundImage?: string
     children?: React.ReactNode
     berita?: boolean
+    backgroundPosition?: string
+    className?: string
 }
 
 export function PageHero({
@@ -15,13 +17,15 @@ export function PageHero({
     subtitle,
     backgroundImage = "https://placehold.co/1920x600/1e293b/ffffff?text=Page+Header",
     children,
-    berita
+    berita,
+    backgroundPosition = "bg-top",
+    className = ""
 }: PageHeroProps) {
     return (
-        <div className={`relative w-full flex items-center justify-center overflow-hidden bg-slate-900 ${berita ? "h-auto min-h-[600px] py-12" : "h-[50vh] min-h-[400px]"}`}>
+        <div className={`relative w-full flex items-center justify-center overflow-hidden bg-slate-900 ${berita ? "h-auto min-h-[600px] py-12" : "h-[90vh] min-h-[600px]"} ${className}`}>
             {/* Background Image */}
             <div
-                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-60 contrast-125"
+                className={`absolute inset-0 z-0 bg-cover ${backgroundPosition} bg-no-repeat opacity-60 contrast-125`}
                 style={{
                     backgroundImage: `url('${backgroundImage}')`
                 }}

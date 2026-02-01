@@ -11,7 +11,7 @@ export function GallerySection() {
                     <div className="w-full lg:w-1/2 relative">
                         <div className="relative aspect-[4/3] w-full overflow-hidden shadow-xl">
                             <Image
-                                src="/gallery.png"
+                                src="/gallery.webp"
                                 alt="Galeri Feature"
                                 fill
                                 className="object-cover"

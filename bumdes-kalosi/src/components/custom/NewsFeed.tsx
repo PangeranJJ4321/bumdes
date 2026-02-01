@@ -58,7 +58,7 @@ export function NewsFeed() {
                 title="Kabar BUMDes"
                 berita={true}
                 subtitle="Informasi terkini, pengumuman, dan aktivitas terbaru dari BUMDes Sumber Kalosi."
-                backgroundImage="https://placehold.co/1920x800/1e293b/ffffff?text=Berita+Desa"
+                backgroundImage="berita.webp"
             >
                 <div className="max-w-4xl mx-auto mt-12">
                     {/* Filter Bar */}

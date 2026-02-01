@@ -11,7 +11,8 @@ export default function ServicesPage() {
                 <PageHero
                     title="Layanan & Produk"
                     subtitle="Temukan berbagai produk unggulan dan layanan terbaik dari BUMDes Sumber Kalosi."
-                    backgroundImage="https://placehold.co/1920x800/0f172a/ffffff?text=Katalog+Produk"
+                    backgroundImage="produk.webp"
+                    backgroundPosition="bg-center"
                 />
 
                 <section className="py-12 container mx-auto px-4 min-h-[600px]">

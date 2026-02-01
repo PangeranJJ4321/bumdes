@@ -3,6 +3,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Menu, ShoppingCart } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -16,6 +17,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ forceOpaque = false }: NavbarProps) {
+    const pathname = usePathname()
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [isCartOpen, setIsCartOpen] = React.useState(false)
     const { totalItems } = useCart()
@@ -76,18 +78,24 @@ export function Navbar({ forceOpaque = false }: NavbarProps) {
                                 { name: "Tentang Kami", href: "/tentang-kami" },
                                 { name: "Layanan & Produk", href: "/layanan" },
                                 { name: "Berita", href: "/berita" },
-                            ].map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={cn(
-                                        "text-xs font-bold uppercase tracking-widest transition-colors hover:text-black whitespace-nowrap",
-                                        showOpaque ? "text-black/70" : "text-white/90 hover:text-white"
-                                    )}
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
+                            ].map((item) => {
+                                const isActive = pathname === item.href
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className={cn(
+                                            "text-xs font-bold uppercase tracking-widest transition-all hover:text-black whitespace-nowrap pb-1 border-b-2",
+                                            showOpaque ? "text-black/70" : "text-white/90 hover:text-white",
+                                            isActive
+                                                ? (showOpaque ? "border-black text-black" : "border-white text-white")
+                                                : "border-transparent"
+                                        )}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                )
+                            })}
                         </nav>
 
                         {/* Actions */}

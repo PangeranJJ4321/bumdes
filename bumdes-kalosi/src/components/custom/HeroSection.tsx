@@ -5,36 +5,18 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Utensils, Ticket, ShoppingBag } from "lucide-react"
 import { useState, useEffect } from "react"
 
-const HERO_IMAGES = [
-    "https://placehold.co/1920x1080/064e3b/ffffff?text=Background+Wisata+Malam",
-    "https://placehold.co/1920x1080/1e293b/ffffff?text=Kuliner+Nusantara",
-    "https://placehold.co/1920x1080/3f3f46/ffffff?text=Belanja+Oleh-Oleh",
-]
+const HERO_IMAGE = "home.webp"
 
 export function HeroSection() {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0)
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % HERO_IMAGES.length)
-        }, 5000)
-
-        return () => clearInterval(interval)
-    }, [])
-
     return (
         <div className="relative h-[90vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-slate-900">
-            {/* Background Image Carousel */}
-            {HERO_IMAGES.map((image, index) => (
-                <div
-                    key={image}
-                    className={`absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${index === currentImageIndex ? "opacity-50" : "opacity-0"
-                        } contrast-125`}
-                    style={{
-                        backgroundImage: `url('${image}')`
-                    }}
-                />
-            ))}
+            {/* Background Image */}
+            <div
+                className="absolute inset-0 z-0 bg-cover bg-top bg-no-repeat opacity-50 contrast-125 transition-opacity duration-1000 ease-in-out"
+                style={{
+                    backgroundImage: `url('${HERO_IMAGE}')`
+                }}
+            />
 
             {/* Gradient Overlay */}
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-transparent to-black/30" />

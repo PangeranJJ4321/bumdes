@@ -13,7 +13,7 @@ export default function AboutPage() {
                 <PageHero
                     title="Tentang Kami"
                     subtitle="Mengenal lebih dekat visi, misi, dan perjalanan BUMDes Sumber Kalosi."
-                    backgroundImage="https://placehold.co/1920x800/0f172a/ffffff?text=Tentang+Kami"
+                    backgroundImage="about.webp"
                 />
 
                 <VisionMission />
