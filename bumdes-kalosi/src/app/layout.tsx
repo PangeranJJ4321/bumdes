@@ -47,6 +47,11 @@ export const metadata: Metadata = {
     description: "Website resmi BUMDes Sumber Kalosi",
     images: ["/logo-sidrap.png"],
   },
+  icons: {
+    icon: "/logo-sidrap.png",
+    shortcut: "/logo-sidrap.png",
+    apple: "/logo-sidrap.png",
+  },
 };
 
 export default function RootLayout({
