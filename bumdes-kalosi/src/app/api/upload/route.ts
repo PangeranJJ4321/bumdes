@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         let buffer = Buffer.from(bytes);
 
         // Define upload directory
-        const uploadDir = join(process.cwd(), "storage", "uploads");
+        const uploadDir = process.env.STORAGE_DIR || join(process.cwd(), "storage", "uploads");
 
         // Ensure directory exists
         try {

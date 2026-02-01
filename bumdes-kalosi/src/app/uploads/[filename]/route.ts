@@ -15,7 +15,8 @@ export async function GET(
     }
 
     // Construct path to storage/uploads
-    const filePath = join(process.cwd(), "storage", "uploads", filename);
+    const storageDir = process.env.STORAGE_DIR || join(process.cwd(), "storage", "uploads");
+    const filePath = join(storageDir, filename);
 
     if (!existsSync(filePath)) {
         return new NextResponse("File not found", { status: 404 });
