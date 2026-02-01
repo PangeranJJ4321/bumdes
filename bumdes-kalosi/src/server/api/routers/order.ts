@@ -50,8 +50,8 @@ export const orderRouter = createTRPCRouter({
 
       // 2. Validate and Build Item Snapshots & Calculate Total
       let totalPrice = 0;
-      const itemSnapshots = [];
-      const orderItemsData = [];
+      const itemSnapshots: any[] = [];
+      const orderItemsData: any[] = [];
 
       for (const item of input.items) {
         const product = productMap.get(item.productId);
@@ -124,8 +124,8 @@ export const orderRouter = createTRPCRouter({
 
       // 2. Build info
       let totalPrice = 0;
-      const itemSnapshots = [];
-      const orderItemsData = [];
+      const itemSnapshots: any[] = [];
+      const orderItemsData: any[] = [];
 
       for (const item of input.items) {
         const product = productMap.get(item.productId);

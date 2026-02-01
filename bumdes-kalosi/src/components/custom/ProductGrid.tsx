@@ -58,7 +58,7 @@ export function ProductGrid() {
         }
     );
 
-    const observer = useRef<IntersectionObserver>();
+    const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback(
         (node: HTMLDivElement) => {
             if (isLoading || isFetchingNextPage) return;

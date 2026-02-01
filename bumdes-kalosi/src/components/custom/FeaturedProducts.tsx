@@ -43,6 +43,7 @@ export async function FeaturedProducts() {
                             <ProductCard
                                 key={product.id}
                                 {...product}
+                                promoPrice={product.promoPrice ?? undefined}
                                 // Map DB 'name' to 'title' prop of ProductCard
                                 title={product.name}
                                 description={product.description || ""}

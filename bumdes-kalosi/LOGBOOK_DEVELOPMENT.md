@@ -52,3 +52,18 @@ Berhasil mengekstrak dan memasukkan data menu dari gambar fisik ke dalam databas
 - **Anti-Flicker:** Menambahkan state `opacity` transition pada gambar produk untuk menghilangkan efek flickering/layout shift saat gambar dimuat.
 - **Filter Ketegori Dinamis:** Meningkatkan interaktifitas filter kategori dengan animasi `framer-motion` (sliding pill), ikon representatif, dan badge jumlah produk yang diambil real-time dari database.
 
+
+## Kesiapan Produksi (Fix Build & Checkout Refactor)
+Menyelesaikan berbagai isu build production dan menyederhanakan alur checkout:
+- **Refactor Checkout:** Menyederhanakan alur dengan metode 'Manual Confirmation'. Menghapus ketergantungan API backend Fonnte dan menggantinya dengan redirect window.open ke WhatsApp Client. Ini memastikan pesan selalu terkirim tanpa tergantung server pihak ketiga yang sering down.
+- **Validasi Build:** Menyelesaikan 13+ error TypeScript dan konfigurasi Next.js yang menghalangi build production, antara lain:
+  1. NewsFeed.tsx: Mengganti varian button invalid 'white' ke 'ghost'.
+  2. ProductGrid.tsx: Inisialisasi useRef dengan null (strict typing).
+  3. data-table.tsx: Menambahkan pengecekan aman (safeguard) untuk akses properti accessorKey.
+  4. ProductForm.tsx: Casting manual pada zodResolver untuk kompatibilitas versi.
+  5. Dashboard Router: Casting Enum ProductCategory pada filter query Prisma.
+  6. Order Router: Menambahkan tipe eksplisit any[] pada array kosong untuk menghindari implicit any.
+  7. Suspense Boundary: Menambahkan Suspense pada halaman /layanan dan /admin/dashboard karena penggunaan useSearchParams.
+  8. Route Handlers: Memperbaiki tipe NextResponse dan handling error Zod pada API routes.
+- **Cleanup:** Membersihkan variabel environment dan file whatsapp.ts yang tidak lagi digunakan.
+

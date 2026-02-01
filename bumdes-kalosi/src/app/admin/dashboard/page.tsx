@@ -16,7 +16,9 @@ import { useSearchParams } from "next/navigation"
 
 import { useState, useEffect } from "react"
 
-export default function Page() {
+import { Suspense } from "react"
+
+function DashboardContent() {
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get("tab") || "overview"
   const tabParam = searchParams.get("tab")
@@ -39,6 +41,40 @@ export default function Page() {
   }, [tabParam])
 
   return (
+    <div className="flex flex-1 flex-col p-4 pt-0">
+      <Tabs defaultValue={defaultTab} className="space-y-4">
+        <div className="flex items-center justify-between px-4 lg:px-6 mt-4">
+          <TabsList>
+            <TabsTrigger value="overview" className="text-base px-4 py-2">Overview</TabsTrigger>
+            <TabsTrigger value="reports" className="text-base px-4 py-2">Rekap & Laporan</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <SectionCards stats={stats} />
+              <div className="px-4 lg:px-6">
+                <ChartAreaInteractive data={chartData || []} />
+              </div>
+              <DataTable
+                data={activity?.recentOrders || []}
+                reviews={activity?.recentReviews || []}
+                onUnitChange={setActivityUnit}
+                selectedUnit={activityUnit}
+              />
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="reports" className="space-y-4">
+          <DashboardReports />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+export default function Page() {
+  return (
     <SidebarProvider
       style={
         {
@@ -50,35 +86,9 @@ export default function Page() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col p-4 pt-0">
-          <Tabs defaultValue={defaultTab} className="space-y-4">
-            <div className="flex items-center justify-between px-4 lg:px-6 mt-4">
-              <TabsList>
-                <TabsTrigger value="overview" className="text-base px-4 py-2">Overview</TabsTrigger>
-                <TabsTrigger value="reports" className="text-base px-4 py-2">Rekap & Laporan</TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value="overview" className="space-y-4">
-              <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                  <SectionCards stats={stats} />
-                  <div className="px-4 lg:px-6">
-                    <ChartAreaInteractive data={chartData || []} />
-                  </div>
-                  <DataTable
-                    data={activity?.recentOrders || []}
-                    reviews={activity?.recentReviews || []}
-                    onUnitChange={setActivityUnit}
-                    selectedUnit={activityUnit}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="reports" className="space-y-4">
-              <DashboardReports />
-            </TabsContent>
-          </Tabs>
-        </div>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading dashboard...</div>}>
+          <DashboardContent />
+        </Suspense>
       </SidebarInset>
     </SidebarProvider>
   )

@@ -55,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   interface NavItem {
     title: string
     url: string
-    icon: React.ElementType
+    icon?: any
     roles: string[]
     excludeUnits?: string[]
     onlyUnits?: string[]

@@ -80,7 +80,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                                     stock: product.stock,
                                     category: product.category,
                                     imageUrl: product.imageUrl || "",
-
+                                    isOnlineOrder: product.isOnlineOrder,
                                 }}
                                 isEdit
                             />

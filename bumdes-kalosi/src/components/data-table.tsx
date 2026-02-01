@@ -311,13 +311,14 @@ export function DataTable({
   // Dynamic Column Headers based on activeTab
   const dynamicColumns = React.useMemo(() => {
     return columns.map(col => {
-      if (col.accessorKey === 'status') {
+      // TypeScript requires checking existence before access on union type
+      if ('accessorKey' in col && col.accessorKey === 'status') {
         return { ...col, header: activeTab === 'transactions' ? 'Status' : 'Rating' }
       }
-      if (col.accessorKey === 'target') {
+      if ('accessorKey' in col && col.accessorKey === 'target') {
         return { ...col, header: () => <div className="w-full text-right">{activeTab === 'transactions' ? 'Total (Rp)' : 'Produk'}</div> }
       }
-      if (col.accessorKey === 'reviewer') {
+      if ('accessorKey' in col && col.accessorKey === 'reviewer') {
         return { ...col, header: activeTab === 'transactions' ? 'Pelanggan' : 'Komentar' }
       }
       return col

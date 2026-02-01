@@ -84,7 +84,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     })
 
     const form = useForm<ProductFormValues>({
-        resolver: zodResolver(productFormSchema),
+        resolver: zodResolver(productFormSchema) as any,
         defaultValues: initialData || defaultValues,
     })
 

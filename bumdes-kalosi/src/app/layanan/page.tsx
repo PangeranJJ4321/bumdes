@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/custom/PageHero";
@@ -16,7 +17,9 @@ export default function ServicesPage() {
                 />
 
                 <section className="py-12 container mx-auto px-4 min-h-[600px]">
-                    <ProductGrid />
+                    <Suspense fallback={<div className="h-96 w-full flex items-center justify-center">Memuat layanan...</div>}>
+                        <ProductGrid />
+                    </Suspense>
                 </section>
             </main>
             <Footer />

@@ -89,7 +89,7 @@ export function NewsFeed() {
 
                             <div className="bg-slate-100/50 rounded-xl p-1 flex items-center h-12">
                                 <Button
-                                    variant={viewMode === "grid" ? "white" : "ghost"}
+                                    variant="ghost"
                                     size="icon"
                                     className={`h-10 w-10 rounded-lg transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-slate-700"}`}
                                     onClick={() => setViewMode("grid")}
@@ -97,7 +97,7 @@ export function NewsFeed() {
                                     <LayoutGrid className="w-4 h-4" />
                                 </Button>
                                 <Button
-                                    variant={viewMode === "list" ? "white" : "ghost"}
+                                    variant="ghost"
                                     size="icon"
                                     className={`h-10 w-10 rounded-lg transition-all ${viewMode === "list" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-slate-700"}`}
                                     onClick={() => setViewMode("list")}

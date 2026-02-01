@@ -1,4 +1,3 @@
-```
 
 import { prisma } from "@/server/db"
 import { notFound } from "next/navigation"
@@ -42,7 +41,7 @@ export default async function EditGalleryPage(props: { params: Promise<{ id: str
                 <SiteHeader />
                 <div className="flex flex-1 flex-col p-4 pt-0">
                     <div className="space-y-6 max-w-2xl">
-                         <div className="flex items-center justify-between space-y-2 py-4">
+                        <div className="flex items-center justify-between space-y-2 py-4">
                             <div className="flex flex-col gap-2">
                                 <Breadcrumb>
                                     <BreadcrumbList>
@@ -55,7 +54,7 @@ export default async function EditGalleryPage(props: { params: Promise<{ id: str
                                         </BreadcrumbItem>
                                         <BreadcrumbSeparator />
                                         <BreadcrumbItem>
-                                                <BreadcrumbPage>Edit Foto</BreadcrumbPage>
+                                            <BreadcrumbPage>Edit Foto</BreadcrumbPage>
                                         </BreadcrumbItem>
                                     </BreadcrumbList>
                                 </Breadcrumb>
@@ -73,4 +72,4 @@ export default async function EditGalleryPage(props: { params: Promise<{ id: str
         </SidebarProvider>
     )
 }
-```
+

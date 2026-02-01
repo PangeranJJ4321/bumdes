@@ -42,13 +42,13 @@ export async function POST(request: NextRequest) {
                 const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
                 filename = `${uniqueSuffix}-${nameWithoutExt}.webp`;
 
-                buffer = await sharp(buffer)
+                buffer = (await sharp(buffer)
                     .resize(1920, 1080, { // Max dimensions
                         fit: 'inside',
                         withoutEnlargement: true
                     })
                     .webp({ quality: 80 })
-                    .toBuffer();
+                    .toBuffer()) as any;
 
             } catch (sharpError) {
                 console.error("Optimization failed, saving original:", sharpError);

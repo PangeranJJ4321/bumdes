@@ -215,7 +215,7 @@ export const dashboardRouter = createTRPCRouter({
                         product: {
                             OR: [
                                 { createdById: user.id },
-                                user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                                user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
                             ]
                         }
                     },
