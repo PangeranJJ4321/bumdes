@@ -15,7 +15,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     const params = await props.params;
     const news = await prisma.news.findUnique({
         where: { slug: params.slug },
-        select: { title: true, content: true }
+        select: { title: true, content: true, publishedAt: true, author: true, thumbnail: true }
     })
 
     if (!news) {
@@ -27,6 +27,30 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     return {
         title: `${news.title} - BUMDes Sumber Kalosi`,
         description: news.content.substring(0, 160).replace(/<[^>]*>?/gm, ""),
+        openGraph: {
+            title: news.title,
+            description: news.content.substring(0, 160).replace(/<[^>]*>?/gm, ""),
+            url: `https://bumdessumberkalosi.com/berita/${params.slug}`,
+            siteName: "BUMDes Sumber Kalosi",
+            locale: "id_ID",
+            type: "article",
+            publishedTime: news.publishedAt.toISOString(),
+            authors: [news.author],
+            images: [
+                {
+                    url: news.thumbnail || "https://bumdessumberkalosi.com/og-default.png",
+                    width: 1200,
+                    height: 630,
+                    alt: news.title,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: news.title,
+            description: news.content.substring(0, 160).replace(/<[^>]*>?/gm, ""),
+            images: [news.thumbnail || "https://bumdessumberkalosi.com/og-default.png"],
+        },
     }
 }
 
@@ -59,7 +83,7 @@ export default async function NewsDetailPage(props: { params: Promise<{ slug: st
                 {/* Hero Section */}
                 <div className="relative h-[60vh] min-h-[500px] w-full flex items-end justify-start overflow-hidden bg-slate-900">
                     <Image
-                        src={news.thumbnail || "https://placehold.co/1920x800/1e293b/ffffff?text=BUMDes+Kalosi"}
+                        src={news.thumbnail || "https://bumdessumberkalosi.com/og-default.png"}
                         alt={news.title}
                         fill
                         className="object-cover opacity-60"
