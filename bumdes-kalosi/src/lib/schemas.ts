@@ -10,9 +10,7 @@ export const checkoutSchema = z.object({
     noHp: z.string().min(10, "Nomor HP tidak valid (min 10 digit)").max(15, "Nomor HP terlalu panjang"),
     alamatLengkap: z.string().optional(),
     metodePengiriman: z.enum(["PICKUP", "COURIER"]),
-    waOptIn: z.boolean().refine(val => val === true, {
-        message: "Anda wajib menyetujui notifikasi WhatsApp untuk melanjutkan.",
-    }),
+    waOptIn: z.boolean().optional(),
 }).superRefine((data, ctx) => {
     if (data.metodePengiriman === 'COURIER') {
         if (!data.alamatLengkap || data.alamatLengkap.length < 10) {

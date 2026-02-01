@@ -123,10 +123,37 @@ export function CheckoutContent() {
             // Remove items from cart
             sellerItems.forEach(item => removeItem(item.id));
 
-            // Success notification - NO REDIRECT
-            toast.success("Pesanan berhasil dibuat! Notifikasi WhatsApp telah dikirim.");
+            // Success notification
+            toast.success("Pesanan disimpan! Mengalihkan ke WhatsApp...");
 
-            // Optional: Redirect to home or order history
+            // Construct WhatsApp Message
+            const orderIdShort = result.orderId.substring(0, 8).toUpperCase();
+
+            // Format phone number (remove leading 0 or +62, then add 62)
+            let sellerWa = targetSellerPhone.replace(/\D/g, '');
+            if (sellerWa.startsWith('0')) sellerWa = '62' + sellerWa.substring(1);
+
+            const itemsListString = sellerItems.map((item) =>
+                `- ${(item as any).title || item.name} (${item.quantity}x) : Rp ${Number(item.price).toLocaleString('id-ID')}`
+            ).join("\n");
+
+            const message = `Halo, saya ingin konfirmasi pesanan *#${orderIdShort}*
+
+Nama: ${data.nama}
+No HP: ${data.noHp}
+Metode: ${data.metodePengiriman === 'COURIER' ? 'Diantar Kurir' : 'Ambil Sendiri'}
+Total: *Rp ${sellerTotal.toLocaleString('id-ID')}*
+${data.metodePengiriman === 'COURIER' ? `Alamat: ${data.alamatLengkap}\n` : ''}
+*Detail Pesanan:*
+${itemsListString}
+
+Mohon diproses. Terima kasih.`;
+
+            // Open WhatsApp
+            const waUrl = `https://wa.me/${sellerWa}?text=${encodeURIComponent(message)}`;
+            window.open(waUrl, '_blank');
+
+            // Redirect
             router.push('/');
 
         } catch (error: any) {
@@ -212,29 +239,7 @@ export function CheckoutContent() {
                                             <FieldError errors={[{ message: errors.noHp?.message }]} />
                                         </Field>
                                     </div>
-                                    <div className="flex items-start space-x-3 pt-4 pb-2">
-                                        <Checkbox
-                                            id="waOptIn"
-                                            checked={watch("waOptIn")}
-                                            onCheckedChange={(checked) => setValue("waOptIn", checked as boolean)}
-                                            className="mt-1"
-                                        />
-                                        <div className="grid gap-1.5 leading-none">
-                                            <label
-                                                htmlFor="waOptIn"
-                                                className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-black"
-                                            >
-                                                Kirim notifikasi status pesanan via WhatsApp <span className="text-red-500">*</span>
-                                                <span className="ml-2 inline-block bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                                                    Wajib
-                                                </span>
-                                            </label>
-                                            <p className="text-xs text-slate-500 leading-normal">
-                                                Centang agar kami bisa mengirim <strong className="text-black">Detail Pesanan</strong> & <strong className="text-black">Update Pengiriman</strong> Anda secara otomatis tanpa perlu chat manual.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {errors.waOptIn && <p className="text-xs font-medium text-destructive mt-1">{errors.waOptIn.message}</p>}
+                                    {/* WA Opt-in removed by request - Manual staff contact flow */}
 
                                     <Field>
                                         <FieldLabel className="text-black font-bold uppercase tracking-widest text-xs font-mono">Metode Pengiriman</FieldLabel>
