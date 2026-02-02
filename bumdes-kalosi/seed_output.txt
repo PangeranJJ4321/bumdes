@@ -1,0 +1,39 @@
+Start seeding ...
+Seeding Users...
+Upserted user: admin (SUPER_ADMIN)
+Upserted user: staff_wisata (STAFF)
+Upserted user: staff_mart (STAFF)
+PrismaClientKnownRequestError: 
+Invalid `prisma.user.upsert()` invocation in
+G:\Proker Individu\bumdes-kalosi\prisma\seed.ts:187:37
+
+  184 const userMap = new Map<string, string>() // email -> id
+  185 
+  186 for (const user of MOCK_USERS) {
+→ 187     const u = await prisma.user.upsert(
+Unique constraint failed on the fields: (`username`)
+    at qr.handleRequestError (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at qr.handleAndLogRequestError (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at qr.request (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async a (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:805:24)
+    at async main (G:\Proker Individu\bumdes-kalosi\prisma\seed.ts:187:19) {
+  code: 'P2002',
+  meta: {
+    modelName: 'User',
+    driverAdapterError: DriverAdapterError: UniqueConstraintViolation
+        at PrismaPgAdapter.onError (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+adapter-pg@7.2.0\node_modules\@prisma\adapter-pg\dist\index.js:687:11)
+        at PrismaPgAdapter.performIO (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+adapter-pg@7.2.0\node_modules\@prisma\adapter-pg\dist\index.js:682:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at async PrismaPgAdapter.queryRaw (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+adapter-pg@7.2.0\node_modules\@prisma\adapter-pg\dist\index.js:602:30)
+        at async <anonymous> (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\tracing.ts:68:22)
+        at async fr (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\tracing.ts:56:10)
+        at async e.interpretNode (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:190:26)
+        at async e.interpretNode (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:217:41)
+        at async e.interpretNode (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:276:41)
+        at async e.run (G:\Proker Individu\bumdes-kalosi\node_modules\.pnpm\@prisma+client@7.2.0_prisma@7.2.0_@types+react@19.2.7_react-dom@19.2.3_react@19.2.3__react@19_bzt7asp4azsbbc2xswsn3upm6u\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:96:23) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.2.0'
+}

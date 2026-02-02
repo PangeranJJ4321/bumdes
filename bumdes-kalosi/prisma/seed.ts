@@ -15,6 +15,58 @@ const prisma = new PrismaClient({
 
 
 
+
+// Map of Product Name from CSV -> Filename Stem (without extension)
+// Use this for typos or mismatches.
+// Keys are lowercased product names. Values are the actual filename stems found in the folder.
+const MANUAL_MAPPING: Record<string, string> = {
+    "jus buah naga": "jus bua naga",
+    "mie goreng sate taichan": "mie goreng sate taichen",
+    "nasi sate taichan crispy": "nasi sate taichen kripsi",
+    "pisang epe topping": "pisang epe toping",
+    "sanggara peppe": "sanggara pappe",
+    "vanila latte": "vanila late",
+    "strawberry": "strawbery",
+    "teh manis": "es tea manis",
+    "es teh manis": "es tea manis",
+    "cappucino": "kapuchino",
+    "mocaccino": "mocachino",
+    "mie goreng ayam geprek": "miew goreng ayam geprek",
+    "burger crispy": "burger krispy",
+}
+
+function findImageForProduct(productName: string): string | null {
+    const normalize = (s: string) => s.toLowerCase().trim()
+    const nameLower = normalize(productName)
+
+    // Determine the target filename stem (either from mapping or product name itself)
+    let targetStem = nameLower
+    if (MANUAL_MAPPING[nameLower]) {
+        targetStem = MANUAL_MAPPING[nameLower]
+    }
+
+    // 2. Try direct match with extensions
+    // If running on VPS, STORAGE_DIR might be set, but for the seed script finding files to LINK,
+    // we look in the local repository folder 'storage-seed'.
+    const searchDir = path.join(process.cwd(), 'storage-seed')
+
+    if (!fs.existsSync(searchDir)) {
+        // Silent fail or warn once? excessive warnings are annoying, just return null
+        return null
+    }
+
+    const files = fs.readdirSync(searchDir)
+
+    for (const file of files) {
+        const fileStem = path.parse(file).name.toLowerCase()
+        if (fileStem === targetStem) {
+            return file // Return the full filename with whatever extension it has
+        }
+    }
+
+    return null
+}
+
 async function seedMenuFromCSV(staffId: string | undefined) {
     console.log('Seeding Menu from CSV...')
     const csvPath = path.join(process.cwd(), 'menu_bumdes.csv')
@@ -48,6 +100,11 @@ async function seedMenuFromCSV(staffId: string | undefined) {
             // All imported items are KULINER
             const category = ProductCategory.KULINER
 
+            const imageFilename = findImageForProduct(name)
+            const imageUrl = imageFilename
+                ? `/uploads/${imageFilename}`
+                : "https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes"
+
             const existing = await prisma.product.findFirst({
                 where: {
                     name: {
@@ -58,18 +115,19 @@ async function seedMenuFromCSV(staffId: string | undefined) {
             })
 
             if (existing) {
-                console.log(`Upserting menu item (update): ${name}`)
+                console.log(`Upserting menu item (update): ${name} -> ${imageUrl}`)
                 await prisma.product.update({
                     where: { id: existing.id },
                     data: {
                         price,
                         description,
                         category,
+                        imageUrl: imageUrl,
                         createdById: staffId // Assign to Kuliner staff
                     }
                 })
             } else {
-                console.log(`Upserting menu item (create): ${name}`)
+                console.log(`Upserting menu item (create): ${name} -> ${imageUrl}`)
                 await prisma.product.create({
                     data: {
                         name,
@@ -78,7 +136,7 @@ async function seedMenuFromCSV(staffId: string | undefined) {
                         category,
                         stock: 100,
                         isOnlineOrder: true,
-                        imageUrl: "https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes",
+                        imageUrl: imageUrl,
                         createdById: staffId // Assign to Kuliner staff
                     }
                 })

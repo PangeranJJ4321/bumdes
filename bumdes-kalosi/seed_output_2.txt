@@ -1,0 +1,81 @@
+Start seeding ...
+Seeding Users...
+Upserted user: admin (SUPER_ADMIN)
+Upserted user: staff_wisata (STAFF)
+Upserted user: staff_mart (STAFF)
+Upserted user: staff_kuliner (STAFF)
+Seeding Products...
+Seeding Menu from CSV...
+Upserting menu item (create): Nasi Goreng Biasa -> /uploads/nasi goreng biasa.webp
+Upserting menu item (create): Nasi Goreng Telur -> /uploads/nasi goreng telur.webp
+Upserting menu item (create): Nasi Goreng Udang -> /uploads/nasi goreng udang.webp
+Upserting menu item (create): Nasi Goreng Level Full -> /uploads/nasi goreng level full.webp
+Upserting menu item (create): Nasi Goreng Ayam Geprek -> /uploads/nasi goreng ayam geprek.webp
+Upserting menu item (create): Nasi Goreng Sate Taichan -> /uploads/nasi goreng sate taichan.webp
+Upserting menu item (create): Nasi Ayam Geprek -> /uploads/nasi ayam geprek.webp
+Upserting menu item (create): Nasi Ayam Lalapan -> /uploads/nasi ayam lalapan.webp
+Upserting menu item (create): Nasi Ayam Goreng -> /uploads/nasi ayam goreng.webp
+Upserting menu item (create): Nasi Sate Taichan Crispy -> /uploads/nasi sate taichen kripsi.webp
+Upserting menu item (create): Mie Goreng Biasa -> /uploads/mie goreng biasa.webp
+Upserting menu item (create): Mie Siram + Telur -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Mie Goreng Udang -> /uploads/mie goreng udang.webp
+Upserting menu item (create): Mie Goreng Ayam Geprek -> /uploads/miew goreng ayam geprek.webp
+Upserting menu item (create): Mie Titti -> /uploads/mie titti.webp
+Upserting menu item (create): Mie Goreng Sate Taichan -> /uploads/mie goreng sate taichen.webp
+Upserting menu item (create): Mie Kuah -> /uploads/mie kuah.webp
+Upserting menu item (create): Bakso Kuah -> /uploads/bakso kuah.webp
+Upserting menu item (create): Pop Mie Goreng -> /uploads/pop mie goreng.webp
+Upserting menu item (create): Pop Mie Soto -> /uploads/pop mie soto.webp
+Upserting menu item (create): Extra Joss Susu -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Kukubima Susu -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Coca-Cola -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Sprite -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Fanta -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Beng-Beng Drink -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Milo -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Jus Alpukat -> /uploads/jus alpukat.webp
+Upserting menu item (create): Jus Buah Naga -> /uploads/jus bua naga.webp
+Upserting menu item (create): Jus Jeruk -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Jus Apel -> /uploads/jus apel.webp
+Upserting menu item (create): Melon Mojito -> /uploads/melon mojito.webp
+Upserting menu item (create): Strawberry -> /uploads/strawbery.webp
+Upserting menu item (create): Mangga -> /uploads/mangga.webp
+Upserting menu item (create): Taro -> /uploads/taro.webp
+Upserting menu item (create): Es Cincau -> /uploads/es cincau.webp
+Upserting menu item (create): Coklat -> /uploads/coklat.webp
+Upserting menu item (create): Es Buah Ice Cream -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Es Pelangi -> /uploads/es pelangi.webp
+Upserting menu item (create): Es Pisang Ijo -> /uploads/es pisang ijo.webp
+Upserting menu item (create): Es Pisang Ijo + Ice Cream -> https://placehold.co/800x600/f97316/ffffff?text=Menu+BUMDes
+Upserting menu item (create): Lemon Tea -> /uploads/lemon tea.webp
+Upserting menu item (create): Green Tea -> /uploads/green tea.webp
+Upserting menu item (create): Thai Tea -> /uploads/thai tea.webp
+Upserting menu item (create): Es Teh Manis -> /uploads/es tea manis.webp
+Upserting menu item (create): Teh Panas -> /uploads/teh panas.webp
+Upserting menu item (create): Kopi Hitam -> /uploads/kopi hitam.webp
+Upserting menu item (create): Kopi Susu -> /uploads/kopi susu.webp
+Upserting menu item (create): Kopi Mix -> /uploads/kopi mix.webp
+Upserting menu item (create): Cappucino -> /uploads/kapuchino.webp
+Upserting menu item (create): Mocaccino -> /uploads/mocachino.webp
+Upserting menu item (create): Vanila Latte -> /uploads/vanila late.webp
+Upserting menu item (create): Sarabba Panas -> /uploads/sarabba panas.webp
+Upserting menu item (create): Bakso Goreng -> /uploads/bakso goreng.webp
+Upserting menu item (create): Bakso Bakar -> /uploads/bakso bakar.webp
+Upserting menu item (create): Sosis Goreng -> /uploads/sosis goreng.webp
+Upserting menu item (create): Sosis Bakar -> /uploads/sosis bakar.webp
+Upserting menu item (create): Bakso Palekko -> /uploads/bakso palekko.webp
+Upserting menu item (create): Roti Bakar Coklat -> /uploads/roti bakar coklat.webp
+Upserting menu item (create): Burger Crispy -> /uploads/burger krispy.webp
+Upserting menu item (create): Burger Daging -> /uploads/burger daging.webp
+Upserting menu item (create): Pempek -> /uploads/pempek.webp
+Upserting menu item (create): Pisang Goreng -> /uploads/pisang goreng.webp
+Upserting menu item (create): Pisang Nugget -> /uploads/pisang nugget.webp
+Upserting menu item (create): Pisang Coklat Keju -> /uploads/pisang coklat keju.webp
+Upserting menu item (create): Pisang Palm Sugar -> /uploads/pisang palm sugar.webp
+Upserting menu item (create): Banana Roll -> /uploads/banana roll.webp
+Upserting menu item (create): Cokodok Pisang -> /uploads/cokodok pisang.webp
+Upserting menu item (create): Pisang Epe Original -> /uploads/pisang epe original.webp
+Upserting menu item (create): Pisang Epe Topping -> /uploads/pisang epe toping.webp
+Upserting menu item (create): Banana Pizza -> /uploads/banana pizza.webp
+Upserting menu item (create): Sanggara Peppe -> /uploads/sanggara pappe.webp
+Seeding finished.
