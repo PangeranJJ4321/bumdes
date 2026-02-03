@@ -10,16 +10,9 @@ export async function FeaturedProducts() {
     // Fetch top 4 featured products (e.g. promo items or latest)
     const products = await prisma.product.findMany({
         take: 4,
-        where: {
-            imageUrl: {
-                not: null
-            },
-            isOnlineOrder: true,
+        orderBy: {
+            createdAt: 'desc', // Newest items first as tie-breaker
         },
-        orderBy: [
-            { isPromo: 'desc' }, // Prioritize promo items
-            { createdAt: 'desc' }, // Newest items first as tie-breaker
-        ],
         include: {
             reviews: {
                 select: {
