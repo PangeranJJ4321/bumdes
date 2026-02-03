@@ -18,7 +18,17 @@ const CATEGORIES = [
     { label: "Perikanan", value: ProductCategory.KETAPANG },
 ];
 
-export function ProductGrid() {
+interface ProductGridProps {
+    limit?: number;
+    showFilters?: boolean;
+    showPagination?: boolean;
+}
+
+export function ProductGrid({
+    limit,
+    showFilters = true,
+    showPagination = true
+}: ProductGridProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const initialCategory = searchParams.get("category") || "ALL";
@@ -48,7 +58,7 @@ export function ProductGrid() {
         isError,
     } = api.product.getInfinite.useInfiniteQuery(
         {
-            limit: 12,
+            limit: limit || 12,
             category: selectedCategory === "ALL" ? undefined : selectedCategory,
             search: debouncedSearch || undefined,
         },
@@ -78,30 +88,32 @@ export function ProductGrid() {
     return (
         <div className="space-y-8">
             {/* Filters & Search */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between sticky top-16 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b border-border/40">
-                <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 w-full md:w-auto scrollbar-hide">
-                    {CATEGORIES.map((cat) => (
-                        <Button
-                            key={cat.value}
-                            variant={selectedCategory === cat.value ? "default" : "outline"}
-                            onClick={() => handleCategoryChange(cat.value)}
-                            className="rounded-full whitespace-nowrap"
-                        >
-                            {cat.label}
-                        </Button>
-                    ))}
-                </div>
+            {showFilters && (
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between sticky top-16 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b border-border/40">
+                    <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 w-full md:w-auto scrollbar-hide">
+                        {CATEGORIES.map((cat) => (
+                            <Button
+                                key={cat.value}
+                                variant={selectedCategory === cat.value ? "default" : "outline"}
+                                onClick={() => handleCategoryChange(cat.value)}
+                                className="rounded-full whitespace-nowrap"
+                            >
+                                {cat.label}
+                            </Button>
+                        ))}
+                    </div>
 
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Cari layanan..."
-                        className="pl-9 rounded-full"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                    <div className="relative w-full md:w-72">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Cari layanan..."
+                            className="pl-9 rounded-full"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Grid */}
             {isLoading ? (
@@ -140,14 +152,16 @@ export function ProductGrid() {
                     </div>
 
                     {/* Intersection Observer Target */}
-                    <div ref={lastElementRef} className="py-8 flex justify-center w-full min-h-[50px]">
-                        {(isFetchingNextPage || hasNextPage) && (
-                            <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                                <span className="text-sm text-muted-foreground">Memuat lebih banyak...</span>
-                            </div>
-                        )}
-                    </div>
+                    {showPagination && (
+                        <div ref={lastElementRef} className="py-8 flex justify-center w-full min-h-[50px]">
+                            {(isFetchingNextPage || hasNextPage) && (
+                                <div className="flex items-center gap-2">
+                                    <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                                    <span className="text-sm text-muted-foreground">Memuat lebih banyak...</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </>
             ) : (
                 <div className="text-center py-20 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/25">
