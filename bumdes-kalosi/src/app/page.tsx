@@ -1,4 +1,6 @@
 import { Navbar } from "@/components/layout/Navbar";
+
+export const dynamic = "force-dynamic";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/custom/HeroSection";
 import { ServiceShowcase } from "@/components/custom/ServiceShowcase";
