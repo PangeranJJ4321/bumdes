@@ -95,7 +95,10 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-red-600 focus:text-red-600 focus:bg-red-50"
-              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+              onClick={async () => {
+                await signOut({ redirect: false })
+                window.location.href = "/admin/login"
+              }}
             >
               <IconLogout className="text-red-600" />
               Log out
