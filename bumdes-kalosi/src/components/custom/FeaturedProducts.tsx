@@ -47,8 +47,8 @@ export async function FeaturedProducts() {
                                 // Map DB 'name' to 'title' prop of ProductCard
                                 title={product.name}
                                 description={product.description || ""}
-                                imageUrl={product.imageUrl || "https://placehold.co/600x400/png?text=No+Image"}
-                                category={product.category as string}
+                                imageUrl={product.imageUrl || `https://placehold.co/600x400/png?text=${encodeURIComponent(product.name)}`}
+                                category={product.category}
                                 rating={avgRating}
                                 reviewCount={product.reviews.length}
                             />

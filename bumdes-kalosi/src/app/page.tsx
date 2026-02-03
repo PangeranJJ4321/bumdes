@@ -8,9 +8,6 @@ import { CTABanner } from "@/components/custom/CTABanner";
 import { FeaturedProducts } from "@/components/custom/FeaturedProducts";
 import { RecentNews } from "@/components/custom/RecentNews";
 
-// Force dynamic rendering to ensure DB content is always fresh
-export const dynamic = "force-dynamic";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
