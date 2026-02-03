@@ -44,15 +44,16 @@ export async function FeaturedProducts() {
                         return (
                             <ProductCard
                                 key={product.id}
-                                {...product}
-                                promoPrice={product.promoPrice ?? undefined}
-                                // Map DB 'name' to 'title' prop of ProductCard
+                                id={product.id}
                                 title={product.name}
                                 description={product.description || ""}
+                                price={product.price}
                                 imageUrl={product.imageUrl || `https://placehold.co/600x400/png?text=${encodeURIComponent(product.name)}`}
                                 category={product.category}
                                 rating={avgRating}
-                                reviewCount={product.reviews.length}
+                                reviewCount={product.reviews?.length || 0}
+                                isPromo={product.isPromo}
+                                promoPrice={product.promoPrice || undefined}
                             />
                         )
                     })}
