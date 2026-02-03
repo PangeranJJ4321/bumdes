@@ -22,6 +22,8 @@ export async function FeaturedProducts() {
         }
     });
 
+    console.log(products);
+
     if (products.length === 0) return null;
 
     return (
