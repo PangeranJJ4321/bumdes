@@ -10,12 +10,17 @@ datasource db {
    ENUMS
 ======================= */
 
-enum ProductCategory {
-  KULINER
-  WISATA
-  MART
-  KETAPANG
-  AGEN
+model BusinessUnit {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+  users       User[]
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("business_units")
 }
 
 enum OrderStatus {
@@ -32,7 +37,7 @@ enum ReviewStatus {
 
 /* =======================
    MODELS
-======================= */
+   ======================= */
 
 model Product {
   id          String           @id @default(uuid())
@@ -41,7 +46,11 @@ model Product {
   promoPrice  Int?             @map("promo_price")
   isPromo     Boolean          @default(false) @map("is_promo")
   description String?
-  category    ProductCategory
+  
+  // Replaced category enum with BusinessUnit relation
+  businessUnitId String        @map("business_unit_id")
+  businessUnit   BusinessUnit  @relation(fields: [businessUnitId], references: [id])
+  
   imageUrl    String?          @map("image_url")
   stock       Int              @default(0)
   isOnlineOrder Boolean        @default(true) @map("is_online_order")
@@ -55,7 +64,7 @@ model Product {
   reviews     Review[]
   orderItems  OrderItem[]
 
-  @@index([category])
+  @@index([businessUnitId])
   @@map("products")
 }
 
@@ -127,7 +136,11 @@ model User {
   role          UserRole  @default(STAFF) // SUPER_ADMIN, STAFF
   isActive      Boolean   @default(true) @map("is_active")
   phone         String?   // Add phone number field
-  unit          ProductCategory? // For multi-store/staff separation
+  
+  // Replaced unit enum with BusinessUnit relation
+  unitId        String?   @map("unit_id")
+  unit          BusinessUnit? @relation(fields: [unitId], references: [id])
+  
   products      Product[] // Products created by this user
   accounts      Account[]
   sessions      Session[]

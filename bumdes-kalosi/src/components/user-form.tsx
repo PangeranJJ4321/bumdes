@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
-import { UserRole, ProductCategory } from "@prisma/client"
+import { UserRole } from "@prisma/client"
 
 const userFormSchema = z.object({
     name: z.string().min(2, {
@@ -42,7 +42,7 @@ const userFormSchema = z.object({
     password: z.string().min(6, {
         message: "Password minimal 6 karakter.",
     }).optional().or(z.literal("")),
-    unit: z.nativeEnum(ProductCategory).optional(),
+    unitId: z.string().optional(),
 })
 
 type UserFormValues = z.infer<typeof userFormSchema>
@@ -66,7 +66,7 @@ interface UserFormProps {
         phone: string | null;
         role: UserRole;
         isActive: boolean;
-        unit: ProductCategory | null;
+        unitId: string | null;
     };
     isEdit?: boolean;
 }
@@ -74,6 +74,7 @@ interface UserFormProps {
 export function UserForm({ initialData, isEdit = false }: UserFormProps) {
     const router = useRouter()
     const utils = api.useUtils()
+    const { data: units } = api.businessUnit.getAll.useQuery()
 
     const form = useForm<UserFormValues>({
         resolver: zodResolver(userFormSchema),
@@ -85,7 +86,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
             role: initialData.role,
             isActive: initialData.isActive,
             password: "",
-            unit: initialData.unit || undefined,
+            unitId: initialData.unitId || undefined,
         } : defaultValues,
     })
 
@@ -123,7 +124,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                 phone: data.phone,
                 role: data.role,
                 isActive: data.isActive,
-                unit: data.role === UserRole.STAFF ? data.unit : null,
+                unitId: data.role === UserRole.STAFF ? data.unitId : null,
             }
             // Only send password if it's not empty, otherwise undefined
             if (data.password && data.password.length > 0) {
@@ -145,7 +146,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                 role: data.role,
                 isActive: data.isActive,
                 password: data.password,
-                unit: data.role === UserRole.STAFF ? data.unit : undefined,
+                unitId: data.role === UserRole.STAFF ? data.unitId : undefined,
             })
         }
     }
@@ -262,7 +263,7 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                         {form.watch("role") === UserRole.STAFF && (
                             <FormField
                                 control={form.control}
-                                name="unit"
+                                name="unitId"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Unit Bisnis (Toko)</FormLabel>
@@ -277,8 +278,8 @@ export function UserForm({ initialData, isEdit = false }: UserFormProps) {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {Object.values(ProductCategory).map((cat) => (
-                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                {units?.map((unit) => (
+                                                    <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>

@@ -7,6 +7,7 @@ import { dashboardRouter } from './dashboard'
 import { userRouter } from './user'
 import { settingsRouter } from './settings'
 import { galleryRouter } from './gallery'
+import { businessUnitRouter } from './business-unit'
 
 export const appRouter = createTRPCRouter({
     product: productRouter,
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
     user: userRouter,
     settings: settingsRouter,
     gallery: galleryRouter,
+    businessUnit: businessUnitRouter,
 })
 
 export type AppRouter = typeof appRouter

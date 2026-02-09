@@ -59,6 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     roles: string[]
     excludeUnits?: string[]
     onlyUnits?: string[]
+    items?: NavItem[] // Added for nested navigation
   }
 
   // Define all navigation items
@@ -97,6 +98,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Users",
       url: "/admin/dashboard/users",
       icon: IconUsers,
+      roles: ["SUPER_ADMIN"],
+    },
+    {
+      title: "Unit Bisnis",
+      url: "/admin/dashboard/units",
+      icon: IconDatabase,
       roles: ["SUPER_ADMIN"],
     },
   ]

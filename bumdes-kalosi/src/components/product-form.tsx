@@ -28,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { trpc as api } from "@/lib/trpc/client"
-import { ProductCategory } from "@prisma/client"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Switch } from "@/components/ui/switch"
 
@@ -37,7 +36,7 @@ const productFormSchema = z.object({
     description: z.string().optional(),
     price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
     stock: z.coerce.number().min(0, { message: "Stok tidak boleh negatif." }),
-    category: z.nativeEnum(ProductCategory),
+    businessUnitId: z.string().min(1, { message: "Unit bisnis harus dipilih." }),
     imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
     isOnlineOrder: z.boolean().default(true),
 })
@@ -60,6 +59,7 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
+    const { data: units, isLoading: isLoadingUnits } = api.businessUnit.getAll.useQuery()
 
     const createMutation = api.product.create.useMutation({
         onSuccess: () => {
@@ -103,7 +103,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         }
     }
 
-    const isPending = createMutation.isPending || updateMutation.isPending
+    const isPending = createMutation.isPending || updateMutation.isPending || isLoadingUnits
 
     return (
         <Form {...form}>
@@ -206,38 +206,38 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
                             control={form.control}
-                            name="category"
+                            name="businessUnitId"
                             render={({ field }) => {
                                 const { data: session } = useSession()
                                 const user = session?.user
 
-                                const availableCategories = React.useMemo(() => {
-                                    if (user?.role === 'STAFF' && user?.unit) {
-                                        return [user.unit]
+                                const availableUnits = React.useMemo(() => {
+                                    if (user?.role === 'STAFF' && user?.unitId) {
+                                        return units?.filter(u => u.id === user.unitId) || []
                                     }
-                                    return Object.values(ProductCategory)
-                                }, [user])
+                                    return units || []
+                                }, [user, units])
 
                                 // Auto-select if only one option and no value
                                 React.useEffect(() => {
-                                    if (availableCategories.length === 1 && !field.value) {
-                                        field.onChange(availableCategories[0])
+                                    if (availableUnits.length === 1 && !field.value) {
+                                        field.onChange(availableUnits[0].id)
                                     }
-                                }, [availableCategories, field])
+                                }, [availableUnits, field])
 
                                 return (
                                     <FormItem>
-                                        <FormLabel>Kategori</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending || (availableCategories.length === 1)}>
+                                        <FormLabel>Unit Bisnis</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending || (availableUnits.length === 1)}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Pilih kategori" />
+                                                    <SelectValue placeholder="Pilih unit bisnis" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {availableCategories.map((category) => (
-                                                    <SelectItem key={category} value={category}>
-                                                        {category}
+                                                {availableUnits.map((unit) => (
+                                                    <SelectItem key={unit.id} value={unit.id}>
+                                                        {unit.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, ProductCategory } from '@prisma/client'
+import { PrismaClient, UserRole } from '@prisma/client'
 import bcrypt from "bcryptjs"
 import fs from 'fs'
 import path from 'path'
@@ -13,12 +13,7 @@ const prisma = new PrismaClient({
     adapter,
 })
 
-
-
-
 // Map of Product Name from CSV -> Filename Stem (without extension)
-// Use this for typos or mismatches.
-// Keys are lowercased product names. Values are the actual filename stems found in the folder.
 const MANUAL_MAPPING: Record<string, string> = {
     "jus buah naga": "jus bua naga",
     "mie goreng sate taichan": "mie goreng sate taichen",
@@ -39,19 +34,14 @@ function findImageForProduct(productName: string): string | null {
     const normalize = (s: string) => s.toLowerCase().trim()
     const nameLower = normalize(productName)
 
-    // Determine the target filename stem (either from mapping or product name itself)
     let targetStem = nameLower
     if (MANUAL_MAPPING[nameLower]) {
         targetStem = MANUAL_MAPPING[nameLower]
     }
 
-    // 2. Try direct match with extensions
-    // If running on VPS, STORAGE_DIR might be set, but for the seed script finding files to LINK,
-    // we look in the local repository folder 'storage-seed'.
     const searchDir = path.join(process.cwd(), 'storage-seed')
 
     if (!fs.existsSync(searchDir)) {
-        // Silent fail or warn once? excessive warnings are annoying, just return null
         return null
     }
 
@@ -60,14 +50,14 @@ function findImageForProduct(productName: string): string | null {
     for (const file of files) {
         const fileStem = path.parse(file).name.toLowerCase()
         if (fileStem === targetStem) {
-            return file // Return the full filename with whatever extension it has
+            return file
         }
     }
 
     return null
 }
 
-async function seedMenuFromCSV(staffId: string | undefined) {
+async function seedMenuFromCSV(staffId: string | undefined, kulinerUnitId: string) {
     console.log('Seeding Menu from CSV...')
     const csvPath = path.join(process.cwd(), 'menu_bumdes.csv')
 
@@ -78,7 +68,6 @@ async function seedMenuFromCSV(staffId: string | undefined) {
 
     const csvContent = fs.readFileSync(csvPath, 'utf-8')
     const lines = csvContent.split('\n')
-    // Skip header
     const dataLines = lines.slice(1).filter(line => line.trim() !== '')
 
     for (const [index, line] of dataLines.entries()) {
@@ -97,9 +86,6 @@ async function seedMenuFromCSV(staffId: string | undefined) {
             const price = parseInt(priceRaw)
             if (isNaN(price)) continue
 
-            // All imported items are KULINER
-            const category = ProductCategory.KULINER
-
             const imageFilename = findImageForProduct(name)
             const imageUrl = imageFilename
                 ? `/uploads/${imageFilename}`
@@ -114,30 +100,28 @@ async function seedMenuFromCSV(staffId: string | undefined) {
                 }
             })
 
+            const productData = {
+                price,
+                description,
+                businessUnitId: kulinerUnitId,
+                imageUrl: imageUrl,
+                createdById: staffId
+            }
+
             if (existing) {
                 console.log(`Upserting menu item (update): ${name} -> ${imageUrl}`)
                 await prisma.product.update({
                     where: { id: existing.id },
-                    data: {
-                        price,
-                        description,
-                        category,
-                        imageUrl: imageUrl,
-                        createdById: staffId // Assign to Kuliner staff
-                    }
+                    data: productData
                 })
             } else {
                 console.log(`Upserting menu item (create): ${name} -> ${imageUrl}`)
                 await prisma.product.create({
                     data: {
                         name,
-                        price,
-                        description,
-                        category,
                         stock: 100,
                         isOnlineOrder: true,
-                        imageUrl: imageUrl,
-                        createdById: staffId // Assign to Kuliner staff
+                        ...productData
                     }
                 })
             }
@@ -150,7 +134,25 @@ async function seedMenuFromCSV(staffId: string | undefined) {
 async function main() {
     console.log('Start seeding ...')
 
-    // 1. Seed Users FIRST so we have IDs for products
+    // 0. Seed Business Units
+    console.log('Seeding Business Units...')
+    const UNITS = ['KULINER', 'WISATA', 'MART', 'KETAPANG', 'AGEN']
+    const unitMap = new Map<string, string>() // Name -> ID
+
+    for (const unitName of UNITS) {
+        const unit = await prisma.businessUnit.upsert({
+            where: { name: unitName },
+            update: {},
+            create: {
+                name: unitName,
+                description: `Unit bisnis ${unitName}`
+            }
+        })
+        unitMap.set(unitName, unit.id)
+        console.log(`Upserted unit: ${unitName}`)
+    }
+
+    // 1. Seed Users
     console.log('Seeding Users...')
     const passwordHash = await bcrypt.hash('password123', 10)
 
@@ -166,24 +168,31 @@ async function main() {
             email: "staff.wisata@bumdes.com",
             name: "Staff Wisata",
             role: UserRole.STAFF,
+            unitKey: 'WISATA'
         },
         {
             username: "staff_mart",
             email: "staff.mart@bumdes.com",
             name: "Staff Mart",
             role: UserRole.STAFF,
+            unitKey: 'MART'
         },
         {
             username: "staff_kuliner",
             email: "staff.kuliner@bumdes.com",
             name: "Staff Kuliner",
             role: UserRole.STAFF,
+            unitKey: 'KULINER'
         }
     ]
 
     const userMap = new Map<string, string>() // email -> id
 
     for (const user of MOCK_USERS) {
+        // Explicitly handle the custom property 'unitKey' to avoid type errors
+        const unitSearchKey = (user as any).unitKey;
+        const unitId = unitSearchKey ? unitMap.get(unitSearchKey) : null;
+
         const u = await prisma.user.upsert({
             where: { email: user.email },
             update: {
@@ -191,6 +200,7 @@ async function main() {
                 username: user.username,
                 role: user.role,
                 isActive: true,
+                unitId: unitId
             },
             create: {
                 name: user.name,
@@ -199,25 +209,21 @@ async function main() {
                 password: passwordHash,
                 role: user.role,
                 isActive: true,
+                unitId: unitId
             },
         })
         userMap.set(user.email, u.id)
         console.log(`Upserted user: ${u.username} (${u.role})`)
     }
 
-    // 2. Seed Products with Staff Assignment
-    console.log('Seeding Products...')
-
-
-
-    // 4. Seed CSV Menu (Kuliner)
+    // 2. Seed Products via CSV
     const kulinerStaffId = userMap.get("staff.kuliner@bumdes.com")
-    if (kulinerStaffId) {
-        await seedMenuFromCSV(kulinerStaffId)
+    const kulinerUnitId = unitMap.get("KULINER")
+
+    if (kulinerUnitId) {
+        await seedMenuFromCSV(kulinerStaffId, kulinerUnitId)
     } else {
-        console.warn('Staff Kuliner not found via map, trying DB lookup or skipping...')
-        const dbUser = await prisma.user.findUnique({ where: { email: "staff.kuliner@bumdes.com" } })
-        await seedMenuFromCSV(dbUser?.id)
+        console.error('KULINER unit not found!')
     }
 
     console.log('Seeding finished.')
