@@ -148,7 +148,7 @@ export const productRouter = createTRPCRouter({
                 isPromo: z.boolean().default(false),
                 description: z.string().optional(),
                 businessUnitId: z.string().min(1),
-                imageUrl: z.string().url().optional(),
+                imageUrl: z.string().optional(),
                 stock: z.number().int().optional(),
                 isOnlineOrder: z.boolean().default(true),
             })
@@ -180,7 +180,7 @@ export const productRouter = createTRPCRouter({
                 isPromo: z.boolean().optional(),
                 description: z.string().optional(),
                 businessUnitId: z.string().optional(),
-                imageUrl: z.string().url().optional(),
+                imageUrl: z.string().optional(),
                 stock: z.number().int().optional(),
                 isOnlineOrder: z.boolean().optional(),
             })
