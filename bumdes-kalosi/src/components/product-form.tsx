@@ -37,7 +37,7 @@ const productFormSchema = z.object({
     price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
     stock: z.coerce.number().min(0, { message: "Stok tidak boleh negatif." }),
     businessUnitId: z.string().min(1, { message: "Unit bisnis harus dipilih." }),
-    imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
+    imageUrl: z.string().optional().or(z.literal("")),
     isOnlineOrder: z.boolean().default(true),
 })
 

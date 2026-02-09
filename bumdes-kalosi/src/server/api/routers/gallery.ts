@@ -40,7 +40,7 @@ export const galleryRouter = createTRPCRouter({
         .input(z.object({
             title: z.string().min(1),
             description: z.string().optional(),
-            imageUrl: z.string().url(),
+            imageUrl: z.string(),
             category: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
@@ -54,7 +54,7 @@ export const galleryRouter = createTRPCRouter({
             id: z.string().uuid(),
             title: z.string().min(1).optional(),
             description: z.string().optional(),
-            imageUrl: z.string().url().optional(),
+            imageUrl: z.string().optional(),
             category: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {

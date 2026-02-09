@@ -6,7 +6,7 @@ const galleryUpdateSchema = z.object({
     title: z.string().min(1).optional(),
     category: z.string().optional(),
     description: z.string().optional(),
-    imageUrl: z.string().url().optional(),
+    imageUrl: z.string().optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
