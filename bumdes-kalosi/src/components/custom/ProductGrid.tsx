@@ -5,18 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { trpc as api } from "@/lib/trpc/client";
-import { ProductCategory } from "@prisma/client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useDebounce } from "use-debounce";
-
-const CATEGORIES = [
-    { label: "Semua", value: "ALL" },
-    { label: "Kuliner", value: ProductCategory.KULINER },
-    { label: "Wisata", value: ProductCategory.WISATA },
-    { label: "Mart", value: ProductCategory.MART },
-    { label: "Agen", value: ProductCategory.AGEN },
-    { label: "Perikanan", value: ProductCategory.KETAPANG },
-];
 
 interface ProductGridProps {
     limit?: number;
@@ -31,20 +21,22 @@ export function ProductGrid({
 }: ProductGridProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const initialCategory = searchParams.get("category") || "ALL";
+    const initialUnitId = searchParams.get("unit") || "ALL";
 
-    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+    const [selectedUnitId, setSelectedUnitId] = useState(initialUnitId);
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearch] = useDebounce(searchQuery, 500);
 
+    const { data: units } = api.businessUnit.getAll.useQuery();
+
     // Update URL when category changes
-    const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category);
+    const handleUnitChange = (unitId: string) => {
+        setSelectedUnitId(unitId);
         const params = new URLSearchParams(searchParams);
-        if (category === "ALL") {
-            params.delete("category");
+        if (unitId === "ALL") {
+            params.delete("unit");
         } else {
-            params.set("category", category);
+            params.set("unit", unitId);
         }
         router.replace(`?${params.toString()}`, { scroll: false });
     };
@@ -59,7 +51,7 @@ export function ProductGrid({
     } = api.product.getInfinite.useInfiniteQuery(
         {
             limit: limit || 12,
-            category: selectedCategory === "ALL" ? undefined : selectedCategory,
+            businessUnitId: selectedUnitId === "ALL" ? undefined : selectedUnitId,
             search: debouncedSearch || undefined,
         },
         {
@@ -91,14 +83,21 @@ export function ProductGrid({
             {showFilters && (
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between sticky top-16 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b border-border/40">
                     <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 w-full md:w-auto scrollbar-hide">
-                        {CATEGORIES.map((cat) => (
+                        <Button
+                            variant={selectedUnitId === "ALL" ? "default" : "outline"}
+                            onClick={() => handleUnitChange("ALL")}
+                            className="rounded-full whitespace-nowrap"
+                        >
+                            Semua
+                        </Button>
+                        {units?.map((unit) => (
                             <Button
-                                key={cat.value}
-                                variant={selectedCategory === cat.value ? "default" : "outline"}
-                                onClick={() => handleCategoryChange(cat.value)}
+                                key={unit.id}
+                                variant={selectedUnitId === unit.id ? "default" : "outline"}
+                                onClick={() => handleUnitChange(unit.id)}
                                 className="rounded-full whitespace-nowrap"
                             >
-                                {cat.label}
+                                {unit.name}
                             </Button>
                         ))}
                     </div>
@@ -141,7 +140,7 @@ export function ProductGrid({
                                     description={product.description || ""}
                                     price={product.price}
                                     imageUrl={product.imageUrl || `https://placehold.co/600x400/png?text=${encodeURIComponent(product.name)}`}
-                                    category={product.category}
+                                    category={product.businessUnit?.name || "Umum"}
                                     rating={avgRating}
                                     reviewCount={product.reviews?.length || 0}
                                     isPromo={product.isPromo}

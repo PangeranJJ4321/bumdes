@@ -64,7 +64,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { trpc as api } from "@/lib/trpc/client"
-import { ProductCategory } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 export type Product = {
@@ -73,7 +72,8 @@ export type Product = {
     description: string | null
     price: number
     stock: number
-    category: ProductCategory
+    businessUnitId: string
+    businessUnit?: { name: string } | null
     imageUrl: string | null
     promoPrice: number | null
     isPromo: boolean
@@ -135,11 +135,11 @@ export const columns: ColumnDef<Product>[] = [
         cell: ({ row }) => <div className="font-medium line-clamp-2">{row.getValue("name")}</div>,
     },
     {
-        accessorKey: "category",
-        header: "Kategori",
+        accessorKey: "businessUnit",
+        header: "Unit Bisnis",
         cell: ({ row }) => (
             <div className="flex flex-col gap-1">
-                <Badge variant="outline" className="w-fit">{row.getValue("category")}</Badge>
+                <Badge variant="outline" className="w-fit">{row.original.businessUnit?.name || "N/A"}</Badge>
                 {row.original.isPromo && (
                     <Badge variant="default" className="w-fit bg-red-500 hover:bg-red-600 text-white border-red-600">
                         Promo
@@ -201,7 +201,7 @@ export const columns: ColumnDef<Product>[] = [
                 onSuccess: () => {
                     toast.success("Produk berhasil dihapus")
                     utils.product.getAll.invalidate()
-                    utils.product.getProductsGroup.invalidate()
+                    utils.product.getDashboardProducts.invalidate()
                     utils.product.getServices.invalidate()
                     utils.dashboard.getStats.invalidate()
                 },
@@ -271,7 +271,7 @@ export function ProductsTable({ data: initialData, isLoading }: { data: Product[
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
+    const [unitFilter, setUnitFilter] = React.useState<string>("all")
     const [stockFilter, setStockFilter] = React.useState<string>("all")
     const [isBulkDeleteOpen, setIsBulkDeleteOpen] = React.useState(false)
 
@@ -279,6 +279,10 @@ export function ProductsTable({ data: initialData, isLoading }: { data: Product[
     const user = session?.user
     const isSuperAdmin = user?.role === 'SUPER_ADMIN'
     const showCategoryFilter = isSuperAdmin // Only Super Admin needs to switch categories
+
+    const { data: units } = api.businessUnit.getAll.useQuery(undefined, {
+        enabled: showCategoryFilter
+    })
 
     // Update local state when initialData changes
     React.useEffect(() => {
@@ -289,9 +293,9 @@ export function ProductsTable({ data: initialData, isLoading }: { data: Product[
     const filteredData = React.useMemo(() => {
         let result = data
 
-        // Category filter
-        if (categoryFilter !== "all") {
-            result = result.filter((item) => item.category === categoryFilter)
+        // Unit filter
+        if (unitFilter !== "all") {
+            result = result.filter((item) => item.businessUnitId === unitFilter)
         }
 
         // Stock filter
@@ -304,7 +308,7 @@ export function ProductsTable({ data: initialData, isLoading }: { data: Product[
         }
 
         return result
-    }, [data, categoryFilter, stockFilter])
+    }, [data, unitFilter, stockFilter])
 
     const table = useReactTable({
         data: filteredData,
@@ -417,19 +421,19 @@ export function ProductsTable({ data: initialData, isLoading }: { data: Product[
                     {showCategoryFilter && (
                         <div className="w-[180px] mr-4">
                             <Select
-                                value={categoryFilter}
-                                onValueChange={setCategoryFilter}
+                                value={unitFilter}
+                                onValueChange={setUnitFilter}
                             >
                                 <SelectTrigger className="w-full">
                                     <div className="flex items-center gap-2">
                                         <IconFilter className="h-4 w-4" />
-                                        <SelectValue placeholder="Kategori" />
+                                        <SelectValue placeholder="Unit Bisnis" />
                                     </div>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all" className="text-sm">Semua Kategori</SelectItem>
-                                    {Object.values(ProductCategory).map((category) => (
-                                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                                    <SelectItem value="all" className="text-sm">Semua Unit</SelectItem>
+                                    {units?.map((unit) => (
+                                        <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

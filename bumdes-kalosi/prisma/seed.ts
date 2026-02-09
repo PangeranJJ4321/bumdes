@@ -105,7 +105,7 @@ async function seedMenuFromCSV(staffId: string | undefined, kulinerUnitId: strin
                 description,
                 businessUnitId: kulinerUnitId,
                 imageUrl: imageUrl,
-                createdById: staffId
+                createdById: staffId ?? null
             }
 
             if (existing) {

@@ -56,7 +56,7 @@ import {
 import { toast } from "sonner"
 import Link from "next/link"
 import { trpc as api } from "@/lib/trpc/client"
-import { UserRole, ProductCategory } from "@prisma/client"
+import { UserRole } from "@prisma/client"
 
 export type User = {
     id: string
@@ -67,7 +67,8 @@ export type User = {
     isActive: boolean
     image: string | null
     phone: string | null
-    unit: ProductCategory | null
+    unitId: string | null
+    unit?: { name: string } | null
     createdAt: Date
 }
 
@@ -147,7 +148,7 @@ export const columns: ColumnDef<User>[] = [
             }
             if (user.role === 'STAFF') {
                 return user.unit ? (
-                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Unit: {user.unit}</Badge>
+                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Unit: {user.unit.name}</Badge>
                 ) : (
                     <span className="text-xs text-muted-foreground">-</span>
                 )

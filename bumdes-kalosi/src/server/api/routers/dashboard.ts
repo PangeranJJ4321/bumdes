@@ -1,7 +1,7 @@
 
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { OrderStatus, ProductCategory } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 export const dashboardRouter = createTRPCRouter({
     getStats: protectedProcedure.query(async ({ ctx }) => {
@@ -12,12 +12,11 @@ export const dashboardRouter = createTRPCRouter({
         let productWhere: any = {}
 
         if (isStaff) {
-            // Filter orders containing products owned by this staff (or their unit for legacy)
-            // We use a shared filter for consistency
+            // Filter orders containing products owned by this staff (or their unit)
             const productFilter = {
                 OR: [
                     { createdById: user.id },
-                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                    user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                 ]
             }
 
@@ -27,7 +26,7 @@ export const dashboardRouter = createTRPCRouter({
                 }
             }
 
-            // Filter Products by category
+            // Filter Products by unit
             productWhere = productFilter;
         }
 
@@ -35,7 +34,6 @@ export const dashboardRouter = createTRPCRouter({
 
         if (isStaff) {
             // Calculate revenue from Completed Orders filtering only valid items
-            // Consistency Note: We query Orders just like getRecentActivity to ensure if it shows there, it counts here.
             const orders = await ctx.prisma.order.findMany({
                 where: {
                     status: OrderStatus.COMPLETED,
@@ -47,7 +45,7 @@ export const dashboardRouter = createTRPCRouter({
                             product: {
                                 OR: [
                                     { createdById: user.id },
-                                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                                    user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                                 ]
                             }
                         },
@@ -93,14 +91,14 @@ export const dashboardRouter = createTRPCRouter({
             ctx.prisma.product.count({
                 where: productWhere
             }),
-            isStaff ? 0 : ctx.prisma.news.count(), // Staff shouldn't generally count news
+            isStaff ? 0 : ctx.prisma.news.count(),
             ctx.prisma.order.count({
                 where: {
                     status: OrderStatus.COMPLETED,
                     ...orderWhere
                 },
             }),
-            isStaff ? 0 : ctx.prisma.user.count(), // Staff shouldn't count users
+            isStaff ? 0 : ctx.prisma.user.count(),
         ]);
 
         return {
@@ -115,7 +113,7 @@ export const dashboardRouter = createTRPCRouter({
 
     getRecentActivity: protectedProcedure
         .input(z.object({
-            unit: z.nativeEnum(ProductCategory).optional(),
+            unitId: z.string().optional(),
         }).optional())
         .query(async ({ ctx, input }) => {
             const user = ctx.session.user;
@@ -128,7 +126,7 @@ export const dashboardRouter = createTRPCRouter({
                 const productFilter = {
                     OR: [
                         { createdById: user.id },
-                        user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                        user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                     ]
                 }
 
@@ -139,15 +137,15 @@ export const dashboardRouter = createTRPCRouter({
                 };
 
                 reviewWhere.product = productFilter;
-            } else if (input?.unit) {
+            } else if (input?.unitId && input.unitId !== "ALL") {
                 // Admin Unit Filter
                 orderWhere.itemsDetail = {
                     some: {
-                        product: { category: input.unit }
+                        product: { businessUnitId: input.unitId }
                     }
                 };
                 reviewWhere.product = {
-                    category: input.unit
+                    businessUnitId: input.unitId
                 };
             }
 
@@ -158,7 +156,7 @@ export const dashboardRouter = createTRPCRouter({
                     orderBy: { created_at: "desc" },
                     include: {
                         itemsDetail: {
-                            include: { product: true }
+                            include: { product: { include: { businessUnit: true } } }
                         }
                     }
                 }),
@@ -167,7 +165,7 @@ export const dashboardRouter = createTRPCRouter({
                     take: 5,
                     orderBy: { createdAt: "desc" },
                     include: {
-                        product: true,
+                        product: { include: { businessUnit: true } },
                     },
                 }),
             ]);
@@ -197,7 +195,7 @@ export const dashboardRouter = createTRPCRouter({
             const productFilter = {
                 OR: [
                     { createdById: user.id },
-                    user.unit ? { category: user.unit, createdById: null } : { createdById: user.id }
+                    user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                 ]
             }
             orderWhere.itemsDetail = {
@@ -215,7 +213,7 @@ export const dashboardRouter = createTRPCRouter({
                         product: {
                             OR: [
                                 { createdById: user.id },
-                                user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                                user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                             ]
                         }
                     },
@@ -262,7 +260,7 @@ export const dashboardRouter = createTRPCRouter({
         .input(z.object({
             startDate: z.date(),
             endDate: z.date(),
-            unit: z.nativeEnum(ProductCategory).optional(), // Admin optional filter
+            unitId: z.string().optional(), // Admin optional filter
         }))
         .query(async ({ ctx, input }) => {
             const user = ctx.session.user
@@ -283,16 +281,16 @@ export const dashboardRouter = createTRPCRouter({
                 const productFilter = {
                     OR: [
                         { createdById: user.id },
-                        user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                        user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                     ]
                 }
                 orderWhere.itemsDetail = {
                     some: { product: productFilter }
                 }
-            } else if (input.unit) {
+            } else if (input.unitId && input.unitId !== "ALL") {
                 // Admin specific unit filter
                 orderWhere.itemsDetail = {
-                    some: { product: { category: input.unit } }
+                    some: { product: { businessUnitId: input.unitId } }
                 }
             }
 
@@ -306,12 +304,12 @@ export const dashboardRouter = createTRPCRouter({
                             product: {
                                 OR: [
                                     { createdById: user.id },
-                                    user.unit ? { category: user.unit as ProductCategory, createdById: null } : { createdById: user.id }
+                                    user.unitId ? { businessUnitId: user.unitId } : { createdById: user.id }
                                 ]
                             }
-                        } : (input.unit ? { product: { category: input.unit } } : undefined),
+                        } : (input.unitId && input.unitId !== "ALL" ? { product: { businessUnitId: input.unitId } } : undefined),
                         include: {
-                            product: true
+                            product: { include: { businessUnit: true } }
                         }
                     }
                 }
@@ -326,7 +324,7 @@ export const dashboardRouter = createTRPCRouter({
                     date: order.created_at,
                     orderId: order.id,
                     productName: item.product.name,
-                    unit: item.product.category,
+                    unit: item.product.businessUnit?.name || "N/A",
                     quantity: item.quantity,
                     price: item.price,
                     total: item.price * item.quantity,

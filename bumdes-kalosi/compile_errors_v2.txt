@@ -1,0 +1,12 @@
+src/components/app-sidebar.tsx(121,37): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/app-sidebar.tsx(121,77): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/app-sidebar.tsx(131,18): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/app-sidebar.tsx(131,55): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(61,23): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(61,44): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(87,23): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(87,44): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(112,23): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(112,44): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(184,23): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.
+src/components/section-cards.tsx(184,44): error TS2339: Property 'unit' does not exist on type '{ role?: string | undefined; unitId?: string | null | undefined; id?: string | undefined; } & User'.

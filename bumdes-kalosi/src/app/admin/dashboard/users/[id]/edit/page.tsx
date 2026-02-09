@@ -72,7 +72,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                                 phone: user.phone || "",
                                 role: user.role,
                                 isActive: user.isActive,
-                                unit: user.unit,
+                                unitId: user.unitId,
                             }}
                             isEdit
                         />

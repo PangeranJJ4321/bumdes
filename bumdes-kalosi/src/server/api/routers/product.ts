@@ -1,9 +1,7 @@
 import { z } from 'zod'
-import { ProductCategory, ReviewStatus } from '@prisma/client'
+import { ReviewStatus } from '@prisma/client'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../../trpc'
 
-// Enum untuk Zod validation
-const productCategoryEnum = z.nativeEnum(ProductCategory)
 const reviewStatusEnum = z.nativeEnum(ReviewStatus)
 
 export const productRouter = createTRPCRouter({
@@ -12,24 +10,24 @@ export const productRouter = createTRPCRouter({
             z.object({
                 limit: z.number().min(1).max(50).default(12),
                 cursor: z.string().nullish(), // itemId (not index)
-                category: z.string().optional(),
+                businessUnitId: z.string().optional(),
                 search: z.string().optional(),
             })
         )
         .query(async ({ ctx, input }) => {
-            const { limit, cursor, category, search } = input
+            const { limit, cursor, businessUnitId, search } = input
             const where: any = {}
 
-            // Category Filter
-            if (category && category !== "ALL") {
-                where.category = category as ProductCategory
+            // Unit Filter
+            if (businessUnitId && businessUnitId !== "ALL") {
+                where.businessUnitId = businessUnitId
             }
 
             // Search Filter
             if (search) {
                 where.name = {
                     contains: search,
-                    mode: 'insensitive' // Requires Prisma Preview Feature "fullTextSearch" or generic simple filtering
+                    mode: 'insensitive'
                 }
             }
 
@@ -39,6 +37,7 @@ export const productRouter = createTRPCRouter({
                 where,
                 orderBy: { createdAt: 'desc' },
                 include: {
+                    businessUnit: true,
                     reviews: {
                         select: {
                             rating: true
@@ -59,24 +58,11 @@ export const productRouter = createTRPCRouter({
             }
         }),
 
-    getCategories: publicProcedure.query(async ({ ctx }) => {
-        const groups = await ctx.prisma.product.groupBy({
-            by: ['category'],
-            _count: {
-                id: true
-            }
-        })
-
-        return groups.map(g => ({
-            category: g.category,
-            count: g._count.id
-        }))
-    }),
-
     getAll: publicProcedure.query(async ({ ctx }) => {
         return ctx.prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
             include: {
+                businessUnit: true,
                 reviews: {
                     select: {
                         rating: true
@@ -91,11 +77,11 @@ export const productRouter = createTRPCRouter({
         const where: any = {}
 
         if (user.role === 'STAFF') {
-            // Filter by ownership if createdById exists, or fallback to unit if legacy
-            if (user.unit) {
+            // Filter by ownership if createdById exists, or fallback to unit
+            if (user.unitId) {
                 where.OR = [
                     { createdById: user.id },
-                    { category: user.unit, createdById: null } // Fallback for old products
+                    { businessUnitId: user.unitId }
                 ]
             } else {
                 where.createdById = user.id
@@ -106,6 +92,7 @@ export const productRouter = createTRPCRouter({
             where,
             orderBy: { createdAt: 'desc' },
             include: {
+                businessUnit: true,
                 reviews: {
                     select: {
                         rating: true
@@ -121,6 +108,7 @@ export const productRouter = createTRPCRouter({
             return ctx.prisma.product.findUnique({
                 where: { id: input.id },
                 include: {
+                    businessUnit: true,
                     reviews: {
                         where: { status: ReviewStatus.APPROVED },
                         orderBy: { createdAt: 'desc' },
@@ -129,39 +117,25 @@ export const productRouter = createTRPCRouter({
             })
         }),
 
-    getByCategory: publicProcedure
-        .input(z.object({ category: productCategoryEnum }))
-        .query(async ({ ctx, input }) => {
-            return ctx.prisma.product.findMany({
-                where: { category: input.category },
-                orderBy: { createdAt: 'desc' },
-            })
-        }),
+    // Legacy support or new implementation matching businessUnit name?
+    // For now we use getInfinite with businessUnitId from frontend
 
     getServices: publicProcedure.query(async ({ ctx }) => {
-        return ctx.prisma.product.findMany({
-            where: {
-                category: {
-                    in: [ProductCategory.WISATA]
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-        })
-    }),
+        // Assuming 'Wisata' is a business unit name. 
+        // We should ideally look up the ID first or join.
+        // For efficiency, let's find the unit first.
+        const wisataUnit = await ctx.prisma.businessUnit.findFirst({
+            where: { name: { contains: 'Wisata', mode: 'insensitive' } }
+        });
 
-    getProductsGroup: publicProcedure.query(async ({ ctx }) => {
+        if (!wisataUnit) return [];
+
         return ctx.prisma.product.findMany({
             where: {
-                category: {
-                    in: [
-                        ProductCategory.MART,
-                        ProductCategory.KULINER,
-                        ProductCategory.AGEN,
-                        ProductCategory.KETAPANG
-                    ]
-                }
+                businessUnitId: wisataUnit.id
             },
             orderBy: { createdAt: 'desc' },
+            include: { businessUnit: true }
         })
     }),
 
@@ -173,7 +147,7 @@ export const productRouter = createTRPCRouter({
                 promoPrice: z.number().int().positive().optional(),
                 isPromo: z.boolean().default(false),
                 description: z.string().optional(),
-                category: productCategoryEnum,
+                businessUnitId: z.string().min(1),
                 imageUrl: z.string().url().optional(),
                 stock: z.number().int().optional(),
                 isOnlineOrder: z.boolean().default(true),
@@ -182,9 +156,9 @@ export const productRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             const user = ctx.session.user
 
-            if (user.role === 'STAFF' && user.unit) {
-                if (input.category !== user.unit) {
-                    throw new Error("Anda tidak memiliki izin untuk membuat produk di kategori ini.")
+            if (user.role === 'STAFF' && user.unitId) {
+                if (input.businessUnitId !== user.unitId) {
+                    throw new Error("Anda tidak memiliki izin untuk membuat produk di unit ini.")
                 }
             }
 
@@ -205,7 +179,7 @@ export const productRouter = createTRPCRouter({
                 promoPrice: z.number().int().positive().optional(),
                 isPromo: z.boolean().optional(),
                 description: z.string().optional(),
-                category: productCategoryEnum.optional(),
+                businessUnitId: z.string().optional(),
                 imageUrl: z.string().url().optional(),
                 stock: z.number().int().optional(),
                 isOnlineOrder: z.boolean().optional(),
@@ -223,16 +197,16 @@ export const productRouter = createTRPCRouter({
                     throw new Error("Produk tidak ditemukan.")
                 }
 
-                // Check ownership or unit fallback
+                // Check ownership or unit match
                 const isOwner = product.createdById === user.id
-                const isUnitMatch = user.unit && product.category === user.unit && product.createdById === null
+                const isUnitMatch = user.unitId && product.businessUnitId === user.unitId
 
                 if (!isOwner && !isUnitMatch) {
                     throw new Error("Anda tidak memiliki izin untuk mengedit produk ini.")
                 }
 
-                if (data.category && user.unit && data.category !== user.unit) {
-                    throw new Error("Anda tidak bisa mengubah kategori produk ke luar unit anda.")
+                if (data.businessUnitId && user.unitId && data.businessUnitId !== user.unitId) {
+                    throw new Error("Anda tidak bisa mengubah unit produk ke luar unit anda.")
                 }
             }
 
@@ -252,7 +226,7 @@ export const productRouter = createTRPCRouter({
                 if (!product) return // Already deleted/not found
 
                 const isOwner = product.createdById === user.id
-                const isUnitMatch = user.unit && product.category === user.unit && product.createdById === null
+                const isUnitMatch = user.unitId && product.businessUnitId === user.unitId
 
                 if (!isOwner && !isUnitMatch) {
                     throw new Error("Anda tidak memiliki izin untuk menghapus produk ini.")

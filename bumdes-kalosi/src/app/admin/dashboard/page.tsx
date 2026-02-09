@@ -29,7 +29,7 @@ function DashboardContent() {
 
   const { data: stats } = api.dashboard.getStats.useQuery()
   const { data: activity } = api.dashboard.getRecentActivity.useQuery({
-    unit: activityUnit as any
+    unitId: activityUnit
   })
   const { data: chartData } = api.dashboard.getChartData.useQuery()
 

@@ -78,7 +78,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                                     description: product.description || "",
                                     price: product.price,
                                     stock: product.stock,
-                                    category: product.category,
+                                    businessUnitId: product.businessUnitId,
                                     imageUrl: product.imageUrl || "",
                                     isOnlineOrder: product.isOnlineOrder,
                                 }}

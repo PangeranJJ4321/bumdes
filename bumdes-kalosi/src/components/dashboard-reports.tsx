@@ -35,24 +35,27 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { trpc as api } from "@/lib/trpc/client"
-import { ProductCategory } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 export function DashboardReports() {
     const { data: session } = useSession()
     const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
 
+    const { data: units } = api.businessUnit.getAll.useQuery(undefined, {
+        enabled: isSuperAdmin
+    })
+
     const [date, setDate] = React.useState<{ from: Date; to: Date }>({
         from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // Start of month
         to: new Date(),
     })
 
-    const [selectedUnit, setSelectedUnit] = React.useState<ProductCategory | "ALL">("ALL")
+    const [selectedUnitId, setSelectedUnitId] = React.useState<string>("ALL")
 
     const { data: report, isLoading } = api.dashboard.getReport.useQuery({
         startDate: date.from,
         endDate: date.to,
-        unit: selectedUnit === "ALL" ? undefined : selectedUnit,
+        unitId: selectedUnitId === "ALL" ? undefined : selectedUnitId,
     })
 
     // Export handle
@@ -133,14 +136,14 @@ export function DashboardReports() {
 
                     {/* Unit Filter (Admin Only) */}
                     {isSuperAdmin && (
-                        <Select value={selectedUnit} onValueChange={(val) => setSelectedUnit(val as any)}>
+                        <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Pilih Unit" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="ALL">Semua Unit</SelectItem>
-                                {Object.values(ProductCategory).map((unit) => (
-                                    <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+                                {units?.map((unit) => (
+                                    <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

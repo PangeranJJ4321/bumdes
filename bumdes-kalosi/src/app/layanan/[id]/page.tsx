@@ -20,6 +20,7 @@ export default async function ProductDetailPage({
         where: { id },
         include: {
             createdBy: true,
+            businessUnit: true,
             reviews: {
                 where: { status: "APPROVED" }, // Only show approved reviews or filtered
                 orderBy: { createdAt: "desc" }
@@ -46,7 +47,7 @@ export default async function ProductDetailPage({
         images: product.imageUrl ? [product.imageUrl] : [],
         imageUrl: product.imageUrl || "",  // Ensure string
         promoPrice: product.promoPrice || undefined, // Handle null -> undefined
-        category: product.category as string,
+        category: product.businessUnit.name,
         rating: averageRating,
         reviewCount: product.reviews.length,
         sellerPhone: product.createdBy?.phone || "6282393318287",

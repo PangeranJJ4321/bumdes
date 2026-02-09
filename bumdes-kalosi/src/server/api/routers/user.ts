@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, adminProcedure, protectedProcedure } from "../../trpc";
-import { UserRole, ProductCategory } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const userRoleEnum = z.nativeEnum(UserRole);
-const productCategoryEnum = z.nativeEnum(ProductCategory);
 
 export const userRouter = createTRPCRouter({
     // --- Admin Only Procedures ---
@@ -20,9 +19,10 @@ export const userRouter = createTRPCRouter({
                 phone: true,
                 role: true,
                 isActive: true,
-                unit: true,
+                unitId: true,
                 image: true,
                 createdAt: true,
+                unit: { select: { name: true } }
             },
         });
     }),
@@ -45,7 +45,7 @@ export const userRouter = createTRPCRouter({
                 role: userRoleEnum,
                 isActive: z.boolean().default(true),
                 phone: z.string().optional(),
-                unit: productCategoryEnum.optional(),
+                unitId: z.string().optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -60,7 +60,7 @@ export const userRouter = createTRPCRouter({
                     role: input.role,
                     phone: input.phone,
                     isActive: input.isActive,
-                    unit: input.unit,
+                    unitId: input.unitId,
                 },
             });
         }),
@@ -76,7 +76,7 @@ export const userRouter = createTRPCRouter({
                 isActive: z.boolean().optional(),
                 phone: z.string().optional(),
                 password: z.string().min(6).optional(),
-                unit: productCategoryEnum.optional().nullable(),
+                unitId: z.string().optional().nullable(),
             })
         )
         .mutation(async ({ ctx, input }) => {

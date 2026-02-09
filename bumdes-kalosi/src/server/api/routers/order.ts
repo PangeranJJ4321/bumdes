@@ -1,18 +1,18 @@
 
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../../trpc";
-import { OrderStatus, ProductCategory } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.user
     const where: any = {}
 
-    if (user.role === 'STAFF' && user.unit) {
+    if (user.role === 'STAFF' && user.unitId) {
       where.itemsDetail = {
         some: {
           product: {
-            category: user.unit as ProductCategory
+            businessUnitId: user.unitId
           }
         }
       }
@@ -21,7 +21,7 @@ export const orderRouter = createTRPCRouter({
     return ctx.prisma.order.findMany({
       where,
       orderBy: { created_at: "desc" },
-      include: { // Include itemsDetail to be helpful, or strictly standard
+      include: {
         itemsDetail: { include: { product: true } }
       }
     });
@@ -42,7 +42,8 @@ export const orderRouter = createTRPCRouter({
       // 1. Fetch products to get real prices and info
       const productIds = input.items.map(i => i.productId);
       const products = await ctx.prisma.product.findMany({
-        where: { id: { in: productIds } }
+        where: { id: { in: productIds } },
+        include: { businessUnit: true }
       });
 
       // Map for easy access
@@ -60,9 +61,9 @@ export const orderRouter = createTRPCRouter({
         }
 
         const user = ctx.session.user
-        if (user.role === 'STAFF' && user.unit) {
-          if (product.category !== user.unit) {
-            throw new Error(`Anda tidak dapat manambahkan produk ${product.name} (Unit: ${product.category}) karena anda bertugas di Unit: ${user.unit}`)
+        if (user.role === 'STAFF' && user.unitId) {
+          if (product.businessUnitId !== user.unitId) {
+            throw new Error(`Anda tidak dapat manambahkan produk ${product.name} (Unit: ${product.businessUnit?.name}) karena anda bertugas di Unit lain.`)
           }
         }
 
@@ -76,7 +77,8 @@ export const orderRouter = createTRPCRouter({
           title: product.name,
           price: price,
           quantity: item.quantity,
-          image: product.imageUrl
+          image: product.imageUrl,
+          unit: product.businessUnit?.name
         });
 
         // Data for relational table
@@ -118,7 +120,8 @@ export const orderRouter = createTRPCRouter({
       // 1. Fetch products for recalculation
       const productIds = input.items.map(i => i.productId);
       const products = await ctx.prisma.product.findMany({
-        where: { id: { in: productIds } }
+        where: { id: { in: productIds } },
+        include: { businessUnit: true }
       });
       const productMap = new Map(products.map(p => [p.id, p]));
 
@@ -132,9 +135,9 @@ export const orderRouter = createTRPCRouter({
         if (!product) throw new Error(`Product ${item.productId} not found`);
 
         const user = ctx.session.user
-        if (user.role === 'STAFF' && user.unit) {
-          if (product.category !== user.unit) {
-            throw new Error(`Anda tidak dapat manambahkan produk ${product.name} (Unit: ${product.category}) karena anda bertugas di Unit: ${user.unit}`)
+        if (user.role === 'STAFF' && user.unitId) {
+          if (product.businessUnitId !== user.unitId) {
+            throw new Error(`Anda tidak dapat manambahkan produk ${product.name} (Unit: ${product.businessUnit?.name}) karena anda bertugas di Unit lain.`)
           }
         }
 
@@ -146,7 +149,8 @@ export const orderRouter = createTRPCRouter({
           title: product.name,
           price: price,
           quantity: item.quantity,
-          image: product.imageUrl
+          image: product.imageUrl,
+          unit: product.businessUnit?.name
         });
 
         orderItemsData.push({
@@ -207,7 +211,7 @@ export const orderRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const user = ctx.session.user
-      if (user.role === 'STAFF' && user.unit) {
+      if (user.role === 'STAFF' && user.unitId) {
         const order = await ctx.prisma.order.findUnique({
           where: { id: input.id },
           include: { itemsDetail: { include: { product: true } } }
@@ -215,7 +219,7 @@ export const orderRouter = createTRPCRouter({
 
         if (!order) throw new Error("Order not found")
 
-        const hasOtherUnitItems = order.itemsDetail.some(item => item.product.category !== user.unit)
+        const hasOtherUnitItems = order.itemsDetail.some(item => item.product.businessUnitId !== user.unitId)
         if (hasOtherUnitItems) {
           throw new Error("Anda tidak dapat menghapus pesanan ini karena berisi item dari unit lain.")
         }
