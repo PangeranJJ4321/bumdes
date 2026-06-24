@@ -1,5 +1,7 @@
 import csv
 import docx
+import urllib.request
+import io
 from docx.shared import Inches, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml, OxmlElement
@@ -160,12 +162,38 @@ def main():
             p_dok_lbl = cell_kegiatan.add_paragraph()
             p_dok_lbl.add_run("Dokumen Pendukung:").bold = True
             
-            p_dok_val = cell_kegiatan.add_paragraph()
-            p_dok_val.paragraph_format.space_after = Pt(12)
             if dok_val:
-                p_dok_val.add_run("Link gambar - ")
-                p_dok_val.add_run(dok_val).font.color.rgb = docx.shared.RGBColor(0, 0, 255)
+                print(f"Downloading image for row {no_val}...")
+                image_stream = None
+                try:
+                    req = urllib.request.Request(
+                        dok_val, 
+                        headers={'User-Agent': 'Mozilla/5.0'}
+                    )
+                    with urllib.request.urlopen(req, timeout=10) as response:
+                        image_bytes = response.read()
+                    image_stream = io.BytesIO(image_bytes)
+                except Exception as e:
+                    print(f"Failed to download image for row {no_val}: {e}")
+                
+                p_dok_val = cell_kegiatan.add_paragraph()
+                p_dok_val.paragraph_format.space_after = Pt(12)
+                if image_stream:
+                    try:
+                        p_img = cell_kegiatan.add_paragraph()
+                        p_img.paragraph_format.space_after = Pt(12)
+                        run_img = p_img.add_run()
+                        run_img.add_picture(image_stream, width=Inches(3.0))
+                    except Exception as img_err:
+                        print(f"Failed to embed image for row {no_val}: {img_err}")
+                        p_dok_val.add_run("Link gambar - ")
+                        p_dok_val.add_run(dok_val).font.color.rgb = docx.shared.RGBColor(0, 0, 255)
+                else:
+                    p_dok_val.add_run("Link gambar - ")
+                    p_dok_val.add_run(dok_val).font.color.rgb = docx.shared.RGBColor(0, 0, 255)
             else:
+                p_dok_val = cell_kegiatan.add_paragraph()
+                p_dok_val.paragraph_format.space_after = Pt(12)
                 p_dok_val.add_run("Tidak ada dokumentasi")
                 
     # Save the document
